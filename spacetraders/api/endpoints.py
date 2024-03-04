@@ -8,6 +8,7 @@ from typing import Optional
 class EndpointDataMixin:
     path: Template
     method: HTTPMethod
+    # auth_required: bool
     # fields: dict
 
 @unique

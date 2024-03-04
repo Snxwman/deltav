@@ -1,4 +1,6 @@
 from dataclasses import dataclass, field
+from datetime import datetime
+from enum import auto, Enum
 from http import HTTPMethod, HTTPStatus
 import json
 from typing import Optional, Tuple, TypedDict
@@ -15,6 +17,7 @@ class SpaceTradersAPIRequest:
     headers: dict = field(default_factory=dict)
     params: list = field(default_factory=list)
     data: dict = field(default_factory=dict)
+    token: Optional[str] = None
 
     def parameterized_endpoint(self) -> str:
         p1 = self.params[0] if len(self.params) > 0 else None
@@ -25,8 +28,9 @@ class SpaceTradersAPIRequest:
         if with_defaults:
             self.headers['Content-Type'] = 'application/json'
 
-            if self.endpoint is not SpaceTradersAPIEndpoint.REGISTER:
-                self.headers['Authorization'] = f'Bearer {CONFIG.token}'
+            if (self.endpoint is not SpaceTradersAPIEndpoint.REGISTER):
+                token = CONFIG.token if self.token is None else self.token
+                self.headers['Authorization'] = f'Bearer {token}'
 
         return self.headers
 
@@ -45,8 +49,21 @@ class SpaceTradersAPIResponse:
             'headers': response.headers,
             'response': response.status_code,
             'error': '',
-            'data': response.json(),
+            'data': response.json()['data'],
         }
+
+class RateLimitType(Enum):
+    IP_ADDRESS = auto()
+    ACCOUNT = auto()
+    DDOS_PROTECTION = auto()
+
+@dataclass
+class RateLimit():
+    type: RateLimitType = RateLimitType.IP_ADDRESS 
+    reset: datetime = datetime.now()
+    burst: int = 30
+    per_second: int = 2
+    remaining: int = 2
 
 class SpaceTradersAPI:
     base_url = 'https://api.spacetraders.io'
@@ -54,6 +71,9 @@ class SpaceTradersAPI:
     base_api_url = f'{base_url}/{version}'
 
     def __init__(self):
+        rate_limit: RateLimit = RateLimit()
+
+    def update_rate_limits(self, rate_limits: dict):
         pass
 
     @staticmethod

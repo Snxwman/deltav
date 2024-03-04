@@ -18,15 +18,15 @@ def get_next_command() -> list[str]:
 
 
 def make_new_agent(args: list):
-    username: str = ''
+    callsign: str = ''
     faction: str = ''
     email: str = ''
 
-    def generate_username() -> str:
+    def generate_callsign() -> str:
         return 'test_user'
 
-    def validate_username(username) -> bool:
-        return len(username) <= 14
+    def validate_callsign(callsign) -> bool:
+        return len(callsign) <= 14
 
     def get_prompt_answer(prompt:str='', 
                           answer=None, 
@@ -50,11 +50,11 @@ def make_new_agent(args: list):
             case _:
                 return answer
 
-    def get_username(arg=None) -> str:
-        prompt = '[REQ] Enter agent\'s username: '
+    def get_callsign(arg=None) -> str:
+        prompt = '[REQ] Enter agent\'s callsign: '
         answer = get_prompt_answer(prompt=prompt, answer=arg, 
-                                   generate=generate_username, 
-                                   validate=validate_username)
+                                   generate=generate_callsign, 
+                                   validate=validate_callsign)
         return answer.upper()
 
     def get_faction(arg=None):
@@ -69,13 +69,13 @@ def make_new_agent(args: list):
         return answer
 
     def confirm_agent_details() -> bool:
-        confirm = input('Confirm new agent details (y) or change value (username, faction, email): ')
+        confirm = input('Confirm new agent details (y) or change value (callsign, faction, email): ')
 
         match confirm:
             case 'y':
                 return True
-            case 'username':
-                agent_data['symbol'] = get_username()
+            case 'callsign':
+                agent_data['symbol'] = get_callsign()
             case 'faction':
                 agent_data['faction'] = get_faction()
             case 'email':
@@ -83,12 +83,12 @@ def make_new_agent(args: list):
 
         return False
 
-    username = get_username(arg=index_or_none(args, 1)) 
+    callsign = get_callsign(arg=index_or_none(args, 1)) 
     faction = get_faction(arg=index_or_none(args, 2))
     email = get_email(arg=index_or_none(args, 3)) 
 
     agent_data: RegisterAgentData = {
-        'symbol': username,
+        'symbol': callsign,
         'faction': faction,
         'email': email,
     } 
