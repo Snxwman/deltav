@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, TypedDict
 
 from spacetraders.api.account import Account
 from spacetraders.api.api import SpaceTradersAPI, SpaceTradersAPIRequest, SpaceTradersAPIResponse
@@ -6,6 +6,11 @@ from spacetraders.api.apierror import SpaceTradersAPIError
 from spacetraders.api.endpoints import SpaceTradersAPIEndpoint
 from spacetraders.api.faction import Faction
 from spacetraders.api.ship import Ship
+
+class RegisterAgentData(TypedDict):
+    symbol: str
+    faction: str
+    email: Optional[str]
 
 class Agent:
 
@@ -31,11 +36,10 @@ class Agent:
     
 
     @staticmethod
-    def register(username: str, faction: Optional[str], email: Optional[str]) -> str:
-        endpoint = SpaceTradersAPIEndpoint.REGISTER 
-        data = {'faction': faction, 'symbol': username, 'email': email}
-
-        req = SpaceTradersAPIRequest(endpoint, data=data)
+    def register(agent_data: RegisterAgentData) -> str:
+        endpoint = SpaceTradersAPIEndpoint.REGISTER
+        
+        req = SpaceTradersAPIRequest(endpoint, data=agent_data)
         res = SpaceTradersAPI.call(req)
 
         match res:
