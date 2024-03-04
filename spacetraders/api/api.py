@@ -56,6 +56,12 @@ class SpaceTradersAPI:
     def __init__(self):
         pass
 
+    @staticmethod
+    def game_state():
+        endpoint = SpaceTradersAPIEndpoint.GAME
+        req = SpaceTradersAPIRequest(endpoint)
+        res = SpaceTradersAPI.call(req)
+
 
     @staticmethod
     def _endpoint_with_params(e: SpaceTradersAPIEndpoint, p: dict) -> str:
@@ -76,6 +82,7 @@ class SpaceTradersAPI:
 
         match res:
             case requests.Response():
+                print(res.json())
                 return SpaceTradersAPIResponse(res)
             case None:
                 raise ValueError

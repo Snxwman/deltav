@@ -114,6 +114,8 @@ def run(client: SpaceTradersAPI):
                 quit = True
             case 'h' | 'help':
                 usage()
+            case 'game':
+                SpaceTradersAPI.game_state()
             case 'new' | 'new-agent':
                 make_new_agent(args)
 
