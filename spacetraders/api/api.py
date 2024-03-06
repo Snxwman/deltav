@@ -3,13 +3,21 @@ from datetime import datetime
 from enum import auto, Enum
 from http import HTTPMethod, HTTPStatus
 import json
-from typing import Optional, Tuple, TypedDict
+from typing import Optional, TypedDict
 
 import requests
 
 from spacetraders.api.apierror import SpaceTradersAPIError
 from spacetraders.api.endpoints import SpaceTradersAPIEndpoint
 from spacetraders.config import CONFIG
+
+MAX_PAGE_LIMIT = 20
+
+@dataclass
+class PagingData():
+    page: int = 1
+    limit: int = MAX_PAGE_LIMIT
+
 
 @dataclass
 class SpaceTradersAPIRequest:
@@ -37,7 +45,6 @@ class SpaceTradersAPIRequest:
     def data_as_json(self) -> str:
         return json.dumps(self.data)
         
-
 class SpaceTradersAPIResponse:
     def __init__(self, response: requests.Response):
         self.http: dict = {
@@ -71,10 +78,20 @@ class SpaceTradersAPI:
     base_api_url = f'{base_url}/{version}'
 
     def __init__(self):
-        rate_limit: RateLimit = RateLimit()
+        self.agents: int
+        self.ships: int
+        self.systems: int
+        self.waypoints: int
+        self.leaderboard_credits: list[tuple[str, int]]
+        self.leaderboard_submitted_charts: list[tuple[str, int]]
+
+        self.next_restart: datetime
+        self.restart_freq: str
+
+        self.rate_limits: RateLimit = RateLimit()
 
     def update_rate_limits(self, rate_limits: dict):
-        pass
+        ...
 
     @staticmethod
     def game_state():

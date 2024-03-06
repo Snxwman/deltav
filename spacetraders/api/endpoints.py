@@ -8,24 +8,76 @@ from typing import Optional
 class EndpointDataMixin:
     path: Template
     method: HTTPMethod
-    # auth_required: bool
+    auth_required: bool
     # fields: dict
 
 @unique
 class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
-    GAME = Template('/'), HTTPMethod.GET
-    GET_AGENTS = Template('/agents'), HTTPMethod.GET
-    GET_AGENT = Template('/agents/$param'), HTTPMethod.GET
-    GET_FACTIONS = Template('/factions'), HTTPMethod.GET
-    GET_FACTION = Template('/factions/$param'), HTTPMethod.GET
-    MY_AGENT = Template('/my/agent'), HTTPMethod.GET
-    MY_CONTRACTS = Template('/my/contracts'), HTTPMethod.GET
-    MY_CONTRACT = Template('/my/contracts/$param'), HTTPMethod.GET
-    ACCEPT_CONTRACT = Template('/my/contracts/$param/accept'), HTTPMethod.POST
-    DELIVER_CONTRACT = Template('/my/contracts/$param/deliver'), HTTPMethod.POST
-    FULFILL_CONTRACT = Template('/my/contracts/$param/fulfill'), HTTPMethod.POST
-    MY_SHIPS = Template('/my/ships'), HTTPMethod.GET
-    MY_SHIP = Template('/my/ships/$param'), HTTPMethod.GET
+    GAME = (
+        Template('/'), 
+        HTTPMethod.GET,
+        False
+    )
+    GET_AGENTS = (
+        Template('/agents?page=$page&limit=$limit'), 
+        HTTPMethod.GET,
+        False
+    )
+    GET_AGENT = (
+        Template('/agents/$param'), 
+        HTTPMethod.GET,
+        False
+    )
+    GET_FACTIONS = (
+        Template('/factions'), 
+        HTTPMethod.GET,
+        False
+    )
+    GET_FACTION = (
+        Template('/factions/$param'), 
+        HTTPMethod.GET,
+        False
+    )
+    MY_AGENT = (
+        Template('/my/agent'), 
+        HTTPMethod.GET,
+        True
+    )
+    MY_CONTRACTS = (
+        Template('/my/contracts'), 
+        HTTPMethod.GET,
+        True
+    )
+    MY_CONTRACT = (
+        Template('/my/contracts/$param'), 
+        HTTPMethod.GET,
+        True
+    )
+    ACCEPT_CONTRACT = (
+        Template('/my/contracts/$param/accept'), 
+        HTTPMethod.POST,
+        True
+    )
+    DELIVER_CONTRACT = (
+        Template('/my/contracts/$param/deliver'), 
+        HTTPMethod.POST,
+        True
+    )
+    FULFILL_CONTRACT = (
+        Template('/my/contracts/$param/fulfill'), 
+        HTTPMethod.POST,
+        True
+    )
+    MY_SHIPS = (
+        Template('/my/ships'), 
+        HTTPMethod.GET,
+        True
+    )
+    MY_SHIP = (
+        Template('/my/ships/$param'), 
+        HTTPMethod.GET,
+        True
+    )
     # Template('/my/ships/$param/cargo')
     # Template('/my/ships/$param/chart')
     # Template('/my/ships/$param/cooldown')
@@ -52,11 +104,31 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     # Template('/my/ships/$param/survey')
     # Template('/my/ships/$param/transfer')
     # Template('/my/ships/$param/warp')
-    REGISTER = Template('/register'), HTTPMethod.POST
-    GET_SYSTEMS = Template('/systems'), HTTPMethod.POST
-    GET_SYSTEM = Template('/systems/$param'), HTTPMethod.GET
-    GET_WAYPOINTS = Template('/systems/$param/waypoints'), HTTPMethod.GET
-    GET_WAYPOINT = Template('/systems/$param/waypoints/$param2'), HTTPMethod.GET
+    REGISTER = (
+        Template('/register'), 
+        HTTPMethod.POST,
+        False
+    )
+    GET_SYSTEMS = (
+        Template('/systems'), 
+        HTTPMethod.POST,
+        False
+    )
+    GET_SYSTEM = (
+        Template('/systems/$param'), 
+        HTTPMethod.GET,
+        False
+    )
+    GET_WAYPOINTS = (
+        Template('/systems/$param/waypoints'), 
+        HTTPMethod.GET,
+        False
+    )
+    GET_WAYPOINT = (
+        Template('/systems/$param/waypoints/$param2'), 
+        HTTPMethod.GET,
+        False
+    )
     # Template('/systems/$param/waypoints/$param2/construction')
     # Template('/systems/$param/waypoints/$param2/construction/supply')
     # Template('/systems/$param/waypoints/$param2/jump-gate')
@@ -65,3 +137,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
 
     def with_params(self, p1: Optional[str], p2: Optional[str]=None) -> str:
         return self.path.substitute(param=p1, param2=p2)
+
+    def with_paging(self, page: int, limit: int) -> str:
+        return self.path.substitute(page=page, limit=limit)
+

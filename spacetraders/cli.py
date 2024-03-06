@@ -1,4 +1,4 @@
-from typing import Any, Callable
+from typing import Any, Callable, Optional
 from spacetraders.config import CONFIG
 from spacetraders.api.agent import Agent, RegisterAgentData
 from spacetraders.api.api import SpaceTradersAPI
@@ -31,8 +31,8 @@ def make_new_agent(args: list):
     def get_prompt_answer(prompt:str='', 
                           answer=None, 
                           default=None, 
-                          generate:Callable|None=None, 
-                          validate:Callable|None=None, 
+                          generate:Optional[Callable]=None, 
+                          validate:Optional[Callable]=None, 
                           allow_empty=False) -> str:
 
         while ( answer is None or
