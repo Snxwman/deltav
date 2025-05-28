@@ -17,27 +17,34 @@ def get_next_command() -> list[str]:
     return raw.split(' ')
 
 
-def make_new_agent(args: list):
+def make_new_agent(args: list[str]):
     callsign: str = ''
     faction: str = ''
-    email: str = ''
+    # email: str = ''
+
 
     def generate_callsign() -> str:
         return 'test_user'
 
+
     def validate_callsign(callsign) -> bool:
-        return len(callsign) <= 14
+        return len(callsign) > 2 and len(callsign) < 15
 
-    def get_prompt_answer(prompt:str='', 
-                          answer=None, 
-                          default=None, 
-                          generate:Optional[Callable]=None, 
-                          validate:Optional[Callable]=None, 
-                          allow_empty=False) -> str:
 
-        while ( answer is None or
-                answer == '' and allow_empty is False or
-                validate is not None and validate(answer) is False ):
+    def get_prompt_answer(
+        prompt: str = '', 
+        answer = None, 
+        default = None, 
+        generate: Callable | None = None, 
+        validate: Callable | None = None, 
+        allow_empty = False
+        ) -> str:
+
+        while (
+            answer is None or
+            answer == '' and allow_empty is False or
+            validate is not None and validate(answer) is False
+        ):
             answer = input(prompt)
 
         match answer:
@@ -50,6 +57,7 @@ def make_new_agent(args: list):
             case _:
                 return answer
 
+
     def get_callsign(arg=None) -> str:
         prompt = '[REQ] Enter agent\'s callsign: '
         answer = get_prompt_answer(prompt=prompt, answer=arg, 
@@ -57,19 +65,22 @@ def make_new_agent(args: list):
                                    validate=validate_callsign)
         return answer.upper()
 
+
     def get_faction(arg=None):
         default = Defaults.FACTION.value
         prompt = f'[OPT] Enter agent\'s faction (default: {default}): '
         answer = get_prompt_answer(prompt=prompt, answer=arg, default=default)
         return answer.upper()
 
-    def get_email(arg=None):
-        prompt = '[OPT] Enter account email: '
-        answer = get_prompt_answer(prompt=prompt, answer=arg, default=CONFIG.email, allow_empty=True)
-        return answer
+
+    # def get_email(arg=None):
+    #     prompt = '[OPT] Enter account email: '
+    #     answer = get_prompt_answer(prompt=prompt, answer=arg, default=CONFIG.email, allow_empty=True)
+    #     return answer
+
 
     def confirm_agent_details() -> bool:
-        confirm = input('Confirm new agent details (y) or change value (callsign, faction, email): ')
+        confirm = input('Confirm new agent details (y) or change value (callsign, faction): ')
 
         match confirm:
             case 'y':
@@ -78,19 +89,19 @@ def make_new_agent(args: list):
                 agent_data['symbol'] = get_callsign()
             case 'faction':
                 agent_data['faction'] = get_faction()
-            case 'email':
-                agent_data['email'] = get_email()
+            # case 'email':
+            #     agent_data['email'] = get_email()
 
         return False
 
     callsign = get_callsign(arg=index_or_none(args, 1)) 
     faction = get_faction(arg=index_or_none(args, 2))
-    email = get_email(arg=index_or_none(args, 3)) 
+    # email = get_email(arg=index_or_none(args, 3)) 
 
     agent_data: RegisterAgentData = {
         'symbol': callsign,
         'faction': faction,
-        'email': email,
+        # 'email': email,
     } 
     
     while confirm_agent_details() is not True:
@@ -110,7 +121,7 @@ def run(client: SpaceTradersAPI):
         args = list(filter(len, get_next_command()))
 
         match args[0]:
-            case 'q' | 'quit':
+            case 'q' | 'quit' | 'e' | 'exit':
                 quit = True
             case 'h' | 'help':
                 usage()

@@ -9,7 +9,7 @@ class FactionInfo(TypedDict):
     is_recruiting: bool
 
 class Faction:
-    default = 'COSMIC'
+    default: str = 'COSMIC'
     
     def __init__(self, faction_info):
-        callsign: str
+        self.callsign: str

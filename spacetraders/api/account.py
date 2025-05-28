@@ -1,6 +1,5 @@
-from typing import Optional
 
 class Account:
-    def __init__(self, id: str, email:Optional[str]=None):
-        self.id = id
-        self.email = email
+    def __init__(self, id: str, email: str | None = None):
+        self.id: str = id
+        self.email: str | None = email

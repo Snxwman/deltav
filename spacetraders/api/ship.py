@@ -14,6 +14,7 @@ class Requirements:
     crew: int
     slots: int
 
+
 @dataclass
 class ShipInventory:
     symbol: str
@@ -21,16 +22,19 @@ class ShipInventory:
     description: str
     units: int
 
+
 @dataclass
 class ShipRegistration:
     name: str
     faction: Faction
     role: ShipRole
 
+
 # TODO: Consider interaction with other areas of navigation
 @dataclass
 class Nav:
     system: str
+
 
 @dataclass
 class ShipCrew:
@@ -40,6 +44,7 @@ class ShipCrew:
     rotation: int
     morale: int
     wages: int
+
 
 @dataclass
 class ShipFrame:
@@ -52,6 +57,7 @@ class ShipFrame:
     requirements: Requirements
     condition: int
 
+
 @dataclass
 class ShipReactor:
     symbol: str
@@ -60,6 +66,7 @@ class ShipReactor:
     power_output: str
     requirements: Requirements
     condition: str
+
 
 @dataclass
 class ShipEngine:
@@ -70,6 +77,7 @@ class ShipEngine:
     requirements: Requirements
     condition: int
 
+
 @dataclass
 class ShipModule:
     symbol: str
@@ -78,6 +86,7 @@ class ShipModule:
     requirements: Requirements
     capacity: int
     range: int
+
 
 @dataclass
 class ShipMounts:
@@ -88,11 +97,13 @@ class ShipMounts:
     strength: int
     deposit: list[str]
 
+
 @dataclass
 class ShipCargo:
     capacity: int
     units: int
     inventory: list[ShipInventory]
+
 
 @dataclass
 class ShipFuel:
@@ -101,12 +112,14 @@ class ShipFuel:
     consumed_amount: int
     consumed_timestamp: datetime
 
+
 @dataclass
 class ShipCooldown:
     symbol: str
     total_seconds: int
     remaining_seconds: int
     expiration: datetime
+
 
 class Ship:
 

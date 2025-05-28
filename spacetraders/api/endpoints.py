@@ -2,7 +2,6 @@ from dataclasses import dataclass
 from enum import Enum, unique
 from http import HTTPMethod
 from string import Template
-from typing import Optional
 
 @dataclass
 class EndpointDataMixin:
@@ -135,8 +134,10 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     # Template('/systems/$param/waypoints/$param2/market')
     # Template('/systems/$param/waypoints/$param2/shipyard')
 
-    def with_params(self, p1: Optional[str], p2: Optional[str]=None) -> str:
+
+    def with_params(self, p1: str | None, p2: str | None = None) -> str:
         return self.path.substitute(param=p1, param2=p2)
+
 
     def with_paging(self, page: int, limit: int) -> str:
         return self.path.substitute(page=page, limit=limit)

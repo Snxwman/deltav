@@ -1,9 +1,10 @@
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import auto, Enum
-from http import HTTPMethod, HTTPStatus
+from http import HTTPMethod
 import json
-from typing import Optional, TypedDict
+import pprint
+from typing import Any
 
 import requests
 
@@ -20,77 +21,103 @@ class PagingData():
 
 
 class SpaceTradersAPIRequest:
-    _endpoint: SpaceTradersAPIEndpoint
-    _method: HTTPMethod
-    _headers: Optional[dict] = field(default_factory=dict)
-    _params: Optional[list] = field(default_factory=list)
-    _data: Optional[dict] = field(default_factory=dict)
-    _token: Optional[str] = None
+    """A builder class for SpaceTraders API Requests"""
 
-    def __init__(self):
-        return self
+    def __init__(self, include_default_headers: bool = True) -> None:
+        self._endpoint: SpaceTradersAPIEndpoint = SpaceTradersAPIEndpoint.GAME
+        self._method: HTTPMethod = self._endpoint.method
+        self._headers: dict[str, str] = {}
+        self._params: list[str] = []
+        self._data: dict[str, str] = {}
+        self._token: str | None = None
+        self.include_default_headers = include_default_headers
+
 
     def parameterized_endpoint(self) -> str:
-        p1 = self.params[0] if len(self.params) > 0 else None
-        p2 = self.params[1] if len(self.params) > 1 else None
-        return SpaceTradersAPIEndpoint.with_params(self.endpoint, p1=p1, p2=p2)
+        p1 = self._params[0] if len(self._params) > 0 else None
+        p2 = self._params[1] if len(self._params) > 1 else None
 
-    def get_headers(self, with_defaults=True):
-        if with_defaults:
-            self.headers['Content-Type'] = 'application/json'
+        # TODO: This check should really be done before calling this method
+        if self._endpoint is None:
+            raise ValueError('Must set an endpoint')
 
-            if (self.endpoint is not SpaceTradersAPIEndpoint.REGISTER):
-                token = CONFIG.token if self.token is None else self.token
-                self.headers['Authorization'] = f'Bearer {token}'
+        return SpaceTradersAPIEndpoint.with_params(self._endpoint, p1=p1, p2=p2)
 
-        return self.headers
+
+    def set_headers(self) -> None:
+        if self.include_default_headers:
+            self._token = CONFIG.token if self._token is None else self._token
+            self._headers['Authorization'] = f'Bearer {self._token}'
+            self._headers['Content-Type'] = 'application/json'
+
 
     def data_as_json(self) -> str:
-        return json.dumps(self.data)
+        return json.dumps(self._data)
+
 
     def endpoint(self, endpoint: SpaceTradersAPIEndpoint) -> 'SpaceTradersAPIRequest':
         self._endpoint = endpoint
+        self._method = self._endpoint.method
         return self
 
-    def method(self, method: HTTPMethod):
+
+    def headers(self, headers: dict[str, str]) -> 'SpaceTradersAPIRequest':
+        self._headers = headers
+        return self
+
+
+    def params(self, params: list[str]) -> 'SpaceTradersAPIRequest':
+        self._params = params
+        return self
+
+
+    def data(self, data: dict[Any, Any]) -> 'SpaceTradersAPIRequest':  # pyright: ignore[reportExplicitAny]
+        http_ready_data = {}
+        for k, v in data.items():  # pyright: ignore[reportAny]
+            http_ready_data[str(k)] = str(v)  # pyright: ignore[reportAny]
+
+        self._data = http_ready_data
+        return self
+
+
+    # TODO: implement
+    def page_number(self, page: int) -> 'SpaceTradersAPIRequest':
         ...
 
-    def headers(self, headers: dict):
+
+    # TODO: implement
+    def page_limit(self, limit: int) -> 'SpaceTradersAPIRequest':
         ...
 
-    def params(self, params: list):
-        ...
-
-    def data(self, data: dict):
-        ...
-
-    def page_number(self, page: int):
-        ...
-
-    def page_limit(self, limit: int):
-        ...
 
     def call(self) -> 'SpaceTradersAPIResponse | SpaceTradersAPIError':
-        ...
+        self.set_headers()
+        return SpaceTradersAPI.call(self)
         
+
 class SpaceTradersAPIResponse:
     def __init__(self, response: requests.Response):
-        self.http: dict = {
+        # TODO: These should be typed dicts
+        self.http: dict[str, Any] = {  # pyright: ignore[reportExplicitAny]
             'headers': response.headers,
             'response': response.status_code,
             'data': response.json(),
         }
-        self.spacetraders: dict = {
+
+        self.spacetraders: dict[str, Any] = {  # pyright: ignore[reportExplicitAny]
             'headers': response.headers,
             'response': response.status_code,
             'error': '',
             'data': response.json()['data'],
+            # 'meta': response.json()['meta']
         }
+
 
 class RateLimitType(Enum):
     IP_ADDRESS = auto()
     ACCOUNT = auto()
     DDOS_PROTECTION = auto()
+
 
 @dataclass
 class RateLimit():
@@ -100,10 +127,11 @@ class RateLimit():
     per_second: int = 2
     remaining: int = 2
 
+
 class SpaceTradersAPI:
-    base_url = 'https://api.spacetraders.io'
-    version = 'v2' 
-    base_api_url = f'{base_url}/{version}'
+    base_url: str = 'https://api.spacetraders.io'
+    version: str = 'v2' 
+    base_api_url: str = f'{base_url}/{version}'
 
     def __init__(self):
         self.agents: int
@@ -118,39 +146,41 @@ class SpaceTradersAPI:
 
         self.rate_limits: RateLimit = RateLimit()
 
-    def update_rate_limits(self, rate_limits: dict):
+
+    def update_rate_limits(self, rate_limits: dict[str, str]):
         ...
 
+
     @staticmethod
-    def game_state():
-        endpoint = SpaceTradersAPIEndpoint.GAME
-        req = SpaceTradersAPIRequest(endpoint)
-        res = SpaceTradersAPI.call(req)
+    def game_state() -> SpaceTradersAPIResponse | SpaceTradersAPIError:
+        return SpaceTradersAPIRequest() \
+            .endpoint(SpaceTradersAPIEndpoint.GAME) \
+            .call()
 
 
     @staticmethod
-    def _endpoint_with_params(e: SpaceTradersAPIEndpoint, p: dict) -> str:
+    def _endpoint_with_params(e: SpaceTradersAPIEndpoint, p: dict[str, str]) -> str:
         return ''
 
 
     @staticmethod
-    def call(req: SpaceTradersAPIRequest) -> (SpaceTradersAPIResponse | SpaceTradersAPIError):
+    def call(req: SpaceTradersAPIRequest) -> SpaceTradersAPIResponse | SpaceTradersAPIError:
         url = f'{SpaceTradersAPI.base_api_url}{req.parameterized_endpoint()}'
 
-        match req.endpoint.method:
+        match req._method:  # pyright: ignore[reportPrivateUsage]
             case HTTPMethod.GET:
-                res = requests.get(url, headers=req.headers)
+                res = requests.get(url, headers=req._headers)  # pyright: ignore[reportPrivateUsage]
             case HTTPMethod.POST:
-                res = requests.post(url, headers=req.get_headers(), data=req.data_as_json())
+                res = requests.post(url, headers=req._headers, data=req.data_as_json())  # pyright: ignore[reportPrivateUsage]
             case _:
                 res = None
 
         match res:
             case requests.Response():
-                print(res.json())
+                print()
+                pprint.pp(res.json())  # pyright: ignore[reportAny]
+                print()
                 return SpaceTradersAPIResponse(res)
             case None:
                 raise ValueError
-            case _:
-                raise TypeError
 

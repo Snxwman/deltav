@@ -14,3 +14,4 @@ class Config:
             return tomlkit.load(config_file)
 
 CONFIG = Config('config.toml')
+print(f'token: {CONFIG.token}')

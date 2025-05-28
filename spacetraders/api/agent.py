@@ -1,8 +1,10 @@
+# pyright: reportAny=false
 from dataclasses import dataclass
-from typing import Optional, Self, TypedDict
+import pprint
+from typing import TypedDict
 
 from spacetraders.api.account import Account
-from spacetraders.api.api import MAX_PAGE_LIMIT, PagingData, SpaceTradersAPI, SpaceTradersAPIRequest, SpaceTradersAPIResponse
+from spacetraders.api.api import MAX_PAGE_LIMIT, SpaceTradersAPI, SpaceTradersAPIRequest, SpaceTradersAPIResponse
 from spacetraders.api.apierror import SpaceTradersAPIError
 from spacetraders.api.contract import Contract
 from spacetraders.api.endpoints import SpaceTradersAPIEndpoint
@@ -12,21 +14,23 @@ from spacetraders.api.ship import Ship
 class RegisterAgentData(TypedDict):
     symbol: str
     faction: str
-    email: Optional[str]
+    # email: str | None
+
 
 @dataclass
 class AgentInfo():
-    account_id: Optional[str]  # Only available if this is 'our' account.
+    account_id: str | None  # Only available if this is 'our' account.
     callsign: str
     headquarters: str
     credits: int
     starting_faction: Faction
     ship_count: int
 
+
 class Agent:
     known_agents:list[AgentInfo] = []
 
-    def __init__(self, token:str, agent_info:Optional[AgentInfo]=None) -> None:
+    def __init__(self, token: str, agent_info: AgentInfo | None = None) -> None:
         self.token: str = token
 
         if agent_info is None:
@@ -50,10 +54,9 @@ class Agent:
     
 
     def my_agent(self) -> AgentInfo:
-        endpoint = SpaceTradersAPIEndpoint.MY_AGENT
-
-        req = SpaceTradersAPIRequest(endpoint, agent=self)
-        res = SpaceTradersAPI.call(req)
+        res = SpaceTradersAPIRequest() \
+            .endpoint(SpaceTradersAPIEndpoint.MY_AGENT) \
+            .call()
         
         agent = res.spacetraders['data']['agent']
         return AgentInfo(
@@ -75,21 +78,17 @@ class Agent:
 
 
     @classmethod
-    def register(cls, agent_data: RegisterAgentData) -> Self:
-        endpoint = SpaceTradersAPIEndpoint.REGISTER
-        
-        req = SpaceTradersAPIRequest(endpoint, data=agent_data)
-        res = SpaceTradersAPI.call(req)
+    def register(cls, agent_data: RegisterAgentData) -> 'Agent':
+        res = SpaceTradersAPIRequest() \
+            .endpoint(SpaceTradersAPIEndpoint.REGISTER) \
+            .data(agent_data) \
+            .call()
 
         match res:
             case SpaceTradersAPIResponse():
-                print()
-                print(res.__dict__)
                 data = res.spacetraders['data'] 
             case SpaceTradersAPIError():
                 raise ValueError
-            case _:
-                raise TypeError
 
         agent = data['agent']
         return cls(
@@ -107,20 +106,9 @@ class Agent:
 
     @staticmethod
     def get_agent(callsign: str) -> AgentInfo | SpaceTradersAPIError:
-        endpoint = SpaceTradersAPIEndpoint.GET_AGENT
-        req = SpaceTradersAPIRequest(endpoint, params=list(callsign))
-        res = SpaceTradersAPI.call(req)
-
-        res = SpaceTradersAPI.call(
-            SpaceTradersAPIRequest(
-                SpaceTradersAPIEndpoint.GET_AGENT,
-                params=list(callsign)
-            )
-        )
-
-        res = SpaceTradersAPIRequest()\
-            .endpoint(SpaceTradersAPIEndpoint.GET_AGENT)\
-            .params(list(callsign))\
+        res = SpaceTradersAPIRequest() \
+            .endpoint(SpaceTradersAPIEndpoint.GET_AGENT) \
+            .params(list(callsign)) \
             .call()
 
 
@@ -136,20 +124,24 @@ class Agent:
 
 
     @staticmethod
-    def get_agents(pages:int|range=-1, limit:int=MAX_PAGE_LIMIT) -> list[AgentInfo] | SpaceTradersAPIError:
-        endpoint = SpaceTradersAPIEndpoint.GET_AGENTS
-        paged_req = lambda p=1: SpaceTradersAPIRequest(endpoint, paging=PagingData(p, limit))
+    def get_agents(
+        pages: int | range = -1,
+        limit: int = MAX_PAGE_LIMIT
+        ) -> list[AgentInfo] | SpaceTradersAPIError:
+
+        paged_req = lambda p=1: SpaceTradersAPIRequest() \
+            .endpoint(SpaceTradersAPIEndpoint.GET_AGENTS) \
+            .page_number(p) \
+            .call()
 
         # Here, -1 implies all pages, think res_pages[:-1]
         if pages == -1:
-            req = paged_req()
-            res = SpaceTradersAPI.call(req)
+            res = paged_req()
 
             pages_remaining: int = int(int(res.spacetraders['meta']['total']) / limit) 
 
             for page in range(2, pages_remaining+1):
-                req = paged_req(page)
-                res = SpaceTradersAPI.call(req)
+                res = paged_req(page)
 
         match pages:
             case int():
