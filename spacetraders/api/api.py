@@ -19,13 +19,16 @@ class PagingData():
     limit: int = MAX_PAGE_LIMIT
 
 
-@dataclass
 class SpaceTradersAPIRequest:
-    endpoint: SpaceTradersAPIEndpoint
-    headers: dict = field(default_factory=dict)
-    params: list = field(default_factory=list)
-    data: dict = field(default_factory=dict)
-    token: Optional[str] = None
+    _endpoint: SpaceTradersAPIEndpoint
+    _method: HTTPMethod
+    _headers: Optional[dict] = field(default_factory=dict)
+    _params: Optional[list] = field(default_factory=list)
+    _data: Optional[dict] = field(default_factory=dict)
+    _token: Optional[str] = None
+
+    def __init__(self):
+        return self
 
     def parameterized_endpoint(self) -> str:
         p1 = self.params[0] if len(self.params) > 0 else None
@@ -44,6 +47,31 @@ class SpaceTradersAPIRequest:
 
     def data_as_json(self) -> str:
         return json.dumps(self.data)
+
+    def endpoint(self, endpoint: SpaceTradersAPIEndpoint) -> self:
+        self._endpoint = endpoint
+        return self
+
+    def method(self, method: HTTPMethod):
+        ...
+
+    def headers(self, headers: dict):
+        ...
+
+    def params(self, params: list):
+        ...
+
+    def data(self, data dict):
+        ...
+
+    def page_number(self, page: int):
+        ...
+
+    def page_limit(self, limit: int):
+        ...
+
+    def call(self) -> SpaceTradersAPIResponse | SpaceTradersAPIError:
+        ...
         
 class SpaceTradersAPIResponse:
     def __init__(self, response: requests.Response):
