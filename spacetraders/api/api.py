@@ -48,7 +48,7 @@ class SpaceTradersAPIRequest:
     def data_as_json(self) -> str:
         return json.dumps(self.data)
 
-    def endpoint(self, endpoint: SpaceTradersAPIEndpoint) -> self:
+    def endpoint(self, endpoint: SpaceTradersAPIEndpoint) -> 'SpaceTradersAPIRequest':
         self._endpoint = endpoint
         return self
 
@@ -61,7 +61,7 @@ class SpaceTradersAPIRequest:
     def params(self, params: list):
         ...
 
-    def data(self, data dict):
+    def data(self, data: dict):
         ...
 
     def page_number(self, page: int):
@@ -70,7 +70,7 @@ class SpaceTradersAPIRequest:
     def page_limit(self, limit: int):
         ...
 
-    def call(self) -> SpaceTradersAPIResponse | SpaceTradersAPIError:
+    def call(self) -> 'SpaceTradersAPIResponse | SpaceTradersAPIError':
         ...
         
 class SpaceTradersAPIResponse:

@@ -118,9 +118,9 @@ class Agent:
             )
         )
 
-        res = SpaceTradersAPIRequest()
-            .endpoint(SpaceTradersAPIEndpoint.GET_AGENT)
-            .params(list(callsign))
+        res = SpaceTradersAPIRequest()\
+            .endpoint(SpaceTradersAPIEndpoint.GET_AGENT)\
+            .params(list(callsign))\
             .call()
 
 
