@@ -1,9 +1,12 @@
 from typing import Any, Callable, Optional
+import traceback
 from spacetraders.config import CONFIG
 from spacetraders.api.agent import Agent, RegisterAgentData
 from spacetraders.api.api import SpaceTradersAPI
 from spacetraders.defaults import Defaults
 from spacetraders.api.ship import Ship
+from spacetraders.api.contract import Contract
+from spacetraders.api.apierror import SpaceTradersAPIError
 
 DEFAULT_FACTION = 'COSMIC'
 active_agent: Optional[Agent] = None
@@ -125,35 +128,41 @@ def accept_contract(active_agent):
         prompt = f'Enter Contract ID: '
         answer = get_prompt_answer(prompt=prompt, answer=arg, default=default)
         return answer
-        
-    # TODO: turn this into a function that lists available contracts
-    contracts = Agent.my_contracts(active_agent)
-    print(f'Contracts for {active_agent.callsign}:')
-    count = 0
-    for contract in contracts:
-        terms = contract['terms']
-        deliver = terms['deliver'][0]  
-        print(f'#{count}:\tID: {contract['id']}\n\t\tAccepted: {contract['accepted']}\n\t\tDeadline: {terms['deadline']}\n\t\tPayout: {terms['payment']}')
-        print(f'\t\tTerms: {deliver['tradeSymbol']} to {deliver['destinationSymbol']} ({deliver['unitsFulfilled']}/{deliver['unitsRequired']})')
-        count += 1
+    contracts = Contract.get_contracts(active_agent)
+    if not contracts:
+        print('No contracts found.')
+        return
 
-    print('Select a contract to accept by entering its index (0-based):')
     arg = ''
-    
     try:
-        contract_chosen = get_contract_id(arg=index_or_none(arg, 1))
-        contract_id = contracts[int(contract_chosen)]['id']
+        print('Select a contract to accept by entering its index (0-based):')
+        contract_chosen = int(get_contract_id(arg=index_or_none(arg, 1)))
+        contract_id = contracts[contract_chosen].id
     
     except (IndexError, ValueError):
         print(f'Invalid contract index: {contract_chosen}. Please enter a valid index.')
         return
     try:
-        contract = Agent.accept_contract(contract_id)
-        print(f'Contract accepted: {contract}')
-    except ValueError as e:
-        print(f'Error accepting contract: {e}')
+        contract = Contract.accept(contract_id)
     except Exception as e:
-        print(f'Unexpected error: {e}')
+        if isinstance(e, SpaceTradersAPIError):
+            print(f'API Error: {e}')
+        else:
+            print(f'Unexpected error: {e}')
+            traceback.print_exc()
+
+def get_contracts(active_agent: Agent):
+    print('Getting contracts for active agent...')
+    contracts = Contract.get_contracts(active_agent)
+
+    print(f'Contracts for {active_agent.callsign}:')
+    if not contracts:
+        print('No contracts found.')
+        return
+    count = 0
+    print('Available contracts:')
+    for x in range(len(contracts)):
+        print(f'#{x} {contracts[x]}')
 
 def ships(active_agent: Agent):
     
@@ -298,4 +307,6 @@ def run(client: SpaceTradersAPI):
                 accept_contract(active_agent)
             case 'ships' | 'ship' | 'my-ships' | 's':
                 ships(active_agent)
+            case 'contracts' | 'c':
+                get_contracts(active_agent)
 

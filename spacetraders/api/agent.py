@@ -145,7 +145,6 @@ class Agent:
             ship_count=int(agent['shipCount']),
         )
 
-
     @staticmethod
     def get_agents(
         pages: int | range = -1,
