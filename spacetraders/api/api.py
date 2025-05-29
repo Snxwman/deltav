@@ -103,14 +103,26 @@ class SpaceTradersAPIResponse:
             'response': response.status_code,
             'data': response.json(),
         }
-
-        self.spacetraders: dict[str, Any] = {  # pyright: ignore[reportExplicitAny]
-            'headers': response.headers,
-            'response': response.status_code,
-            'error': '',
-            'data': response.json()['data'],
-            # 'meta': response.json()['meta']
-        }
+        print(f'response: {response.status_code} - {response.reason}')
+        if response.status_code != 200:
+            self.spacetraders: dict[str, Any] = {  # pyright: ignore[reportExplicitAny]
+                'headers': response.headers,
+                'response': response.status_code,
+                'error': response.json().get('error', None),
+                'data': None,
+                # 'meta': response.json()['meta']
+            }
+            print(response.json())
+            # print('403 error (No access)')
+        
+        else:
+            self.spacetraders: dict[str, Any] = {  # pyright: ignore[reportExplicitAny]
+                'headers': response.headers,
+                'response': response.status_code,
+                'error': '',
+                'data': response.json()['data'],
+                # 'meta': response.json()['meta']
+            }
 
 
 class RateLimitType(Enum):
@@ -166,6 +178,7 @@ class SpaceTradersAPI:
     @staticmethod
     def call(req: SpaceTradersAPIRequest) -> SpaceTradersAPIResponse | SpaceTradersAPIError:
         url = f'{SpaceTradersAPI.base_api_url}{req.parameterized_endpoint()}'
+        print(f'Calling {url} with method {req._method} and headers ') # {req._headers} ')
 
         match req._method:  # pyright: ignore[reportPrivateUsage]
             case HTTPMethod.GET:
@@ -178,9 +191,8 @@ class SpaceTradersAPI:
         match res:
             case requests.Response():
                 print()
-                pprint.pp(res.json())  # pyright: ignore[reportAny]
+                # pprint.pp(res.json())  # pyright: ignore[reportAny]
                 print()
                 return SpaceTradersAPIResponse(res)
             case None:
                 raise ValueError
-

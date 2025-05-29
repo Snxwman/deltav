@@ -6,7 +6,8 @@ class Config:
         self._config_path = config_path
         raw_config = self._from_file()
 
-        self.token: str = str(raw_config['agent_token'])
+        self.token: str = str(raw_config['token'])
+        self.agent_token: str = str(raw_config['agent_token'])
         self.email: str = str(raw_config['email'])
 
     def _from_file(self):
@@ -14,4 +15,5 @@ class Config:
             return tomlkit.load(config_file)
 
 CONFIG = Config('config.toml')
-print(f'token: {CONFIG.token}')
+# print(f'account-token: {CONFIG.token}')
+# print(f'agent-token: {CONFIG.agent_token}')
