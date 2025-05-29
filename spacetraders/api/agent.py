@@ -1,4 +1,3 @@
-# pyright: reportAny=false
 from dataclasses import dataclass
 import pprint
 from typing import TypedDict
@@ -80,123 +79,7 @@ class Agent:
 
         return ships if ships is not None else []
     
-    def scan_waypoints(shipSymbol: str) -> list[str]:
-        print("pass before res")
-        res = SpaceTradersAPIRequest() \
-            .endpoint(SpaceTradersAPIEndpoint.MY_SHIPS_SCAN_WAYPOINTS) \
-            .params(list([shipSymbol])) \
-            .call()
-        print("pass after res")
-        print(data)
-        
-        data = res.spacetraders['data']
-        print("fail after data")
-
-        match res:
-            case SpaceTradersAPIResponse():
-                data = res.spacetraders['data']
-            case SpaceTradersAPIError():
-                print('value')
-                raise ValueError
-        print("fail after match")
-        return data if data is not None else []
     
-    def get_nav_status(shipSymbol: str) -> Ship:
-        res = SpaceTradersAPIRequest() \
-            .endpoint(SpaceTradersAPIEndpoint.MY_SHIPS_NAV) \
-            .params(list([shipSymbol])) \
-            .call()
-
-        data = res.spacetraders['data']
-
-        match res:
-            case SpaceTradersAPIResponse():
-                data = res.spacetraders['data']
-            case SpaceTradersAPIError():
-                print('value')
-                raise ValueError
-
-        return data if data is not None else []
-    
-    def navigate(shipSymbol: str, waypointSymbol: str):
-        res = SpaceTradersAPIRequest() \
-            .endpoint(SpaceTradersAPIEndpoint.MY_SHIP_NAVIGATE) \
-            .params(list([shipSymbol])) \
-            .data({"waypointSymbol": waypointSymbol}) \
-            .call()
-
-        data = res.spacetraders['data']
-        match res:
-            case SpaceTradersAPIResponse():
-                data = res.spacetraders['data']
-            case SpaceTradersAPIError():
-                raise ValueError
-
-        return data if data is not None else []
-    
-    def orbit_ship(shipSymbol: str):
-        res = SpaceTradersAPIRequest() \
-            .endpoint(SpaceTradersAPIEndpoint.MY_SHIPS_ORBIT) \
-            .params(list([shipSymbol])) \
-            .call()
-
-        data = res.spacetraders['data']
-        match res:
-            case SpaceTradersAPIResponse():
-                data = res.spacetraders['data']
-            case SpaceTradersAPIError():
-                raise ValueError
-
-        return data if data is not None else []
-    
-    def dock_ship(shipSymbol: str):
-        res = SpaceTradersAPIRequest() \
-            .endpoint(SpaceTradersAPIEndpoint.MY_SHIPS_DOCK) \
-            .params(list([shipSymbol])) \
-            .call()
-
-        data = res.spacetraders['data']
-        match res:
-            case SpaceTradersAPIResponse():
-                data = res.spacetraders['data']
-            case SpaceTradersAPIError():
-                raise ValueError
-
-        return data if data is not None else []
-    
-    def purchase_cargo(shipSymbol: str, cargoSymbol: str, units):
-        res = SpaceTradersAPIRequest() \
-            .endpoint(SpaceTradersAPIEndpoint.MY_SHIPS_PURCHASE) \
-            .params(list([shipSymbol])) \
-            .data({"symbol": cargoSymbol, "units": units}) \
-            .call()
-
-        data = res.spacetraders['data']
-        match res:
-            case SpaceTradersAPIResponse():
-                data = res.spacetraders['data']
-            case SpaceTradersAPIError():
-                raise ValueError
-
-        return data if data is not None else []
-    
-    def deliver_contract(contract_id: str, shipSymbol: str, tradeSymbol: str, units: int):
-        res = SpaceTradersAPIRequest() \
-            .endpoint(SpaceTradersAPIEndpoint.DELIVER_CONTRACT) \
-            .params(list([contract_id])) \
-            .data({"shipSymbol": shipSymbol.upper(),
-                    "tradeSymbol": tradeSymbol.upper(),
-                    "units": int(units)}) \
-            .call()
-
-        data = res.spacetraders['data']
-        match res:
-            case SpaceTradersAPIResponse():
-                data = res.spacetraders['data']
-            case SpaceTradersAPIError():
-                raise ValueError
-
-        return data if data is not None else []
 
 
     def my_contracts(self) -> list[Contract]:
@@ -221,7 +104,6 @@ class Agent:
             case SpaceTradersAPIError():
                 raise ValueError
         return Contract(**data['contract'])
-
 
     @classmethod
     def register(cls, agent_data: RegisterAgentData) -> 'Agent':

@@ -160,7 +160,7 @@ def ships(active_agent: Agent):
     def navigate(shipSymbol: str, waypointSymbol: str):
         print(f'Navigating ship {shipSymbol} to waypoint {waypointSymbol}...')
         try:
-            Agent.navigate(shipSymbol, waypointSymbol)
+            Ship.navigate(shipSymbol, waypointSymbol)
             print(f'Ship {shipSymbol} is now navigating to {waypointSymbol}.')
         except ValueError as e:
             print(f'Error navigating ship: {e}')
@@ -168,7 +168,7 @@ def ships(active_agent: Agent):
     def scanWaypoints(shipSymbol: str):
         print(f'Scanning waypoints for ship {shipSymbol}...')
         try:
-            waypoints = Agent.scan_waypoints(shipSymbol)
+            waypoints = Ship.scan_waypoints(shipSymbol)
             print(f'Waypoints for ship {shipSymbol}:')
             count = 0
             for waypoint in waypoints:
@@ -179,7 +179,7 @@ def ships(active_agent: Agent):
         
     def getNavStatus(shipSymbol: str):
         print(f'Getting navigation status for ship {shipSymbol}...')
-        status = Agent.get_nav_status(shipSymbol)
+        status = Ship.get_nav_status(shipSymbol)
         if not status:
             print(f'No navigation status found for ship {shipSymbol}. (Error likely)')
             return
@@ -189,7 +189,7 @@ def ships(active_agent: Agent):
     def orbitShip(shipSymbol: str):
         print(f'Orbiting ship {shipSymbol}...')
         try:
-            Agent.orbit_ship(shipSymbol)
+            Ship.orbit_ship(shipSymbol)
             print(f'Ship {shipSymbol} is now orbiting.')
         except ValueError as e:
             print(f'Error orbiting ship: {e}')
@@ -197,7 +197,7 @@ def ships(active_agent: Agent):
     def dockShip(shipSymbol: str):
         print(f'Docking ship {shipSymbol}...')
         try:
-            Agent.dock_ship(shipSymbol)
+            Ship.dock_ship(shipSymbol)
             print(f'Ship {shipSymbol} is now docked.')
         except ValueError as e:
             print(f'Error docking ship: {e}')
@@ -205,7 +205,7 @@ def ships(active_agent: Agent):
     def purchaseCargo(shipSymbol: str, cargoSymbol: str, units):
         print(f'Purchasing {units} units of {cargoSymbol} for ship {shipSymbol}...')
         try:
-            Agent.purchase_cargo(shipSymbol, cargoSymbol, units)
+            Ship.purchase_cargo(shipSymbol, cargoSymbol, units)
             print(f'Purchased {units} units of {cargoSymbol} for ship {shipSymbol}.')
         except ValueError as e:
             print(f'Error purchasing cargo: {e}')
@@ -250,27 +250,28 @@ def ships(active_agent: Agent):
 
 
     action = input('Enter action number (1-9): ')
-    if action == '1':
-        print('Available waypoints:')
-        scanWaypoints(chosen_ship['symbol'])
-    elif action == '2':
-        waypoint_symbol = input('Enter waypoint symbol to navigate to: ')
-        navigate(chosen_ship['symbol'], waypoint_symbol.upper())
-        if not waypoint_symbol:
-            print('No waypoint symbol provided. Aborting navigation.')
-            return
-    elif action == '3':
-        orbitShip(chosen_ship['symbol'])
-    elif action == '4':
-        dockShip(chosen_ship['symbol'])
-    elif action == '5':
-        getNavStatus(chosen_ship['symbol'])
-    elif action == '6':
-        cargo_symbol = input('Enter cargo symbol to purchase: ')
-        units = input('Enter number of units to purchase: ')
-        purchaseCargo(chosen_ship['symbol'], cargo_symbol, units)
-    elif action == '9':
-        print('Delivering cargo...')
+    match action:
+        case '1':
+            print('Available waypoints:')
+            scanWaypoints(chosen_ship['symbol'])
+        case '2':
+            waypoint_symbol = input('Enter waypoint symbol to navigate to: ')
+            navigate(chosen_ship['symbol'], waypoint_symbol.upper())
+            if not waypoint_symbol:
+                print('No waypoint symbol provided. Aborting navigation.')
+                return
+        case '3':
+            orbitShip(chosen_ship['symbol'])
+        case '4':
+            dockShip(chosen_ship['symbol'])
+        case '5':
+            getNavStatus(chosen_ship['symbol'])
+        case '6':
+            cargo_symbol = input('Enter cargo symbol to purchase: ')
+            units = input('Enter number of units to purchase: ')
+            purchaseCargo(chosen_ship['symbol'], cargo_symbol, units)
+        case '9':
+            print('Delivering cargo...')
 
 
 

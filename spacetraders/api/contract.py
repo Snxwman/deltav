@@ -3,6 +3,7 @@ from datetime import datetime
 from enum import Enum, auto
 
 from spacetraders.api.faction import Faction
+from spacetraders.api.api import SpaceTradersAPIRequest, SpaceTradersAPIEndpoint, SpaceTradersAPIResponse, SpaceTradersAPIError
 
 
 class ContractType(Enum):
