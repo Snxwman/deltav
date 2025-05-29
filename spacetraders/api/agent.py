@@ -1,7 +1,8 @@
-# pyright: reportAny=false
 from dataclasses import dataclass
 import pprint
 from typing import TypedDict
+
+from spacetraders.config import CONFIG
 
 from spacetraders.api.account import Account
 from spacetraders.api.api import MAX_PAGE_LIMIT, SpaceTradersAPI, SpaceTradersAPIRequest, SpaceTradersAPIResponse
@@ -19,7 +20,7 @@ class RegisterAgentData(TypedDict):
 
 @dataclass
 class AgentInfo():
-    account_id: str | None  # Only available if this is 'our' account.
+    accountId: str | None  # Only available if this is 'our' account.
     callsign: str
     headquarters: str
     credits: int
@@ -36,7 +37,7 @@ class Agent:
         if agent_info is None:
             agent_info = self.my_agent()
 
-        self.account: Account = Account(agent_info.account_id)
+        self.account: Account = Account(agent_info.accountId)
         self.callsign: str = agent_info.callsign
         self.credits: int = agent_info.credits 
         self.faction: Faction = agent_info.starting_faction 
@@ -60,7 +61,7 @@ class Agent:
         
         agent = res.spacetraders['data']['agent']
         return AgentInfo(
-            account_id=agent['accountId'],
+            accountId=agent['accountId'],
             callsign=agent['symbol'],
             headquarters=agent['headquarters'],
             credits=int(agent['credits']),
@@ -70,12 +71,35 @@ class Agent:
 
 
     def my_ships(self) -> list[Ship]:
-        return []
+        res = SpaceTradersAPIRequest() \
+            .endpoint(SpaceTradersAPIEndpoint.MY_SHIPS) \
+            .call()
+        
+        ships = res.spacetraders['data']
+
+        return ships if ships is not None else []
     
-
     def my_contracts(self) -> list[Contract]:
-        return []
+        res = SpaceTradersAPIRequest() \
+            .endpoint(SpaceTradersAPIEndpoint.MY_CONTRACTS) \
+            .call()
+        
+        contracts = res.spacetraders['data']
 
+        return contracts if contracts is not None else []
+    
+    def accept_contract(contract_id: str):
+        res = SpaceTradersAPIRequest() \
+            .endpoint(SpaceTradersAPIEndpoint.ACCEPT_CONTRACT) \
+            .params(list([contract_id])) \
+            .call()
+
+        match res:
+            case SpaceTradersAPIResponse():
+                data = res.spacetraders['data']
+            case SpaceTradersAPIError():
+                raise ValueError
+        return data if data is not None else []
 
     @classmethod
     def register(cls, agent_data: RegisterAgentData) -> 'Agent':
@@ -103,25 +127,23 @@ class Agent:
             )
         )
 
-
     @staticmethod
     def get_agent(callsign: str) -> AgentInfo | SpaceTradersAPIError:
         res = SpaceTradersAPIRequest() \
             .endpoint(SpaceTradersAPIEndpoint.GET_AGENT) \
-            .params(list(callsign)) \
+            .params(list([callsign])) \
             .call()
 
 
         agent = res.spacetraders['data']
         return AgentInfo(
-            account_id=agent['accountId'],
+            accountId = CONFIG.accountID, #=agent['accountId'],
             callsign=agent['symbol'],
             headquarters=agent['headquarters'],
             credits=int(agent['credits']),
             starting_faction=agent['startingFaction'],
             ship_count=int(agent['shipCount']),
         )
-
 
     @staticmethod
     def get_agents(
