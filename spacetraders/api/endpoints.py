@@ -80,7 +80,11 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     # Template('/my/ships/$param/cargo')
     # Template('/my/ships/$param/chart')
     # Template('/my/ships/$param/cooldown')
-    # Template('/my/ships/$param/dock')
+    MY_SHIPS_DOCK = (
+        Template('/my/ships/$param/dock'),
+        HTTPMethod.POST,
+        True
+    )
     # Template('/my/ships/$param/extract')
     # Template('/my/ships/$param/extract/survey')
     # Template('/my/ships/$param/jettison')
@@ -88,16 +92,44 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     # Template('/my/ships/$param/mounts')
     # Template('/my/ships/$param/mounts/install')
     # Template('/my/ships/$param/mounts/remove')
-    # Template('/my/ships/$param/nav')
-    # Template('/my/ships/$param/navigate')
+    MY_SHIPS_NAV = (
+        Template('/my/ships/$param/nav'),
+        HTTPMethod.GET,
+        True
+    )
+    MY_SHIP_NAVIGATE = (
+        Template('/my/ships/$param/navigate'), 
+        HTTPMethod.POST,
+        True
+    )
     # Template('/my/ships/$param/negotiate/contract')
-    # Template('/my/ships/$param/orbit')
-    # Template('/my/ships/$param/purchase')
+    MY_SHIPS_ORBIT = (
+        Template('/my/ships/$param/orbit'),
+        HTTPMethod.POST,
+        True
+    )
+    MY_SHIPS_PURCHASE = (
+        Template('/my/ships/$param/purchase'),
+        HTTPMethod.POST,
+        False
+    )
     # Template('/my/ships/$param/refine')
     # Template('/my/ships/$param/refuel')
-    # Template('/my/ships/$param/scan/ships')
-    # Template('/my/ships/$param/scan/systems')
-    # Template('/my/ships/$param/scan/waypoints')
+    MY_SHIPS_SCAN_SHIPS = (
+        Template('/my/ships/$param/scan/ships'), 
+        HTTPMethod.POST,
+        True
+    )
+    MY_SHIPS_SCAN_SYSTEMS = (
+        Template('/my/ships/$param/scan/systems'), 
+        HTTPMethod.POST,
+        True
+    )
+    MY_SHIPS_SCAN_WAYPOINTS = (
+        Template('/my/ships/$param/scan/waypoints'), 
+        HTTPMethod.POST,
+        True
+    )
     # Template('/my/ships/$param/sell')
     # Template('/my/ships/$param/siphon')
     # Template('/my/ships/$param/survey')
