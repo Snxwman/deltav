@@ -15,12 +15,11 @@ from spacetraders.api.ship import Ship
 class RegisterAgentData(TypedDict):
     symbol: str
     faction: str
-    # email: str | None
 
 
 @dataclass
 class AgentInfo():
-    accountId: str | None  # Only available if this is 'our' account.
+    account_id: str | None  # Only available if this is 'our' account.
     callsign: str
     headquarters: str
     credits: int
@@ -29,7 +28,7 @@ class AgentInfo():
 
 
 class Agent:
-    known_agents:list[AgentInfo] = []
+    # known_agents:list[AgentInfo] = []
 
     def __init__(self, token: str, agent_info: AgentInfo | None = None) -> None:
         self.token: str = token
@@ -37,17 +36,14 @@ class Agent:
         if agent_info is None:
             agent_info = self.my_agent()
 
-        self.account: Account = Account(agent_info.accountId)
+        self.account: Account = Account(agent_info.account_id)
         self.callsign: str = agent_info.callsign
-        self.credits: int = agent_info.credits 
-        self.faction: Faction = agent_info.starting_faction 
-        self.headquarters: str = agent_info.headquarters 
-        self.ship_count: int = agent_info.ship_count 
+        self.credits: int = agent_info.credits
+        self.faction: Faction = agent_info.starting_faction
+        self.headquarters: str = agent_info.headquarters
+        self.ship_count: int = agent_info.ship_count
         self.ships: list[Ship] = self.my_ships()
         self.contracts: list[Contract] = self.my_contracts()
-
-        print()
-        print(self.__dict__)
 
 
     def save_to_file(self):
@@ -61,7 +57,7 @@ class Agent:
         
         agent = res.spacetraders['data']['agent']
         return AgentInfo(
-            accountId=agent['accountId'],
+            account_id=agent['accountId'],
             callsign=agent['symbol'],
             headquarters=agent['headquarters'],
             credits=int(agent['credits']),
@@ -137,7 +133,7 @@ class Agent:
 
         agent = res.spacetraders['data']
         return AgentInfo(
-            accountId = CONFIG.accountID, #=agent['accountId'],
+            account_id = CONFIG.accountID, #=agent['accountId'],
             callsign=agent['symbol'],
             headquarters=agent['headquarters'],
             credits=int(agent['credits']),
