@@ -73,10 +73,11 @@ class SpaceTradersAPIRequest:
 
     def data(self, data: dict[Any, Any]) -> 'SpaceTradersAPIRequest':  # pyright: ignore[reportExplicitAny]
         http_ready_data = {}
-        for k, v in data.items():  # pyright: ignore[reportAny]
-            http_ready_data[str(k)] = str(v)  # pyright: ignore[reportAny]
+        # for k, v in data.items():  # pyright: ignore[reportAny]
+        #     http_ready_data[str(k)] = str(v)  # pyright: ignore[reportAny]
 
-        self._data = http_ready_data
+        # self._data = http_ready_data
+        self._data = data
         return self
 
 
@@ -104,7 +105,7 @@ class SpaceTradersAPIResponse:
             'data': response.json(),
         }
         print(f'response: {response.status_code} - {response.reason}')
-        if response.status_code != 200:
+        if response.status_code != 200 and response.status_code != 201:
             self.spacetraders: dict[str, Any] = {  # pyright: ignore[reportExplicitAny]
                 'headers': response.headers,
                 'response': response.status_code,

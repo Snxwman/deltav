@@ -137,27 +137,27 @@ class Ship:
         self.fuel: ShipFuel
         self.cooldown: ShipCooldown
 
+    @staticmethod
     def scan_waypoints(shipSymbol: str) -> list[str]:
-        print("pass before res")
         res = SpaceTradersAPIRequest() \
             .endpoint(SpaceTradersAPIEndpoint.MY_SHIPS_SCAN_WAYPOINTS) \
             .params(list([shipSymbol])) \
             .call()
-        print("pass after res")
-        print(data)
         
         data = res.spacetraders['data']
-        print("fail after data")
 
         match res:
             case SpaceTradersAPIResponse():
                 data = res.spacetraders['data']
+                if res.spacetraders['error'] is not None:
+                    print(f'{shipSymbol} had an error while scanning waypoints.')
+                    print(f'Code: {res.spacetraders['error']['code']}, Message: {res.spacetraders['error']['message']}')
+                    return []
             case SpaceTradersAPIError():
-                print('value')
                 raise ValueError
-        print("fail after match")
         return data if data is not None else []
     
+    @staticmethod
     def get_nav_status(shipSymbol: str):
         res = SpaceTradersAPIRequest() \
             .endpoint(SpaceTradersAPIEndpoint.MY_SHIPS_NAV) \
@@ -175,6 +175,7 @@ class Ship:
 
         return data if data is not None else []
     
+    @staticmethod
     def navigate(shipSymbol: str, waypointSymbol: str):
         res = SpaceTradersAPIRequest() \
             .endpoint(SpaceTradersAPIEndpoint.MY_SHIP_NAVIGATE) \
@@ -191,6 +192,7 @@ class Ship:
 
         return data if data is not None else []
     
+    @staticmethod
     def orbit_ship(shipSymbol: str):
         res = SpaceTradersAPIRequest() \
             .endpoint(SpaceTradersAPIEndpoint.MY_SHIPS_ORBIT) \
@@ -206,6 +208,7 @@ class Ship:
 
         return data if data is not None else []
     
+    @staticmethod
     def dock_ship(shipSymbol: str):
         res = SpaceTradersAPIRequest() \
             .endpoint(SpaceTradersAPIEndpoint.MY_SHIPS_DOCK) \
@@ -222,7 +225,7 @@ class Ship:
         return data if data is not None else []
     
     
-    
+    @staticmethod
     def deliver_contract(contract_id: str, shipSymbol: str, tradeSymbol: str, units: int):
         res = SpaceTradersAPIRequest() \
             .endpoint(SpaceTradersAPIEndpoint.DELIVER_CONTRACT) \
@@ -241,11 +244,67 @@ class Ship:
 
         return data if data is not None else []
     
+    @staticmethod
     def purchase_cargo(shipSymbol: str, cargoSymbol: str, units):
         res = SpaceTradersAPIRequest() \
             .endpoint(SpaceTradersAPIEndpoint.MY_SHIPS_PURCHASE) \
             .params(list([shipSymbol])) \
-            .data({"symbol": cargoSymbol, "units": units}) \
+            .data({"symbol": cargoSymbol,
+                   "units": units}) \
+            .call()
+
+        data = res.spacetraders['data']
+        match res:
+            case SpaceTradersAPIResponse():
+                data = res.spacetraders['data']
+            case SpaceTradersAPIError():
+                raise ValueError
+
+        return data if data is not None else []
+
+    @staticmethod
+    def extract(shipSymbol: str):
+        res = SpaceTradersAPIRequest() \
+            .endpoint(SpaceTradersAPIEndpoint.MY_SHIPS_EXTRACT) \
+            .params(list([shipSymbol])) \
+            .call()
+
+        data = res.spacetraders['data']
+        match res:
+            case SpaceTradersAPIResponse():
+                data = res.spacetraders['data']
+                # if res.spacetraders['error'] is not None:
+                #     print(res.spacetraders['error'])
+                #     print(f'{shipSymbol} had an error while extracting.')
+                #     # print(f'Code: {res.spacetraders["error"]["code"]}, Message: {res.spacetraders["error"]["message"]}')
+            case SpaceTradersAPIError():
+                raise ValueError
+
+        return data if data is not None else []
+
+    @staticmethod
+    def get_cooldown(shipSymbol: str):
+        res = SpaceTradersAPIRequest() \
+            .endpoint(SpaceTradersAPIEndpoint.MY_SHIPS_COOLDOWN) \
+            .params(list([shipSymbol])) \
+            .call()
+
+        # status 200 if successfully fetched cooldowns, 204 if no cooldown
+        # its going to return no content body if no cooldown
+        
+        match res:
+            case SpaceTradersAPIResponse():
+                data = res.spacetraders['data']
+            case SpaceTradersAPIError():
+                raise ValueError
+
+        return data if data is not None else []
+    
+    @staticmethod
+    def get_cargo(shipSymbol: str):
+        res = SpaceTradersAPIRequest() \
+            .endpoint(SpaceTradersAPIEndpoint.MY_SHIPS_CARGO) \
+            .params(list([shipSymbol])) \
             .call()
 
         data = res.spacetraders['data']
