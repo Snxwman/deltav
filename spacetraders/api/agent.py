@@ -37,7 +37,8 @@ class Agent:
         if agent_info is None:
             agent_info = self.my_agent()
 
-        self.account: Account = Account(agent_info.accountId)
+
+        self.account: Account = Account(agent_info.accountId) if agent_info.accountId is not None else Account("None")
         self.callsign: str = agent_info.callsign
         self.credits: int = agent_info.credits 
         self.faction: Faction = agent_info.starting_faction 
@@ -87,19 +88,6 @@ class Agent:
         contracts = res.spacetraders['data']
 
         return contracts if contracts is not None else []
-    
-    def accept_contract(contract_id: str):
-        res = SpaceTradersAPIRequest() \
-            .endpoint(SpaceTradersAPIEndpoint.ACCEPT_CONTRACT) \
-            .params(list([contract_id])) \
-            .call()
-
-        match res:
-            case SpaceTradersAPIResponse():
-                data = res.spacetraders['data']
-            case SpaceTradersAPIError():
-                raise ValueError
-        return data if data is not None else []
 
     @classmethod
     def register(cls, agent_data: RegisterAgentData) -> 'Agent':
@@ -118,7 +106,7 @@ class Agent:
         return cls(
             data['token'], 
             AgentInfo(
-                account_id=agent['accountId'],
+                accountId=agent['accountId'],
                 callsign=agent['symbol'],
                 headquarters=agent['headquarters'],
                 credits=int(agent['credits']),

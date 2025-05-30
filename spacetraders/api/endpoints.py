@@ -77,15 +77,27 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
         HTTPMethod.GET,
         True
     )
-    # Template('/my/ships/$param/cargo')
+    MY_SHIPS_CARGO = (
+        Template('/my/ships/$param/cargo'),
+        HTTPMethod.GET,
+        True
+    )
     # Template('/my/ships/$param/chart')
-    # Template('/my/ships/$param/cooldown')
+    MY_SHIPS_COOLDOWN = (
+        Template('/my/ships/$param/cooldown'),
+        HTTPMethod.GET,
+        True
+    )
     MY_SHIPS_DOCK = (
         Template('/my/ships/$param/dock'),
         HTTPMethod.POST,
         True
     )
-    # Template('/my/ships/$param/extract')
+    MY_SHIPS_EXTRACT = (
+        Template('/my/ships/$param/extract'),
+        HTTPMethod.POST,
+        True
+    )
     # Template('/my/ships/$param/extract/survey')
     # Template('/my/ships/$param/jettison')
     # Template('/my/ships/$param/jump')

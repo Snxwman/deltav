@@ -180,9 +180,10 @@ def ships(active_agent: Agent):
             waypoints = Ship.scan_waypoints(shipSymbol)
             print(f'Waypoints for ship {shipSymbol}:')
             count = 0
-            for waypoint in waypoints:
-                print(f'{count}- {waypoint["symbol"]} ({waypoint["type"]})')
-                count += 1
+            print(waypoints)
+            # for waypoint in waypoints:
+            #     print(f'{count}- {waypoint["symbol"]} ({waypoint["type"]})')
+            #     count += 1
         except Exception as e:
             print(f'Error scanning waypoints: {e}')
         
@@ -218,6 +219,53 @@ def ships(active_agent: Agent):
             print(f'Purchased {units} units of {cargoSymbol} for ship {shipSymbol}.')
         except ValueError as e:
             print(f'Error purchasing cargo: {e}')
+
+    def extract_resources(shipSymbol: str):
+        print(f'Extracting resources for ship {shipSymbol}...')
+        try:
+            extract = Ship.extract(shipSymbol)
+            print(f'Resources extracted for ship {shipSymbol}:')
+            print(f'Cargo Hold: {extract["cargo"]["units"]}/{extract["cargo"]["capacity"]} units')
+            for item in extract['cargo']['inventory']:
+                print(f'{item["symbol"]}: {item["units"]} units')
+
+            print(f'Ship {shipSymbol} has extracted resources.')
+        except ValueError as e:
+            print(f'Error extracting resources: {e}')
+
+    def viewCargo(shipSymbol: str):
+        print(f'Viewing cargo for ship {shipSymbol}...')
+        try:
+            cargo = Ship.get_cargo(shipSymbol)
+            print(f'Cargo for ship {shipSymbol}:')
+            print(f'Cargo Hold: {cargo["units"]}/{cargo["capacity"]} units')
+            for item in cargo['inventory']:
+                print(f'{item["symbol"]}: {item["units"]} units')
+            
+        except ValueError as e:
+            print(f'Error viewing cargo: {e}')
+
+    def deliverCargo(shipSymbol: str):
+        print(f'Delivering cargo for ship {shipSymbol}...')
+        try:
+            contract_id = input('Enter contract ID to deliver cargo for: ')
+            tradeSymbol = input('Enter trade symbol: ').upper()
+            units = int(input('Enter number of units to deliver: '))
+            delivery = Ship.deliver_contract(contract_id, shipSymbol, tradeSymbol, units)
+            print(f'Cargo delivered for ship {shipSymbol}:')
+            print(delivery)
+        except ValueError as e:
+            print(f'Error delivering cargo: {e}')
+    
+    def getCooldown(shipSymbol: str):
+        print(f'Getting cooldowns for ship {shipSymbol}...')
+        try:
+            cooldown = Ship.get_cooldown(shipSymbol)
+            print(f'Cooldowns for ship {shipSymbol}:')
+            print(f'Total Cooldown: {cooldown["totalSeconds"]} seconds')
+            print(f'Remaining: {cooldown["remainingSeconds"]} seconds')
+        except ValueError as e:
+            print(f'No Cooldown found for ship {shipSymbol}.')
         
         
 
@@ -255,7 +303,10 @@ def ships(active_agent: Agent):
     print('4. Dock Ship')
     print('5. Get Status of Ship')
     print('6. Purchase Cargo')
+    print('7. Extract Resources')
+    print('8. View Cargo')
     print('9. Deliver Cargo')
+    print('10. Get Cooldown')
 
 
     action = input('Enter action number (1-9): ')
@@ -279,8 +330,14 @@ def ships(active_agent: Agent):
             cargo_symbol = input('Enter cargo symbol to purchase: ')
             units = input('Enter number of units to purchase: ')
             purchaseCargo(chosen_ship['symbol'], cargo_symbol, units)
+        case '7':
+            extract_resources(chosen_ship['symbol'])
+        case '8':
+            viewCargo(chosen_ship['symbol'])
         case '9':
-            print('Delivering cargo...')
+            deliverCargo(chosen_ship['symbol'])
+        case '10':
+            getCooldown(chosen_ship['symbol'])
 
 
 
@@ -303,7 +360,9 @@ def run(client: SpaceTradersAPI):
             case 'current' | 'agent' | 'me':
                 get_current_agent()
             # TODO: negotate contract
-            case 'accept' | 'a' | 'contract' | 'accept-contract':
+            case 'contract' | 'contracts' | 'c':
+                get_contracts(active_agent)
+            case 'accept' | 'a' | 'accept-contract':
                 accept_contract(active_agent)
             case 'ships' | 'ship' | 'my-ships' | 's':
                 ships(active_agent)

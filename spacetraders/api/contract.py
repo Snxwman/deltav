@@ -56,7 +56,7 @@ class Contract:
         self.fulfilled: bool = fulfilled
         # TODO: convert these to datetime objects
         self.expiration: str = expiration
-        self.accept_deadline: str = deadlineToAccept
+        self.deadlineToAccept: str = deadlineToAccept
 
 
     @classmethod 
@@ -106,7 +106,7 @@ class Contract:
             accepted=contract['accepted'],
             fulfilled=contract['fulfilled'],
             expiration=datetime.fromisoformat(contract['expiration']),
-            accept_deadline=datetime.fromisoformat(contract['deadlineToAccept']),
+            deadlineToAccept=datetime.fromisoformat(contract['deadlineToAccept']),
         )
 
     @staticmethod
@@ -156,7 +156,7 @@ class Contract:
                 f"  Type: {self.type.name}\n"
                 # f"  Faction: {self.faction.symbol if hasattr(self.faction, 'symbol') else self.faction}\n" # Assuming Faction has a symbol attribute
                 f"  Expires: {self.expiration.strftime('%Y-%m-%d %H:%M:%S')}\n"
-                f"  Deadline to Accept: {self.accept_deadline.strftime('%Y-%m-%d %H:%M:%S')}\n"
+                f"  Deadline to Accept: {self.deadlineToAccept.strftime('%Y-%m-%d %H:%M:%S')}\n"
                 f"  Terms: Deliver {self.terms.deliver_units_required} {self.terms.deliver_trade_symbol.name} "
                 f"to {self.terms.deliver_destination} "
                 f"({self.terms.deliver_units_fulfilled}/{self.terms.deliver_units_required} fulfilled)")
