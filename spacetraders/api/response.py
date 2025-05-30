@@ -18,7 +18,7 @@ from spacetraders.api.enums import (
 )
 
 class SpaceTradersAPIResponseShape(TypedDict):
-    ...
+    pass
 
 
 class AccountShape(SpaceTradersAPIResponseShape):
@@ -96,7 +96,7 @@ class ShipNavRouteShape(SpaceTradersAPIResponseShape):
 class ShipNavShape(SpaceTradersAPIResponseShape):
     system_symbol: str
     waypoint_symbol: str
-    route:
+    route: ShipNavRouteShape
     departure_time: datetime
     arrival: datetime
 

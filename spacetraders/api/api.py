@@ -9,6 +9,7 @@ from typing import Any
 import requests
 
 from spacetraders.api.apierror import SpaceTradersAPIError
+from spacetraders.api.data import EndpointData
 from spacetraders.api.endpoints import SpaceTradersAPIEndpoint
 from spacetraders.config import CONFIG
 
@@ -28,7 +29,7 @@ class SpaceTradersAPIRequest:
         self._method: HTTPMethod = self._endpoint.method
         self._headers: dict[str, str] = {}
         self._params: list[str] = []
-        self._data: dict[str, str] = {}
+        self._data: EndpointData = {}
         self._token: str | None = None
         self.include_default_headers = include_default_headers
 
@@ -71,12 +72,7 @@ class SpaceTradersAPIRequest:
         return self
 
 
-    def data(self, data: dict[Any, Any]) -> 'SpaceTradersAPIRequest':  # pyright: ignore[reportExplicitAny]
-        http_ready_data = {}
-        # for k, v in data.items():  # pyright: ignore[reportAny]
-        #     http_ready_data[str(k)] = str(v)  # pyright: ignore[reportAny]
-
-        # self._data = http_ready_data
+    def data(self, data: EndpointData) -> 'SpaceTradersAPIRequest':
         self._data = data
         return self
 

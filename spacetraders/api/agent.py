@@ -1,47 +1,28 @@
-from dataclasses import dataclass
-import pprint
-from typing import TypedDict
-
+from spacetraders.api.enums import FactionSymbol
 from spacetraders.config import CONFIG
 
 from spacetraders.api.account import Account
-from spacetraders.api.api import MAX_PAGE_LIMIT, SpaceTradersAPI, SpaceTradersAPIRequest, SpaceTradersAPIResponse
+from spacetraders.api.api import MAX_PAGE_LIMIT, SpaceTradersAPIRequest, SpaceTradersAPIResponse
 from spacetraders.api.apierror import SpaceTradersAPIError
+from spacetraders.api.data import RegisterAgentData
+from spacetraders.api.response import AgentShape
 from spacetraders.api.contract import Contract
 from spacetraders.api.endpoints import SpaceTradersAPIEndpoint
-from spacetraders.api.faction import Faction
 from spacetraders.api.ship import Ship
-
-class RegisterAgentData(TypedDict):
-    symbol: str
-    faction: str
-
-
-@dataclass
-class AgentInfo():
-    account_id: str | None  # Only available if this is 'our' account.
-    callsign: str
-    headquarters: str
-    credits: int
-    starting_faction: Faction
-    ship_count: int
 
 
 class Agent:
-    # known_agents:list[AgentInfo] = []
-
-    def __init__(self, token: str, agent_info: AgentInfo | None = None) -> None:
+    def __init__(self, token: str, agent_info: AgentShape) -> None:
         self.token: str = token
 
-        if agent_info is None:
-            agent_info = self.my_agent()
+        if agent_info['account_id'] is not None:
+            self.account: Account = Account(agent_info['account_id'])
 
-        self.account: Account = Account(agent_info.account_id)
-        self.callsign: str = agent_info.callsign
-        self.credits: int = agent_info.credits
-        self.faction: Faction = agent_info.starting_faction
-        self.headquarters: str = agent_info.headquarters
-        self.ship_count: int = agent_info.ship_count
+        self.callsign: str = agent_info['symbol']
+        self.credits: int = agent_info['credits']
+        self.faction: FactionSymbol = agent_info['starting_faction']
+        self.headquarters: str = agent_info['headquarters']
+        self.ship_count: int = agent_info['ship_count']
         self.ships: list[Ship] = self.my_ships()
         self.contracts: list[Contract] = self.my_contracts()
 
@@ -50,20 +31,20 @@ class Agent:
         ...
     
 
-    def my_agent(self) -> AgentInfo:
+    def my_agent(self) -> AgentShape:
         res = SpaceTradersAPIRequest() \
             .endpoint(SpaceTradersAPIEndpoint.MY_AGENT) \
             .call()
         
         agent = res.spacetraders['data']['agent']
-        return AgentInfo(
-            account_id=agent['accountId'],
-            callsign=agent['symbol'],
-            headquarters=agent['headquarters'],
-            credits=int(agent['credits']),
-            starting_faction=agent['startingFaction'],
-            ship_count=int(agent['shipCount']),
-        ) 
+        return { 
+            'account_id': agent['accountId'],
+            'symbol': agent['symbol'],
+            'headquarters': agent['headquarters'],
+            'credits': agent['credits'],
+            'starting_faction': FactionSymbol[agent['startingFaction']],
+            'ship_count': agent['shipCount'],
+        } 
 
 
     def my_ships(self) -> list[Ship]:
@@ -100,18 +81,18 @@ class Agent:
         agent = data['agent']
         return cls(
             data['token'], 
-            AgentInfo(
-                accountId=agent['accountId'],
-                callsign=agent['symbol'],
-                headquarters=agent['headquarters'],
-                credits=int(agent['credits']),
-                starting_faction=agent['startingFaction'],
-                ship_count=int(agent['shipCount']),
-            )
+            { 
+                'account_id': agent['accountId'],
+                'symbol': agent['symbol'],
+                'headquarters': agent['headquarters'],
+                'credits': int(agent['credits']),
+                'starting_faction': FactionSymbol[agent['startingFaction']],
+                'ship_count': int(agent['shipCount']),
+            } 
         )
 
     @staticmethod
-    def get_agent(callsign: str) -> AgentInfo | SpaceTradersAPIError:
+    def get_agent(callsign: str) -> AgentShape | SpaceTradersAPIError:
         res = SpaceTradersAPIRequest() \
             .endpoint(SpaceTradersAPIEndpoint.GET_AGENT) \
             .params(list([callsign])) \
@@ -119,20 +100,20 @@ class Agent:
 
 
         agent = res.spacetraders['data']
-        return AgentInfo(
-            account_id = CONFIG.accountID, #=agent['accountId'],
-            callsign=agent['symbol'],
-            headquarters=agent['headquarters'],
-            credits=int(agent['credits']),
-            starting_faction=agent['startingFaction'],
-            ship_count=int(agent['shipCount']),
-        )
+        return { 
+            'account_id': agent['accountId'],
+            'symbol': agent['symbol'],
+            'headquarters': agent['headquarters'],
+            'credits': agent['credits'],
+            'starting_faction': FactionSymbol[agent['startingFaction']],
+            'ship_count': agent['shipCount'],
+        } 
 
     @staticmethod
     def get_agents(
         pages: int | range = -1,
         limit: int = MAX_PAGE_LIMIT
-        ) -> list[AgentInfo] | SpaceTradersAPIError:
+        ) -> list[AgentShape] | SpaceTradersAPIError:
 
         paged_req = lambda p=1: SpaceTradersAPIRequest() \
             .endpoint(SpaceTradersAPIEndpoint.GET_AGENTS) \
