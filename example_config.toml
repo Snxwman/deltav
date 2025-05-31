@@ -1,0 +1,23 @@
+# Accounts
+# ---
+# Table is in the format ["account".nickname]
+# The account nickname is not part of the SpaceTraders platform.
+# It is only used internally by the client to identify accounts 
+# when running agents on multiple accounts.
+[account.snxwman]
+email = ""
+token = ""
+proxy = ""
+
+# Agents
+# ---
+# Table name format: ["agent".account_nickname.agent_nickname]
+# The agent nickname is not the agent's callsign (in case it is not available).
+# It is only used internally by the client to identify agents consistently.
+[agent.snxwman.test1]
+callsign = "SNXW1"
+token = ""
+
+[agent.snxwman.test1]
+callsign = "SNXW1"
+token = ""
