@@ -30,26 +30,32 @@ class AgentsShape(SpaceTradersAPIResShape):
 class MyAgentEventsShape(SpaceTradersAPIResShape):
     events: list[EventShape]
 
+
 class MyContractsShape(SpaceTradersAPIResShape):
     contracts: list[ContractShape]
+
 
 class AcceptContractShape(SpaceTradersAPIResShape):
     contract: ContractShape
     agent: AgentShape
+
 
 class MarketTransactionShape(SpaceTradersAPIResShape):
     cargo: ShipCargoShape
     transaction: TransactionShape
     agent: AgentShape
 
+
 class ContractSuccessfulDeliveryShape(SpaceTradersAPIResShape):
     contract: ContractShape
     cargo: ShipCargoShape
+
 
 class NavigateResponseShape(SpaceTradersAPIResShape):
     nav: ShipNavShape
     fuel: ShipFuelShape
     event: EventShape | None
+
 
 class WaypointScanShape(SpaceTradersAPIResShape):
     cooldown: ShipCooldownShape

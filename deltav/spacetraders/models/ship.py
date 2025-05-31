@@ -40,8 +40,8 @@ class ShipNavRouteShape(SpaceTradersAPIResShape):
 
 
 class ShipNavShape(SpaceTradersAPIResShape):
-    system_symbol: str
-    waypoint_symbol: str
+    systemSymbol: str
+    waypointSymbol: str
     route: ShipNavRouteShape
     status: str
     flightMode: str
@@ -160,13 +160,16 @@ class ShipShape(SpaceTradersAPIResShape):
     fuel: ShipFuelShape
     cooldown: ShipCooldownShape
 
+
 class ShipExtractResourceShape(SpaceTradersAPIResShape):
     symbol: TradeSymbol
     units: int
 
+
 class ShipExtractionShape(SpaceTradersAPIResShape):
     symbol: str
     result: ShipExtractResourceShape
+
 
 class ShipExtractShape(SpaceTradersAPIResShape):
     extraction: ShipExtractionShape
