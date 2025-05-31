@@ -16,6 +16,8 @@ from deltav.spacetraders.enums.ship import (
 )
 from deltav.spacetraders.enums.waypoint import WaypointType
 from deltav.spacetraders.models import SpaceTradersAPIResShape
+from deltav.spacetraders.models.agent import AgentShape
+from deltav.spacetraders.models.market import ShipTransactionShape
 
 
 class ShipRegistrationShape(SpaceTradersAPIResShape):
@@ -175,6 +177,27 @@ class ShipExtractShape(SpaceTradersAPIResShape):
     extraction: ShipExtractionShape
     cooldown: ShipCooldownShape
     cargo: ShipCargoShape
+
+
+class ShipPurchaseShape(SpaceTradersAPIResShape):
+    shipType: str
+    waypointSymbol: str
+
+
+class SuccessfulShipPurchaseShape(SpaceTradersAPIResShape):
+    ship: ShipShape
+    agent: AgentShape
+    transaction: ShipTransactionShape
+
+class ShipRefuelShape(SpaceTradersAPIResShape):
+    units: int
+    fromCargo: bool | None
+
+class ShipRefuelResponseShape(SpaceTradersAPIResShape):
+    agent: AgentShape
+    fuel: ShipFuelShape
+    cargo: ShipCargoShape
+    transaction: ShipTransactionShape
 
 
 

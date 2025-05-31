@@ -9,10 +9,12 @@ from deltav.spacetraders.enums.waypoint import WaypointType, WaypointTraitSymbol
 class WaypointNavigateShape(SpaceTradersAPIResShape):
     waypointSymbol: str
 
+
 class WaypointChartShape(SpaceTradersAPIResShape):
     waypointSymbol: str
     submittedBy: str
     submittedOn: datetime
+
 
 class WaypointShape(SpaceTradersAPIResShape):
     symbol: str
@@ -22,5 +24,10 @@ class WaypointShape(SpaceTradersAPIResShape):
     y: int
     orbitals: list[str]
     faction: FactionSymbol
-    traits: list[WaypointTraitSymbol]
+    traits: list[WaypointTraitShape]
     chart: WaypointChartShape
+
+class WaypointTraitShape(SpaceTradersAPIResShape):
+    symbol: WaypointTraitSymbol
+    name: str
+    description: str

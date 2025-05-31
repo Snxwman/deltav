@@ -11,7 +11,7 @@ from deltav.spacetraders.models.contract import ContractShape
 from deltav.spacetraders.models.endpoint import AcceptContractShape, MarketTransactionShape, NavigateResponseShape
 from deltav.spacetraders.models.faction import FactionShape
 from deltav.spacetraders.models.market import CargoItemShape, TransactionShape
-from deltav.spacetraders.models.ship import ShipCargoShape, ShipCooldownShape, ShipShape
+from deltav.spacetraders.models.ship import ShipPurchaseShape, ShipCargoShape, ShipCooldownShape, ShipRefuelResponseShape, ShipRefuelShape, ShipShape
 from deltav.spacetraders.models.waypoint import WaypointNavigateShape
 
 
@@ -122,7 +122,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
         HTTPMethod.POST,
         TokenType.AGENT,
         None,
-        MarketTransactionShape,
+        ShipPurchaseShape,
     )
     MY_SHIPS_CARGO = (
         Template('/my/ships/$param1/cargo'),
@@ -195,7 +195,13 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
         None,
     )
     # Template('/my/ships/$param1/refine')
-    # Template('/my/ships/$param1/refuel')
+    MY_SHIPS_REFUEL = (
+        Template('/my/ships/$param1/refuel'), 
+        HTTPMethod.POST,
+        TokenType.AGENT,
+        ShipRefuelResponseShape,
+        ShipRefuelShape,
+    )
     MY_SHIPS_SCAN_SHIPS = (
         Template('/my/ships/$param1/scan/ships'), 
         HTTPMethod.POST,
@@ -266,9 +272,27 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     )
     # Template('/systems/$param1/waypoints/$param2/construction')
     # Template('/systems/$param1/waypoints/$param2/construction/supply')
-    # Template('/systems/$param1/waypoints/$param2/jump-gate')
-    # Template('/systems/$param1/waypoints/$param2/market')
-    # Template('/systems/$param1/waypoints/$param2/shipyard')
+    GET_JUMPGATE = (
+        Template('/systems/$param1/waypoints/$param2/jumpgate'), 
+        HTTPMethod.GET,
+        TokenType.NONE,
+        None,
+        None,
+    )
+    GET_MARKET = (
+        Template('/systems/$param1/waypoints/$param2/market'), 
+        HTTPMethod.GET,
+        TokenType.NONE,
+        None,
+        None,
+    )
+    GET_SHIPYARD = (
+        Template('/systems/$param1/waypoints/$param2/shipyard'), 
+        HTTPMethod.GET,
+        TokenType.NONE,
+        None,
+        None,
+    )
 
 
     def with_params(self, params: list[str]) -> str:
