@@ -9,3 +9,8 @@ class ErrorShape(SpaceTradersAPIResShape):
     message: str
     data: dict[Any, Any]  # pyright: ignore[reportExplicitAny]
     request_id: str
+
+class HttpErrorShape(SpaceTradersAPIResShape):
+    message: str
+    error: str
+    status_code: int

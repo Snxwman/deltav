@@ -14,10 +14,9 @@ class ContractPaymentShape(SpaceTradersAPIResShape):
 
 
 class ContractDeliverShape(SpaceTradersAPIResShape):
-    trade_symbol: TradeSymbol
-    destination_symbol: str
-    units_required: int
-    units_fulfilled: int
+    ship_symbol: str
+    trade_symbol: str
+    units: int
 
 
 class ContractTermsShape(SpaceTradersAPIResShape):

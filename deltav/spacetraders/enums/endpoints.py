@@ -8,8 +8,11 @@ from deltav.spacetraders.models import SpaceTradersAPIReqShape, SpaceTradersAPIR
 from deltav.spacetraders.models import ServerStatusShape
 from deltav.spacetraders.models.agent import AgentShape
 from deltav.spacetraders.models.contract import ContractShape
+from deltav.spacetraders.models.endpoint import AcceptContractShape, MarketTransactionShape, NavigateResponseShape
 from deltav.spacetraders.models.faction import FactionShape
+from deltav.spacetraders.models.market import CargoItemShape, TransactionShape
 from deltav.spacetraders.models.ship import ShipCargoShape, ShipCooldownShape, ShipShape
+from deltav.spacetraders.models.waypoint import WaypointNavigateShape
 
 
 @dataclass
@@ -84,7 +87,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
         HTTPMethod.POST,
         TokenType.AGENT,
         None,
-        None,
+        AcceptContractShape,
     )
     DELIVER_CONTRACT = (
         Template('/my/contracts/$param1/deliver'), 
@@ -119,7 +122,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
         HTTPMethod.POST,
         TokenType.AGENT,
         None,
-        None,
+        MarketTransactionShape,
     )
     MY_SHIPS_CARGO = (
         Template('/my/ships/$param1/cargo'),
@@ -151,7 +154,13 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
         None,
     )
     # Template('/my/ships/$param1/extract/survey')
-    # Template('/my/ships/$param1/jettison')
+    MY_SHIPS_JETTISON = (
+        Template('/my/ships/$param1/jettison'),
+        HTTPMethod.POST,
+        TokenType.AGENT,
+        None,
+        None,
+    )
     # Template('/my/ships/$param1/jump')
     # Template('/my/ships/$param1/mounts')
     # Template('/my/ships/$param1/mounts/install')
@@ -167,8 +176,8 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
         Template('/my/ships/$param1/navigate'), 
         HTTPMethod.POST,
         TokenType.AGENT,
-        None,
-        None,
+        WaypointNavigateShape,
+        NavigateResponseShape,
     )
     # Template('/my/ships/$param1/negotiate/contract')
     MY_SHIPS_ORBIT = (
@@ -208,7 +217,14 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
         None,
         None,
     )
-    # Template('/my/ships/$param1/sell')
+    MY_SHIPS_SELL = (
+        Template('/my/ships/$param1/sell'), 
+        HTTPMethod.POST,
+        TokenType.AGENT,
+        CargoItemShape,
+        TransactionShape,
+    )
+    
     # Template('/my/ships/$param1/siphon')
     # Template('/my/ships/$param1/survey')
     # Template('/my/ships/$param1/transfer')

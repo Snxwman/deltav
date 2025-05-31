@@ -160,6 +160,19 @@ class ShipShape(SpaceTradersAPIResShape):
     fuel: ShipFuelShape
     cooldown: ShipCooldownShape
 
+class ShipExtractResourceShape(SpaceTradersAPIResShape):
+    symbol: TradeSymbol
+    units: int
+
+class ShipExtractionShape(SpaceTradersAPIResShape):
+    symbol: str
+    result: ShipExtractResourceShape
+
+class ShipExtractShape(SpaceTradersAPIResShape):
+    extraction: ShipExtractionShape
+    cooldown: ShipCooldownShape
+    cargo: ShipCargoShape
+
 
 
 

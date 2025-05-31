@@ -36,16 +36,7 @@ class Agent:
             .endpoint(SpaceTradersAPIEndpoint.MY_AGENT) \
             .build()
     
-
-    # def my_contracts(self) -> SpaceTradersAPIRequest:
-    #     return SpaceTradersAPIRequest() \
-    #         .endpoint(SpaceTradersAPIEndpoint.MY_CONTRACTS) \
-    #     
-    #     contracts = res.spacetraders['data']
-    #
-    #     return contracts if contracts is not None else []
-
-
+        
     @staticmethod
     def register(agent_data: RegisterAgentData) -> SpaceTradersAPIRequest:
         return SpaceTradersAPIRequest().builder() \
@@ -61,7 +52,7 @@ class Agent:
             .path_params(callsign) \
             .build()
 
-
+    # TODO: snxwman? idk what this is for
     # @staticmethod
     # def get_agents(
     #     pages: int | range = -1,
