@@ -1,3 +1,5 @@
 email='test@example.com'
+token=''
 agent_token=''
+account_id=''
 proxy=''
