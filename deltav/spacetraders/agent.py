@@ -17,9 +17,6 @@ from deltav.spacetraders.api.client import SpaceTradersAPIClient
 from deltav.spacetraders.models.ship import ShipShape
 
 
-
-
-
 class Agent:
     def __init__(self, token: str, agent_info: AgentShape) -> None:
         self.token: str = token
@@ -39,22 +36,6 @@ class Agent:
             .endpoint(SpaceTradersAPIEndpoint.MY_AGENT) \
             .build()
     
-    def my_ships(self) -> ShipShape | SpaceTradersAPIError:
-        req = SpaceTradersAPIRequest().builder() \
-            .endpoint(SpaceTradersAPIEndpoint.MY_SHIPS) \
-            .with_agent_token() \
-            .build()
-    
-        match (res := SpaceTradersAPIClient.call(req)):
-            case SpaceTradersAPIResponse():
-                data: ShipShape = cast(ShipShape, res.spacetraders.data)
-
-
-                return data
-            case SpaceTradersAPIError() as err:
-                return err
-        
-    
 
     # def my_contracts(self) -> SpaceTradersAPIRequest:
     #     return SpaceTradersAPIRequest() \
@@ -67,11 +48,11 @@ class Agent:
 
     @staticmethod
     def register(agent_data: RegisterAgentData) -> SpaceTradersAPIRequest:
-        return SpaceTradersAPIRequest() \
-            .builder() \
+        return SpaceTradersAPIRequest().builder() \
             .endpoint(SpaceTradersAPIEndpoint.REGISTER) \
             .data(agent_data) \
             .build()
+
 
     @staticmethod
     def get_agent(callsign: str) -> SpaceTradersAPIRequest:

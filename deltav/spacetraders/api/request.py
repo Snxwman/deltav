@@ -14,7 +14,7 @@ class SpaceTradersAPIRequest:
     """A builder class for SpaceTraders API Requests"""
 
     def __init__(self) -> None:
-        self._endpoint: SpaceTradersAPIEndpoint = SpaceTradersAPIEndpoint.GAME
+        self._endpoint: SpaceTradersAPIEndpoint = SpaceTradersAPIEndpoint.SERVER_STATUS
         self._method: HTTPMethod = self._endpoint.method
         self._headers: dict[str, str] = {}
         self._params: list[str] = []
@@ -95,6 +95,11 @@ class SpaceTradersAPIRequestBuilder:
 
     # TODO: implement
     def pages(self, start: int, end: int) -> 'SpaceTradersAPIRequestBuilder':
+        ...
+
+
+    # TODO: implement
+    def all_pages(self) -> 'SpaceTradersAPIRequestBuilder':
         ...
 
 

@@ -23,7 +23,7 @@ class ContractDeliverShape(SpaceTradersAPIResShape):
 class ContractTermsShape(SpaceTradersAPIResShape):
     deadline: datetime
     payment: ContractPaymentShape
-    deliver: ContractDeliverShape
+    deliver: list[ContractDeliverShape]
 
 
 class ContractShape(SpaceTradersAPIResShape):

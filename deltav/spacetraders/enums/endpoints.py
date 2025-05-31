@@ -12,19 +12,6 @@ from deltav.spacetraders.models.faction import FactionShape
 from deltav.spacetraders.models.ship import ShipCargoShape, ShipCooldownShape, ShipShape
 
 
-
-# from deltav.spacetraders.models.account import *
-# from deltav.spacetraders.models.agent import *
-# from deltav.spacetraders.models.chart import *
-# from deltav.spacetraders.models.contract import *
-# from deltav.spacetraders.models.faction import *
-# from deltav.spacetraders.models.global import *
-# from deltav.spacetraders.models.market import *
-# from deltav.spacetraders.models.ship import *
-# from deltav.spacetraders.models.system import *
-# from deltav.spacetraders.models.waypoint import *
-
-
 @dataclass
 class EndpointDataMixin:
     path: Template
@@ -36,7 +23,7 @@ class EndpointDataMixin:
 
 @unique
 class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
-    GAME = (
+    SERVER_STATUS = (
         Template('/'),
         HTTPMethod.GET,
         TokenType.NONE,
@@ -48,7 +35,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
         HTTPMethod.GET,
         TokenType.NONE,
         None,
-        None,
+        AgentShape,
     )
     GET_AGENT = (
         Template('/agents/$param'), 

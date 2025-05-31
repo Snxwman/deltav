@@ -415,8 +415,7 @@ def run(client: SpaceTradersAPIClient):
             #     usage()
             case 'game':
                 from pprint import pp
-                pp(SpaceTradersGame().fetch_game_state())
-            
+                pp(SpaceTradersGame().fetch_server_status())
             # case 'new' | 'new-agent':
             #     make_new_agent(args)
             # case 'current' | 'agent' | 'me':

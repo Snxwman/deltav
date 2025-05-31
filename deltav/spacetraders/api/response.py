@@ -32,7 +32,6 @@ class SpaceTradersAPIResponse:
     ]
 
     def __init__(self, endpoint: SpaceTradersAPIEndpoint, res: Response):
-
         http_headers = res.headers.copy()
         spacetraders_headers = res.headers.copy()
 
@@ -43,6 +42,7 @@ class SpaceTradersAPIResponse:
                 _ = spacetraders_headers.pop(header)
 
         json_data: dict[Any, Any] = res.json()
+
         data: SpaceTradersAPIResShape = cast(  # pyright: ignore[reportUnknownVariableType]
             endpoint.value.response_shape,  # pyright: ignore[reportInvalidTypeForm]
             json_data if 'data' not in json_data else json_data['data']

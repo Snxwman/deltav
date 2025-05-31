@@ -1,11 +1,13 @@
-# from dataclasses import dataclass
-# from datetime import datetime
-# from enum import Enum, auto
-#
-# from spacetraders.api.faction import Faction
-# from spacetraders.api.api import SpaceTradersAPIRequest, SpaceTradersAPIEndpoint, SpaceTradersAPIResponse, SpaceTradersAPIErrorCodes
-#
-#
+from typing import cast
+
+from deltav.spacetraders.api.client import SpaceTradersAPIClient
+from deltav.spacetraders.api.error import SpaceTradersAPIError
+from deltav.spacetraders.api.request import SpaceTradersAPIRequest
+from deltav.spacetraders.api.response import SpaceTradersAPIResponse
+from deltav.spacetraders.enums.endpoints import SpaceTradersAPIEndpoint
+from deltav.spacetraders.models.ship import ShipShape
+
+
 class Ship:
 
     def __init__(self):
@@ -22,6 +24,20 @@ class Ship:
         # self.cooldown: ShipCooldown
         ...
 
+
+    def my_ships(self) -> ShipShape | SpaceTradersAPIError:
+        req = SpaceTradersAPIRequest().builder() \
+            .endpoint(SpaceTradersAPIEndpoint.MY_SHIPS) \
+            .with_agent_token() \
+            .build()
+    
+        match (res := SpaceTradersAPIClient.call(req)):
+            case SpaceTradersAPIResponse():
+                data: ShipShape = cast(ShipShape, res.spacetraders.data)
+                return data
+            case SpaceTradersAPIError() as err:
+                return err
+        
 
     # @staticmethod
     # def scan_waypoints(shipSymbol: str) -> list[str]:
