@@ -4,11 +4,20 @@ from deltav.spacetraders.api.client import MAX_PAGE_LIMIT
 from deltav.spacetraders.api.response import SpaceTradersAPIResponse
 from deltav.spacetraders.api.request import SpaceTradersAPIRequest
 from deltav.spacetraders.enums.endpoints import SpaceTradersAPIEndpoint
+from deltav.spacetraders.api.error import SpaceTradersAPIError
 from deltav.spacetraders.enums.faction import FactionSymbol
 from deltav.spacetraders.enums.error import SpaceTradersAPIErrorCodes
 from deltav.spacetraders.models.agent import RegisterAgentData, AgentShape
 from deltav.spacetraders.contract import Contract
 from deltav.spacetraders.ship import Ship
+from typing import cast
+
+from deltav.spacetraders.api.client import SpaceTradersAPIClient
+
+from deltav.spacetraders.models.ship import ShipShape
+
+
+
 
 
 class Agent:
@@ -23,23 +32,28 @@ class Agent:
         self.faction: FactionSymbol = agent_info['starting_faction']
         self.headquarters: str = agent_info['headquarters']
         self.ship_count: int = agent_info['ship_count']
-        # self.ships: list[Ship] = self.my_ships()
-        # self.contracts: list[Contract] = self.my_contracts()
 
 
     def my_agent(self) -> SpaceTradersAPIRequest:
         return SpaceTradersAPIRequest().builder() \
             .endpoint(SpaceTradersAPIEndpoint.MY_AGENT) \
             .build()
-        
+    
+    def my_ships(self) -> ShipShape | SpaceTradersAPIError:
+        req = SpaceTradersAPIRequest().builder() \
+            .endpoint(SpaceTradersAPIEndpoint.MY_SHIPS) \
+            .with_agent_token() \
+            .build()
+    
+        match (res := SpaceTradersAPIClient.call(req)):
+            case SpaceTradersAPIResponse():
+                data: ShipShape = cast(ShipShape, res.spacetraders.data)
 
-    # def my_ships(self) -> SpaceTradersAPIRequest:
-    #     return SpaceTradersAPIRequest() \
-    #         .endpoint(SpaceTradersAPIEndpoint.MY_SHIPS) \
-    #     
-    #     ships = res.spacetraders['data']
-    #
-    #     return ships if ships is not None else []
+
+                return data
+            case SpaceTradersAPIError() as err:
+                return err
+        
     
 
     # def my_contracts(self) -> SpaceTradersAPIRequest:
@@ -58,26 +72,6 @@ class Agent:
             .endpoint(SpaceTradersAPIEndpoint.REGISTER) \
             .data(agent_data) \
             .build()
-
-        # match res:
-        #     case SpaceTradersAPIResponse():
-        #         data = res.spacetraders['data'] 
-        #     case SpaceTradersAPIErrorCodes():
-        #         raise ValueError
-
-        # agent = data['agent']
-        # return cls(
-        #     data['token'], 
-        #     { 
-        #         'account_id': agent['accountId'],
-        #         'symbol': agent['symbol'],
-        #         'headquarters': agent['headquarters'],
-        #         'credits': int(agent['credits']),
-        #         'starting_faction': FactionSymbol[agent['startingFaction']],
-        #         'ship_count': int(agent['shipCount']),
-        #     } 
-        # )
-
 
     @staticmethod
     def get_agent(callsign: str) -> SpaceTradersAPIRequest:

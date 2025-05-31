@@ -1,25 +1,16 @@
 from dataclasses import dataclass
 from datetime import datetime
+from typing import cast
 
 from deltav.spacetraders.enums.contract import ContractType
 from deltav.spacetraders.enums.endpoints import SpaceTradersAPIEndpoint
-from deltav.spacetraders.enums.error import SpaceTradersAPIErrorCodes
+from deltav.spacetraders.api.error import SpaceTradersAPIError
 from deltav.spacetraders.enums.market import TradeSymbol
 from deltav.spacetraders.api.request import SpaceTradersAPIRequest 
+from deltav.spacetraders.api.client import SpaceTradersAPIClient
+from deltav.spacetraders.api.response import SpaceTradersAPIResponse, SpaceTradersAPIResShape, SpaceTradersAPIResData
 
-
-@dataclass
-class ContractTerms:
-    deadline: datetime
-    payment_on_accept: int
-    payment_on_fulfil: int
-    deliver_trade_symbol: TradeSymbol
-    deliver_destination: str
-    deliver_units_required: int
-    deliver_units_fulfilled: int
-
-    def remaining_units_to_deliver(self):
-        return self.deliver_units_required - self.deliver_units_fulfilled
+from deltav.spacetraders.models.contract import ContractShape
 
 class Contract:
 
@@ -56,10 +47,19 @@ class Contract:
 
 
     @classmethod 
-    def get_contracts(cls, active_agent: str) -> SpaceTradersAPIRequest:
-        return SpaceTradersAPIRequest().builder() \
+    def get_contracts(cls) -> list[ContractShape] | SpaceTradersAPIError:
+        req =  SpaceTradersAPIRequest().builder() \
             .endpoint(SpaceTradersAPIEndpoint.MY_CONTRACTS) \
+            .with_agent_token() \
             .build()
+         
+        match (res := SpaceTradersAPIClient.call(req)):
+            case SpaceTradersAPIResponse():
+                data: list[ContractShape] = cast(list[ContractShape], res.spacetraders.data)
+                return data
+            case SpaceTradersAPIError() as err:
+                return err
+
     
         # match res:
         #     case SpaceTradersAPIResponse():
@@ -82,29 +82,23 @@ class Contract:
         # return contracts if contracts is not None else []
     
 
-    # @classmethod 
-    # def get_contract(cls, contract_id) -> 'Contract':
-    #     res = SpaceTradersAPIRequest() \
-    #         .endpoint(SpaceTradersAPIEndpoint.MY_CONTRACT) \
-    #         .params(list([contract_id])) \
-    #         .call()
-    # 
-    #     match res:
-    #         case SpaceTradersAPIResponse():
-    #             data = res.spacetraders['data']
-    #         case SpaceTradersAPIErrorCodes():
-    #             raise ValueError
-    #     
-    #     contract = data[0]
-    #     return cls(
-    #         id=contract['id'],
-    #         type=contract['type'],
-    #         terms=contract['terms'],
-    #         accepted=contract['accepted'],
-    #         fulfilled=contract['fulfilled'],
-    #         expiration=datetime.fromisoformat(contract['expiration']),
-    #         deadlineToAccept=datetime.fromisoformat(contract['deadlineToAccept']),
-    #     )
+    @classmethod 
+    def get_contract(cls, contract_id) -> ContractShape | SpaceTradersAPIError:
+        req = SpaceTradersAPIRequest().builder() \
+            .endpoint(SpaceTradersAPIEndpoint.MY_CONTRACT) \
+            .path_params(contract_id) \
+            .with_agent_token() \
+            .build()
+    
+        match (res := SpaceTradersAPIClient.call(req)):
+            case SpaceTradersAPIResponse():
+                data: ContractShape = cast(ContractShape, res.spacetraders.data)
+                return data
+            case SpaceTradersAPIError() as err:
+                return err
+        
+ 
+
 
 
     # @staticmethod

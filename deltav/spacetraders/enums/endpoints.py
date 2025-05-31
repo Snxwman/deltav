@@ -6,6 +6,13 @@ from string import Template
 from deltav.spacetraders.enums.token import TokenType
 from deltav.spacetraders.models import SpaceTradersAPIReqShape, SpaceTradersAPIResShape
 from deltav.spacetraders.models import ServerStatusShape
+from deltav.spacetraders.models.agent import AgentShape
+from deltav.spacetraders.models.contract import ContractShape
+from deltav.spacetraders.models.faction import FactionShape
+from deltav.spacetraders.models.ship import ShipCargoShape, ShipCooldownShape, ShipShape
+
+
+
 # from deltav.spacetraders.models.account import *
 # from deltav.spacetraders.models.agent import *
 # from deltav.spacetraders.models.chart import *
@@ -33,7 +40,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
         Template('/'),
         HTTPMethod.GET,
         TokenType.NONE,
-        None,
+        None, 
         ServerStatusShape,
     )
     GET_AGENTS = (
@@ -48,7 +55,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
         HTTPMethod.GET,
         TokenType.NONE,
         None,
-        None,
+        AgentShape,
     )
     GET_FACTIONS = (
         Template('/factions'), 
@@ -62,7 +69,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
         HTTPMethod.GET,
         TokenType.NONE,
         None,
-        None,
+        FactionShape,
     )
     MY_AGENT = (
         Template('/my/agent'), 
@@ -83,7 +90,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
         HTTPMethod.GET,
         TokenType.AGENT,
         None,
-        None,
+        ContractShape,
     )
     ACCEPT_CONTRACT = (
         Template('/my/contracts/$param1/accept'), 
@@ -111,6 +118,13 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
         HTTPMethod.GET,
         TokenType.AGENT,
         None,
+        ShipShape,
+    )
+    MY_SHIP = (
+        Template('/my/ships/$param'), 
+        HTTPMethod.GET,
+        TokenType.AGENT,
+        None,
         None,
     )
     MY_SHIPS_PURCHASE_SHIP = (
@@ -120,19 +134,12 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
         None,
         None,
     )
-    MY_SHIP = (
-        Template('/my/ships/$param'), 
-        HTTPMethod.GET,
-        TokenType.AGENT,
-        None,
-        None,
-    )
     MY_SHIPS_CARGO = (
         Template('/my/ships/$param1/cargo'),
         HTTPMethod.GET,
         TokenType.AGENT,
         None,
-        None,
+        ShipCargoShape,
     )
     # Template('/my/ships/$param1/chart')
     MY_SHIPS_COOLDOWN = (
@@ -140,7 +147,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
         HTTPMethod.GET,
         TokenType.AGENT,
         None,
-        None,
+        ShipCooldownShape,
     )
     MY_SHIPS_DOCK = (
         Template('/my/ships/$param1/dock'),

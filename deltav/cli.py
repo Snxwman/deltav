@@ -12,9 +12,10 @@ from deltav.spacetraders.api.client import SpaceTradersAPIClient
 from deltav.spacetraders.ship import Ship
 from deltav.spacetraders.contract import Contract
 from deltav.spacetraders.enums.error import SpaceTradersAPIErrorCodes
+from deltav.spacetraders.api.error import SpaceTradersAPIError
 
 DEFAULT_FACTION = 'COSMIC'
-active_agent: Agent | None = None
+active_agent: AgentShape | None = None
 
 
 # def index_or_none(indexable, index: int) -> (Any | None):
@@ -163,20 +164,35 @@ def get_next_command() -> list[str]:
 #             traceback.print_exc()
 #
 #
-# def get_contracts(active_agent: Agent):
-#     print('Getting contracts for active agent...')
-#     contracts = Contract.get_contracts(active_agent)
+def get_contracts():
+    print('Getting contracts for active agent...')
+    contracts = Contract.get_contracts()
+
+    # print(f'Contracts for {active_agent}:')
+    if not contracts:
+        print('No contracts found.')
+        return
+    count = 0
+    print('Available contracts:')
+    print(contracts)
+    # for x in range(len(contracts)):
+    #     print(f'#{x} {contracts[x]}')
+def get_contract(contract_id: str):
+    print('Getting contracts for active agent...')
+    contract = Contract.get_contract(contract_id)
+
+    # print(f'Contracts for {active_agent}:')
+    if not contract:
+        print('No contracts found.')
+        return
+    print(f'Contract {contract_id} details:')
+    print(contract)
+    count = 0
+    # print('Available contracts:')
+    # for x in range(len(contracts)):
+    #     print(f'#{x} {contracts[x]}')
 #
-#     print(f'Contracts for {active_agent.callsign}:')
-#     if not contracts:
-#         print('No contracts found.')
-#         return
-#     count = 0
-#     print('Available contracts:')
-#     for x in range(len(contracts)):
-#         print(f'#{x} {contracts[x]}')
-#
-#
+#g
 # def ships(active_agent: Agent):
 #     def navigate(shipSymbol: str, waypointSymbol: str):
 #         print(f'Navigating ship {shipSymbol} to waypoint {waypointSymbol}...')
@@ -358,6 +374,24 @@ def get_next_command() -> list[str]:
 #         case '10':
 #             getCooldown(chosen_ship['symbol'])
 
+def ships(client: SpaceTradersAPIClient):
+    print('Fetching ships...')
+    agent = Agent(CONFIG.agent_token, {
+                        'symbol': 'AGENT_MOJO',
+                        'starting_faction': FactionSymbol.COSMIC,
+                        'account_id': CONFIG.account_id,
+                        'headquarters': 'HQ-001',
+                        'credits': 0,
+                        'ship_count': 0
+                    }
+                 )
+    ships = Agent.my_ships(self=agent)
+
+    print('Ships:')
+    print(ships)
+    # for ship in ships:
+        # print(f'Ship ID: {ship.symbol}, Location: {ship.nav.waypoint_symbol}')
+
 
 def run(client: SpaceTradersAPIClient):
     quit = False
@@ -367,9 +401,10 @@ def run(client: SpaceTradersAPIClient):
     #     case SpaceTradersAPIResponse:
     #         agent_data: AgentShape = cast(AgentShape, res.spacetraders.data)
     #         active_agent: Agent = Agent(CONFIG.agent_token, agent_data)
-    #
+    
     # print(f'Active agent: {active_agent.callsign} ({active_agent.starting_faction})')
 
+    contract_id = 'cmb8cutehk6lxuo6x23gs1gu1'
     while not quit:
         args = list(filter(len, get_next_command()))
 
@@ -381,16 +416,20 @@ def run(client: SpaceTradersAPIClient):
             case 'game':
                 from pprint import pp
                 pp(SpaceTradersGame().fetch_game_state())
+            
             # case 'new' | 'new-agent':
             #     make_new_agent(args)
             # case 'current' | 'agent' | 'me':
             #     get_current_agent()
             # TODO: negotate contract
-            # case 'contract' | 'contracts' | 'c':
-            #     get_contracts(active_agent)
+            case 'contract' | 'contract' | 'c':
+                get_contract(contract_id)
+            case 'contracts':
+                get_contracts()
             # case 'accept' | 'a' | 'accept-contract':
             #     accept_contract(active_agent)
-            # case 'ships' | 'ship' | 'my-ships' | 's':
+            case 'ships' | 'ship' | 'my-ships' | 's':
+                ships(client)
             #     ships(active_agent)
             # case 'contracts' | 'c':
             #     get_contracts(active_agent)

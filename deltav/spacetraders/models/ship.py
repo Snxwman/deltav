@@ -35,14 +35,16 @@ class ShipNavRouteLocationShape(SpaceTradersAPIResShape):
 class ShipNavRouteShape(SpaceTradersAPIResShape):
     destination: ShipNavRouteLocationShape
     origin: ShipNavRouteLocationShape
+    departureTime: datetime
+    arrival: datetime
 
 
 class ShipNavShape(SpaceTradersAPIResShape):
     system_symbol: str
     waypoint_symbol: str
     route: ShipNavRouteShape
-    departure_time: datetime
-    arrival: datetime
+    status: str
+    flightMode: str
 
 
 class ShipCrewShape(SpaceTradersAPIResShape):

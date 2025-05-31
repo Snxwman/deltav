@@ -10,6 +10,8 @@ from deltav.spacetraders.ship import Ship
 from deltav.spacetraders.system import System
 from deltav.spacetraders.waypoint import Waypoint
 
+from deltav.spacetraders.models import ServerStatusShape
+from typing import cast
 
 class SpaceTradersGame():
 
@@ -26,12 +28,17 @@ class SpaceTradersGame():
 
 
     @staticmethod
-    def fetch_game_state() -> SpaceTradersAPIResponse | SpaceTradersAPIError:
+    def fetch_game_state() -> ServerStatusShape | SpaceTradersAPIError:
         req = SpaceTradersAPIRequest() \
             .builder() \
             .endpoint(SpaceTradersAPIEndpoint.GAME) \
             .build()
 
-        return SpaceTradersAPIClient.call(req)
+        match (res := SpaceTradersAPIClient.call(req)):
+            case SpaceTradersAPIResponse():
+                data: ServerStatusShape = cast(ServerStatusShape, res.spacetraders.data)
+                return data
+            case SpaceTradersAPIError() as err:
+                return err
 
 
