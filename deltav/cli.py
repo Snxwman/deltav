@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from typing import Any, Callable, cast
 import traceback
 
@@ -202,11 +203,29 @@ def ships(active_agent: AgentShape | None):
     def getNavStatus(shipSymbol: str):
         print(f'Getting navigation status for ship {shipSymbol}...')
         status = Ship.get_nav_status(shipSymbol)
-        if not status:
-            print(f'No navigation status found for ship {shipSymbol}. (Error likely)')
+        if isinstance(status, SpaceTradersAPIError):
+            print(f'No navigation status found for ship {shipSymbol}. Error: {status.message}')
             return
         print(f'Navigation status for ship {shipSymbol}:')
-        print(status)
+        if (status['status'] =='IN_TRANSIT'):
+            departure_time_str = status['route']['departureTime']
+            arrival_time_str = status['route']['arrival']
+            departureTime: datetime = datetime.fromisoformat(str(departure_time_str))
+            arrivalTime: datetime = datetime.fromisoformat(str(arrival_time_str))
+            time_difference: timedelta = arrivalTime - departureTime
+            total_seconds = time_difference.total_seconds()
+            hours = total_seconds // 3600
+            minutes = (total_seconds % 3600) // 60
+            seconds = total_seconds % 60
+
+            print(f'Ship {shipSymbol} is currently in transit.')
+            print(f'Origin: {status['route']['origin']['symbol']}')
+            print(f'Destination: {status['route']['destination']['symbol']}')
+            print(f"Arriving to destination in: {int(hours)} hours, {int(minutes)} minutes, {int(seconds)} seconds")
+        else:
+            print(f'Location: {status["waypointSymbol"]}\tStatus: {status["status"]}\tFlight Mode: {status["flightMode"]}')
+
+
 
 
     def orbitShip(shipSymbol: str):
@@ -243,7 +262,7 @@ def ships(active_agent: AgentShape | None):
             print(f'Error purchasing cargo: {e}')
 
 
-    def sellCargo(shipSymbol: str, tradeSymbol: str, units):
+    def sellCargo(shipSymbol: str, tradeSymbol: str, units: int):
         print(f'Selling {units} units of {tradeSymbol} for ship {shipSymbol}...')
         try:
             sell: CargoItemShape = {
@@ -251,7 +270,11 @@ def ships(active_agent: AgentShape | None):
                 'units': units
             }
             data = Ship.sell_cargo(shipSymbol, sell)
-            print(f'Sold {units} units of {tradeSymbol} for ship {shipSymbol}.')
+            if isinstance(data, SpaceTradersAPIError):
+
+                print(f'Error selling cargo: {data.message}')
+                return
+            print(f'Successfully sold {units} units of {tradeSymbol} for ship {shipSymbol}.')
         except ValueError as e:
             print(f'Error selling cargo: {e}')
 
@@ -314,6 +337,9 @@ def ships(active_agent: AgentShape | None):
             print(f'Error code: {cooldown.code}')
             print(f'Probably means no cooldown?')
             return
+        if 'total_seconds' not in cooldown or 'remaining_seconds' not in cooldown:
+            print(f'No Cooldown currently for ship {shipSymbol}.')
+            return
         print(f'Cooldowns for ship {shipSymbol}:')
         print(f'Total Cooldown: {cooldown["total_seconds"]} seconds')
         print(f'Remaining: {cooldown["remaining_seconds"]} seconds')
@@ -326,6 +352,9 @@ def ships(active_agent: AgentShape | None):
                 'units': units
             }
             cargo_jettisoned = Ship.jettison_cargo(shipSymbol, jettison)
+            if isinstance(cargo_jettisoned, SpaceTradersAPIError):
+                print(f'Error jettisoning cargo: {cargo_jettisoned}')
+                return
             print(f'Jettisoned {units} units of {cargoSymbol} from ship {shipSymbol}.')
         except ValueError as e:
             print(f'Error jettisoning cargo: {e}')
@@ -371,6 +400,8 @@ def ships(active_agent: AgentShape | None):
         return
     
     def functions_on_orbit(shipSymbol: str):
+        print('1. Get Navigation Status')
+        print('1. Get Cooldown')
         print('3. Dock Ship')
         print('4. Scan waypoints')
         print('5. Navigate to a waypoint')
@@ -404,6 +435,8 @@ def ships(active_agent: AgentShape | None):
                 
         
     def functions_while_docked(shipSymbol: str):
+        print('1. Get Navigation Status')
+        print('1. Get Cooldown')
         print('3. Orbit Ship')
         print('4. View Cargo')
         print('5. Purchase Cargo')
@@ -427,7 +460,7 @@ def ships(active_agent: AgentShape | None):
             case '6':
                 viewCargo(shipSymbol)
                 cargo_symbol = input('Enter cargo symbol to sell: ')
-                units = input('Enter number of units to sell: ')
+                units = int(input('Enter number of units to sell: '))
                 sellCargo(shipSymbol, cargo_symbol, units)
             case '7':
                 # TODO: is this while docked or in orbit?
@@ -438,16 +471,27 @@ def ships(active_agent: AgentShape | None):
                 units = int(input('Enter number of units to jettison: '))
                 jettisonCargo(shipSymbol, cargo_symbol, units)
 
+    def functions_in_transit(shipSymbol: str):
+        print('1. Get Navigation Status')
+        print('1. Get Cooldown')
+
+        action = input('Enter action number (1-9): ')
+        match action:
+            case '1':
+                getNavStatus(shipSymbol)
+            case '2':
+                getCooldown(shipSymbol)
+
 
     nav_status = chosen_ship['nav']['status']
     print(f'You selected ship: {chosen_ship["symbol"]} at {chosen_ship["nav"]["waypointSymbol"]}')
     print("What would you like to do with this ship?")
-    print('1. Get Status of Ship')
-    print('2. Get Cooldown of Ship')
     if nav_status == 'DOCKED':
         functions_while_docked(chosen_ship['symbol'])
     elif nav_status == 'IN_ORBIT':
         functions_on_orbit(chosen_ship['symbol'])
+    elif nav_status == 'IN_TRANSIT':
+        functions_in_transit(chosen_ship['symbol'])
 
 
 def run(client: SpaceTradersAPIClient):

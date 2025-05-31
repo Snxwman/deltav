@@ -41,7 +41,10 @@ class SpaceTradersAPIResponse:
             else:
                 _ = spacetraders_headers.pop(header)
 
-        json_data: dict[Any, Any] = res.json()
+        if res.status_code == 204:
+            json_data: dict[Any, Any] = {}
+        else:
+            json_data: dict[Any, Any] = res.json()
 
         data: SpaceTradersAPIResShape = cast(  # pyright: ignore[reportUnknownVariableType]
             endpoint.value.response_shape,  # pyright: ignore[reportInvalidTypeForm]

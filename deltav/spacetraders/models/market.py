@@ -7,6 +7,7 @@ class CargoItemShape(SpaceTradersAPIResShape):
     symbol: str
     units: int
 
+
 class TransactionShape(SpaceTradersAPIResShape):
     waypointSymbol: str
     shipSymbol: str
