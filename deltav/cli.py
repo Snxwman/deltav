@@ -197,14 +197,16 @@ def ships(active_agent: AgentShape | None):
             return
         navigation_data: ShipNavShape = res['nav']
         fuel: ShipFuelShape = res['fuel']
-        event: EventShape | None = res['event']
+        if 'event' in res:
+            event: EventShape | None = res['event']
+            if event and isinstance(event, dict) and "message" in event:
+                print(f'Event during navigation: {event["message"]}')
 
         print(f'Ship {shipSymbol} is now navigating to waypoint {waypointSymbol}.')
         print(f'Fuel remaining: {fuel["current"]}/{fuel["capacity"]} units')
         print(f'Fuel consumed on this trip: {fuel["consumed"]} units')
 
-        if event and isinstance(event, dict) and "message" in event:
-            print(f'Event during navigation: {event["message"]}')
+        
 
 
 
@@ -415,7 +417,7 @@ def ships(active_agent: AgentShape | None):
             ship_type = transaction['shipType']
             price = transaction['price']
             ship_prices[ship_type] = price
-            print(f"#{count}Ship Type: {ship_type} - Price: {price} credits")
+            print(f"# - {count}Ship Type: {ship_type} - Price: {price} credits")
             count += 1
 
         shipType = input('Enter ship type to purchase (e.g. EXPLORER, FIGHTER, etc.): ').upper()
@@ -495,6 +497,7 @@ def ships(active_agent: AgentShape | None):
 
         print(f'Ship {shipSymbol} refueled successfully.')
         print(f'Fuel: {fuel["current"]}/{fuel["capacity"]} units')
+        print(f'Spent {transaction["price"]} credits on refueling.')
         
 
     print('Printing ships details...')
@@ -517,7 +520,15 @@ def ships(active_agent: AgentShape | None):
     if isinstance(current_ships, list):
         for x in range(len(current_ships)):
             ship = current_ships[x]
-            print(f'#{x} + Ship Name: {ship['symbol']}\tLocation: {ship['nav']['waypointSymbol']}\tStatus: {ship['nav']['status']}\tFuel: {ship['fuel']['current']}/{ship['fuel']['capacity']}\tCargo: {ship['cargo']['units']}/{ship['cargo']['capacity']} units')
+            if ship['nav']['status'] == 'IN_ORBIT':
+                status: str = 'IN_ORBIT  '
+            elif ship['nav']['status'] == 'IN_TRANSIT':
+                status: str = 'IN_TRANSIT'
+            elif ship['nav']['status'] == 'DOCKED':
+                status: str = 'DOCKED    '
+            else:
+                status: str = 'UNKNOWN   '
+            print(f'#{x} + Ship Name: {ship['symbol']}\tLocation: {ship['nav']['waypointSymbol']}\tType: {ship['registration']['role']}\tStatus: {status}\tFuel: {ship['fuel']['current']}/{ship['fuel']['capacity']}\tCargo: {ship['cargo']['units']}/{ship['cargo']['capacity']} units')
     elif isinstance(current_ships, SpaceTradersAPIError):
         print(f'Error retrieving ships: {current_ships}')
         return
