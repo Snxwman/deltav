@@ -10,7 +10,7 @@ from deltav.spacetraders.api.request import SpaceTradersAPIRequest
 from deltav.spacetraders.api.client import SpaceTradersAPIClient
 from deltav.spacetraders.api.response import SpaceTradersAPIResponse, SpaceTradersAPIResShape, SpaceTradersAPIResData
 
-from deltav.spacetraders.models.contract import ContractShape
+from deltav.spacetraders.models.contract import ContractDeliverResponseShape, ContractDeliverShape, ContractShape
 from deltav.spacetraders.models.endpoint import AcceptContractShape
 
 class Contract:
@@ -60,19 +60,22 @@ class Contract:
             case SpaceTradersAPIError() as err: 
                 return err
     
-        
     
-    # def negotiate_contract(self):
-    #     pass
-
-
-    # can't reject a contract, only accept
-    # def reject(self):
-    #     pass
-
-
-    # def deliver(self):
-    #     pass
+    @staticmethod
+    def deliver(contract_id: str, contract: ContractDeliverShape) -> ContractDeliverResponseShape | SpaceTradersAPIError:
+        req = SpaceTradersAPIRequest().builder() \
+            .endpoint(SpaceTradersAPIEndpoint.DELIVER_CONTRACT) \
+            .path_params(contract_id) \
+            .with_agent_token() \
+            .data(contract) \
+            .build()
+        
+        match (res := SpaceTradersAPIClient.call(req)):
+            case SpaceTradersAPIResponse():
+                data: ContractDeliverResponseShape = cast(ContractDeliverResponseShape, res.spacetraders.data)
+                return data
+            case SpaceTradersAPIError() as err:
+                return err
 
 
     # def __str__(self) -> str:

@@ -1,10 +1,7 @@
 from datetime import datetime, timedelta
 from typing import Any, Callable, cast
-import traceback
 
 from deltav.config import CONFIG
-from deltav.defaults import Defaults
-from deltav.spacetraders import waypoint
 from deltav.spacetraders.agent import Agent
 from deltav.spacetraders.api.response import SpaceTradersAPIResponse
 from deltav.spacetraders.enums.faction import FactionSymbol
@@ -22,7 +19,7 @@ from deltav.spacetraders.ship import Ship
 from deltav.spacetraders.contract import Contract
 from deltav.spacetraders.enums.error import SpaceTradersAPIErrorCodes
 from deltav.spacetraders.api.error import SpaceTradersAPIError
-from deltav.spacetraders.models.systems import ShipyardShape
+from deltav.spacetraders.models.systems import MarketShape, ShipyardShape
 from deltav.spacetraders.system import System
 
 DEFAULT_FACTION = 'COSMIC'
@@ -206,9 +203,6 @@ def ships(active_agent: AgentShape | None):
         print(f'Fuel remaining: {fuel["current"]}/{fuel["capacity"]} units')
         print(f'Fuel consumed on this trip: {fuel["consumed"]} units')
 
-        
-
-
 
     def scanWaypoints(shipSymbol: str):
         print(f'Scanning waypoints for ship {shipSymbol}...')
@@ -254,8 +248,6 @@ def ships(active_agent: AgentShape | None):
             print(f"Arriving to destination in: {int(hours)} hours, {int(minutes)} minutes, {int(seconds)} seconds")
         else:
             print(f'Location: {status["waypointSymbol"]}\tStatus: {status["status"]}\tFlight Mode: {status["flightMode"]}')
-
-
 
 
     def orbitShip(shipSymbol: str):
@@ -340,7 +332,7 @@ def ships(active_agent: AgentShape | None):
                 'trade_symbol': tradeSymbol,
                 'units': units
             }
-            delivery = Ship.deliver_contract(contract_id, deliver)
+            delivery = Contract.deliver(contract_id, deliver)
             print(f'Cargo delivered for ship {shipSymbol}:')
             print(delivery)
         except ValueError as e:
@@ -397,7 +389,14 @@ def ships(active_agent: AgentShape | None):
 
     
     def purchase_ship(waypointSymbol: str):
-        shipyard = System.get_shipyard(waypointSymbol)
+        req = System.get_shipyard(waypointSymbol)
+
+        match (res := SpaceTradersAPIClient().call(req)):
+            case SpaceTradersAPIResponse():
+                shipyard: ShipyardShape = cast(ShipyardShape, res.spacetraders.data)
+            case SpaceTradersAPIError() as err:
+                return err
+            
         if isinstance(shipyard, SpaceTradersAPIError):
             print(f'Error getting shipyard at waypoint {waypointSymbol}: {shipyard}')
             print(f'Error: {shipyard.code.value} - {shipyard.message}')
@@ -442,12 +441,13 @@ def ships(active_agent: AgentShape | None):
 
         print(f'Ship purchased successfully: {ship["symbol"]} for {transaction["price"]} credits.')
 
+
     def refuel_ship(shipSymbol: str):
-        # one unit of fuel from marketplace/cargo = 100 fuel units
+        # one unit of fuel from marketplace/cargo = 100 fuel units TODO: verify?
         print(f'Refueling ship {shipSymbol}...')
         refuel: ShipRefuelShape = {
-            'units': 0,  # 0 means refuel to full capacity
-            'fromCargo': True  # Use cargo if available, otherwise use credits
+            'units': 0,  
+            'fromCargo': True 
         }
 
         # if not at marketplace with fuel, check if ship cargo has fuel, if so use it
@@ -460,7 +460,17 @@ def ships(active_agent: AgentShape | None):
             fuel = cargo['inventory'].get('FUEL', None)
         # need to check if ship is docked in a waypoint with a marketplace that sells fuel
         waypointSymbol = req['nav']['waypointSymbol']
-        market = System.get_market(waypointSymbol)
+        
+        market_request = System.get_market(waypointSymbol)
+
+        market: MarketShape | None = None
+
+        match (res := SpaceTradersAPIClient().call(market_request)):
+            case SpaceTradersAPIResponse():
+                market = cast(MarketShape, res.spacetraders.data)
+            case SpaceTradersAPIError() as err:
+                return err
+            
         if isinstance(market, SpaceTradersAPIError):
             print(f'Possibly just not docked at a waypoint with a market, or no market at waypoint {waypointSymbol}.')
             print(f'Error getting market at waypoint during refueling {waypointSymbol}: {market.code.value} - {market.message}')
@@ -501,7 +511,6 @@ def ships(active_agent: AgentShape | None):
         
 
     print('Printing ships details...')
-    
     current_ships = []
     if active_agent is not None:
         agent_instance = Agent(CONFIG.agent_token, active_agent)

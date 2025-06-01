@@ -2,8 +2,9 @@ from __future__ import annotations
 
 from datetime import datetime
 
+from matplotlib.pyplot import cool
 from deltav.spacetraders.enums.faction import FactionSymbol
-from deltav.spacetraders.enums.market import TradeSymbol
+from deltav.spacetraders.enums.market import SurveySize, TradeSymbol
 from deltav.spacetraders.enums.ship import (
     ShipCrewRotation, 
     ShipEngines,
@@ -14,10 +15,14 @@ from deltav.spacetraders.enums.ship import (
     ShipReactors,
     ShipRole
 )
-from deltav.spacetraders.enums.waypoint import WaypointType
+from deltav.spacetraders.enums.system import SystemType
+from deltav.spacetraders.enums.waypoint import WaypointModifierSymbol, WaypointType
 from deltav.spacetraders.models import SpaceTradersAPIResShape
 from deltav.spacetraders.models.agent import AgentShape
+from deltav.spacetraders.models.event import EventShape
 from deltav.spacetraders.models.market import ShipTransactionShape
+from deltav.spacetraders.models.waypoint import WaypointChartShape
+from deltav.spacetraders.system import SystemWaypointShape
 
 
 class ShipRegistrationShape(SpaceTradersAPIResShape):
@@ -163,20 +168,35 @@ class ShipShape(SpaceTradersAPIResShape):
     cooldown: ShipCooldownShape
 
 
-class ShipExtractResourceShape(SpaceTradersAPIResShape):
+class ShipTradeResourceShape(SpaceTradersAPIResShape):
     symbol: TradeSymbol
     units: int
 
 
 class ShipExtractionShape(SpaceTradersAPIResShape):
     symbol: str
-    result: ShipExtractResourceShape
+    result: ShipTradeResourceShape
 
 
 class ShipExtractShape(SpaceTradersAPIResShape):
     extraction: ShipExtractionShape
     cooldown: ShipCooldownShape
     cargo: ShipCargoShape
+
+
+class ShipExtractSurveyShape(SpaceTradersAPIResShape):
+    signature: str
+    symbol: str
+    deposits: list[str]
+    expiration: datetime
+    size: SurveySize
+
+class ShipExtractSurveyResponseShape(SpaceTradersAPIResShape):
+    extraction: ShipExtractionShape
+    cooldown: ShipCooldownShape
+    cargo: ShipCargoShape
+    modifiers: list[WaypointModifierSymbol]
+    events: list[EventShape]
 
 
 class ShipPurchaseShape(SpaceTradersAPIResShape):
@@ -189,15 +209,59 @@ class SuccessfulShipPurchaseShape(SpaceTradersAPIResShape):
     agent: AgentShape
     transaction: ShipTransactionShape
 
+
 class ShipRefuelShape(SpaceTradersAPIResShape):
     units: int
     fromCargo: bool | None
+
 
 class ShipRefuelResponseShape(SpaceTradersAPIResShape):
     agent: AgentShape
     fuel: ShipFuelShape
     cargo: ShipCargoShape
     transaction: ShipTransactionShape
+
+
+class ShipCreateChartShape(SpaceTradersAPIResShape):
+    chart: WaypointChartShape
+    waypoint: SystemWaypointShape
+    transaction: ShipTransactionShape
+    agent: AgentShape
+
+
+class ShipJumpShape(SpaceTradersAPIResShape):
+    nav: ShipNavShape
+    cooldown: ShipCooldownShape
+    transaction: ShipTransactionShape
+    agent: AgentShape
+
+
+class ShipScanShipsShape(SpaceTradersAPIResShape):
+    cooldown: ShipCooldownShape
+    ships: list[ShipShape]
+
+class ShipSystemShape(SpaceTradersAPIResShape):
+    symbol: str
+    sectorSymbol: str
+    type: SystemType
+    x: int
+    y: int
+    distance: int
+
+class ShipScanSystemsShape(SpaceTradersAPIResShape):
+    cooldown: ShipCooldownShape
+    systems: list[ShipSystemShape]
+
+
+class ShipRefineShape(SpaceTradersAPIResShape):
+    produce: TradeSymbol
+
+
+class ShipRefineResponseShape(SpaceTradersAPIResShape):
+    cargo: ShipCargoShape
+    cooldown: ShipCooldownShape
+    produced: ShipTradeResourceShape
+    consumed: ShipTradeResourceShape
 
 
 

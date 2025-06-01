@@ -2,13 +2,11 @@ from typing import cast
 
 from deltav.config import CONFIG
 from deltav.spacetraders.account import Account
-from deltav.spacetraders.api.client import MAX_PAGE_LIMIT
+# from deltav.spacetraders.api.client import MAX_PAGE_LIMIT
 from deltav.spacetraders.api.request import SpaceTradersAPIRequest
 from deltav.spacetraders.enums.endpoints import SpaceTradersAPIEndpoint
 from deltav.spacetraders.enums.faction import FactionSymbol
 from deltav.spacetraders.models.agent import RegisterAgentData, AgentShape
-
-
 
 
 class Agent:
@@ -25,9 +23,11 @@ class Agent:
         self.ship_count: int = agent_info['ship_count']
 
 
-    def my_agent(self) -> SpaceTradersAPIRequest:
+    @staticmethod
+    def my_agent() -> SpaceTradersAPIRequest:
         return SpaceTradersAPIRequest().builder() \
             .endpoint(SpaceTradersAPIEndpoint.MY_AGENT) \
+            .with_agent_token() \
             .build()
     
         
@@ -36,6 +36,7 @@ class Agent:
         return SpaceTradersAPIRequest().builder() \
             .endpoint(SpaceTradersAPIEndpoint.REGISTER) \
             .data(agent_data) \
+            .with_agent_token() \
             .build()
 
 
@@ -44,6 +45,7 @@ class Agent:
         return SpaceTradersAPIRequest().builder() \
             .endpoint(SpaceTradersAPIEndpoint.GET_AGENT) \
             .path_params(callsign) \
+            .with_agent_token() \
             .build()
 
     # TODO: snxwman? idk what this is for
