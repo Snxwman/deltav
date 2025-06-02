@@ -4,11 +4,10 @@ from deltav.spacetraders.enums.faction import FactionSymbol
 from deltav.spacetraders.enums.market import TradeSymbol
 from deltav.spacetraders.enums.ship import ShipType
 from deltav.spacetraders.enums.system import SystemType
-from deltav.spacetraders.enums.waypoint import WaypointModifierSymbol, WaypointType
 from deltav.spacetraders.models import SpaceTradersAPIResShape
 from deltav.spacetraders.models.market import CargoItemShape, ShipTransactionShape, TradeGoodShape, TransactionShape
 from deltav.spacetraders.models.ship import ShipCargoShape, ShipShape
-from deltav.spacetraders.models.waypoint import WaypointChartShape, WaypointTraitShape
+from deltav.spacetraders.models.waypoint import SystemWaypointShape
 
 
 class ShipyardShape(SpaceTradersAPIResShape):
@@ -45,27 +44,6 @@ class SystemShape(SpaceTradersAPIResShape):
     name: str
 
 
-class SystemWaypointModifierShape(SpaceTradersAPIResShape):
-    symbol: WaypointModifierSymbol
-    name: str
-    description: str
-
-
-class SystemWaypointShape(SpaceTradersAPIResShape):
-    symbol: str
-    type: WaypointType
-    systemSymbol: str
-    x: int
-    y: int
-    orbitals: list[str]
-    orbits: str
-    factionSymbol: FactionSymbol 
-    traits: list[WaypointTraitShape]
-    modifiers: list[SystemWaypointModifierShape]
-    chart: WaypointChartShape
-    isUnderConstruction: bool
-
-
 class ConstructionMaterialShape(SpaceTradersAPIResShape):
     tradeSymbol: TradeSymbol
     required: int
@@ -82,7 +60,7 @@ class SupplyConstructionSiteShape(SpaceTradersAPIResShape):
     shipSymbol: str
     tradeSymbol: TradeSymbol
     units: int
-    
+
 
 class SupplyConstructionSiteResponseShape(SpaceTradersAPIResShape):
     construction: ConstructionSiteShape

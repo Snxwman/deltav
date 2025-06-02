@@ -48,17 +48,13 @@ class SpaceTradersAPIResponse:
 
         data: SpaceTradersAPIResShape = cast(  # pyright: ignore[reportUnknownVariableType]
             endpoint.value.response_shape,  # pyright: ignore[reportInvalidTypeForm]
-            json_data if 'data' not in json_data else json_data['data']
+            json_data if 'data' not in json_data else json_data['data'],
         )
         meta = None if 'meta' not in json_data else cast(MetaShape, json_data['meta'])
 
-        self.http: HttpResponse = HttpResponse(
-            status_code = res.status_code, 
-            headers = http_headers
-        )
+        self.http: HttpResponse = HttpResponse(status_code=res.status_code, headers=http_headers)
         self.spacetraders: SpaceTradersAPIResData = SpaceTradersAPIResData(
-            data = data,
-            meta = meta,
-            headers = spacetraders_headers,
+            data=data,
+            meta=meta,
+            headers=spacetraders_headers,
         )
-

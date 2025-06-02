@@ -19,4 +19,3 @@ class SpaceTradersAPIError:
             self.status_code: int = data['status_code']
             self.message: str = data['message']
             self.error: str = data['error']
-

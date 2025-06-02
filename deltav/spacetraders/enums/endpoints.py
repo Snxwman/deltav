@@ -1,18 +1,47 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
 from enum import Enum, unique
 from http import HTTPMethod
 from string import Template
 
 from deltav.spacetraders.enums.token import TokenType
-from deltav.spacetraders.models import SpaceTradersAPIReqShape, SpaceTradersAPIResShape
-from deltav.spacetraders.models import ServerStatusShape
+from deltav.spacetraders.models import ServerStatusShape, SpaceTradersAPIReqShape, SpaceTradersAPIResShape
 from deltav.spacetraders.models.agent import AgentShape
 from deltav.spacetraders.models.contract import ContractShape
-from deltav.spacetraders.models.endpoint import AcceptContractShape, MarketTransactionShape, NavigateResponseShape, ShipJumpWaypointShape, WaypointScanShape
+from deltav.spacetraders.models.endpoint import (
+    AcceptContractShape,
+    MarketTransactionShape,
+    NavigateResponseShape,
+    ShipJumpWaypointShape,
+    WaypointScanShape,
+)
 from deltav.spacetraders.models.faction import FactionShape
 from deltav.spacetraders.models.market import CargoItemShape, TransactionShape
-from deltav.spacetraders.models.ship import ShipCreateChartShape, ShipExtractSurveyResponseShape, ShipExtractSurveyShape, ShipJumpShape, ShipPurchaseShape, ShipCargoShape, ShipCooldownShape, ShipRefineResponseShape, ShipRefineShape, ShipRefuelResponseShape, ShipRefuelShape, ShipShape
-from deltav.spacetraders.models.systems import ConstructionSiteShape, JumpgateShape, MarketShape, ShipyardShape, SupplyConstructionSiteResponseShape, SupplyConstructionSiteShape, SystemShape, SystemWaypointShape
+from deltav.spacetraders.models.ship import (
+    ShipCargoShape,
+    ShipCooldownShape,
+    ShipCreateChartShape,
+    ShipExtractSurveyResponseShape,
+    ShipExtractSurveyShape,
+    ShipJumpShape,
+    ShipPurchaseShape,
+    ShipRefineResponseShape,
+    ShipRefineShape,
+    ShipRefuelResponseShape,
+    ShipRefuelShape,
+    ShipShape,
+)
+from deltav.spacetraders.models.systems import (
+    ConstructionSiteShape,
+    JumpgateShape,
+    MarketShape,
+    ShipyardShape,
+    SupplyConstructionSiteResponseShape,
+    SupplyConstructionSiteShape,
+    SystemShape,
+    SystemWaypointShape,
+)
 from deltav.spacetraders.models.waypoint import WaypointNavigateShape
 
 
@@ -31,95 +60,95 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
         Template('/'),
         HTTPMethod.GET,
         TokenType.NONE,
-        None, 
+        None,
         ServerStatusShape,
     )
     GET_AGENTS = (
-        Template('/agents?page=$page&limit=$limit'), 
+        Template('/agents?page=$page&limit=$limit'),
         HTTPMethod.GET,
         TokenType.NONE,
         None,
         AgentShape,
     )
     GET_AGENT = (
-        Template('/agents/$param'), 
+        Template('/agents/$param'),
         HTTPMethod.GET,
         TokenType.NONE,
         None,
         AgentShape,
     )
     GET_FACTIONS = (
-        Template('/factions'), 
+        Template('/factions'),
         HTTPMethod.GET,
         TokenType.NONE,
         None,
         None,
     )
     GET_FACTION = (
-        Template('/factions/$param'), 
+        Template('/factions/$param'),
         HTTPMethod.GET,
         TokenType.NONE,
         None,
         FactionShape,
     )
     MY_AGENT = (
-        Template('/my/agent'), 
+        Template('/my/agent'),
         HTTPMethod.GET,
         TokenType.AGENT,
         None,
         None,
     )
     MY_CONTRACTS = (
-        Template('/my/contracts'), 
+        Template('/my/contracts'),
         HTTPMethod.GET,
         TokenType.AGENT,
         None,
         None,
     )
     MY_CONTRACT = (
-        Template('/my/contracts/$param'), 
+        Template('/my/contracts/$param'),
         HTTPMethod.GET,
         TokenType.AGENT,
         None,
         ContractShape,
     )
     ACCEPT_CONTRACT = (
-        Template('/my/contracts/$param1/accept'), 
+        Template('/my/contracts/$param1/accept'),
         HTTPMethod.POST,
         TokenType.AGENT,
         None,
         AcceptContractShape,
     )
     DELIVER_CONTRACT = (
-        Template('/my/contracts/$param1/deliver'), 
+        Template('/my/contracts/$param1/deliver'),
         HTTPMethod.POST,
         TokenType.AGENT,
         None,
         None,
     )
     FULFILL_CONTRACT = (
-        Template('/my/contracts/$param1/fulfill'), 
+        Template('/my/contracts/$param1/fulfill'),
         HTTPMethod.POST,
         TokenType.AGENT,
         None,
         None,
     )
     MY_SHIPS = (
-        Template('/my/ships'), 
+        Template('/my/ships'),
         HTTPMethod.GET,
         TokenType.AGENT,
         None,
         ShipShape,
     )
     MY_SHIP = (
-        Template('/my/ships/$param'), 
+        Template('/my/ships/$param'),
         HTTPMethod.GET,
         TokenType.AGENT,
         None,
         ShipShape,
     )
     MY_SHIPS_PURCHASE_SHIP = (
-        Template('/my/ships'), 
+        Template('/my/ships'),
         HTTPMethod.POST,
         TokenType.AGENT,
         None,
@@ -192,7 +221,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
         None,
     )
     MY_SHIP_NAVIGATE = (
-        Template('/my/ships/$param1/navigate'), 
+        Template('/my/ships/$param1/navigate'),
         HTTPMethod.POST,
         TokenType.AGENT,
         WaypointNavigateShape,
@@ -220,129 +249,126 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
         MarketTransactionShape,
     )
     MY_SHIPS_REFINE = (
-        Template('/my/ships/$param1/refine'), 
+        Template('/my/ships/$param1/refine'),
         HTTPMethod.POST,
         TokenType.AGENT,
         ShipRefineShape,
         ShipRefineResponseShape,
     )
     MY_SHIPS_REFUEL = (
-        Template('/my/ships/$param1/refuel'), 
+        Template('/my/ships/$param1/refuel'),
         HTTPMethod.POST,
         TokenType.AGENT,
         ShipRefuelShape,
         ShipRefuelResponseShape,
     )
     MY_SHIPS_SCAN_SHIPS = (
-        Template('/my/ships/$param1/scan/ships'), 
+        Template('/my/ships/$param1/scan/ships'),
         HTTPMethod.POST,
         TokenType.AGENT,
         None,
         None,
     )
     MY_SHIPS_SCAN_SYSTEMS = (
-        Template('/my/ships/$param1/scan/systems'), 
+        Template('/my/ships/$param1/scan/systems'),
         HTTPMethod.POST,
         TokenType.AGENT,
         None,
         None,
     )
     MY_SHIPS_SCAN_WAYPOINTS = (
-        Template('/my/ships/$param1/scan/waypoints'), 
+        Template('/my/ships/$param1/scan/waypoints'),
         HTTPMethod.POST,
         TokenType.AGENT,
         None,
         WaypointScanShape,
     )
     MY_SHIPS_SELL = (
-        Template('/my/ships/$param1/sell'), 
+        Template('/my/ships/$param1/sell'),
         HTTPMethod.POST,
         TokenType.AGENT,
         CargoItemShape,
         TransactionShape,
     )
-    
+
     # Template('/my/ships/$param1/siphon')
     # Template('/my/ships/$param1/survey')
     # Template('/my/ships/$param1/transfer')
     # Template('/my/ships/$param1/warp')
     REGISTER = (
-        Template('/register'), 
+        Template('/register'),
         HTTPMethod.POST,
         TokenType.NONE,
         None,
         None,
     )
     SYSTEM_GET_SYSTEMS = (
-        Template('/systems'), 
+        Template('/systems'),
         HTTPMethod.GET,
         TokenType.NONE,
         None,
         None,
     )
     SYSTEM_GET_SYSTEM = (
-        Template('/systems/$param'), 
+        Template('/systems/$param'),
         HTTPMethod.GET,
         TokenType.NONE,
         None,
         SystemShape,
     )
     SYSTEM_GET_WAYPOINTS = (
-        Template('/systems/$param1/waypoints'), 
+        Template('/systems/$param1/waypoints'),
         HTTPMethod.GET,
         TokenType.NONE,
         None,
         None,
     )
     SYSTEM_GET_WAYPOINT = (
-        Template('/systems/$param1/waypoints/$param2'), 
+        Template('/systems/$param1/waypoints/$param2'),
         HTTPMethod.GET,
         TokenType.NONE,
         None,
         SystemWaypointShape,
     )
     SYSTEM_GET_CONSTRUCTION_SITE = (
-        Template('/systems/$param1/waypoints/$param2/construction'), 
+        Template('/systems/$param1/waypoints/$param2/construction'),
         HTTPMethod.GET,
         TokenType.NONE,
         None,
         ConstructionSiteShape,
     )
     SYSTEM_SUPPLY_CONSTRUCTION_SITE = (
-        Template('/systems/$param1/waypoints/$param2/construction/supply'), 
+        Template('/systems/$param1/waypoints/$param2/construction/supply'),
         HTTPMethod.POST,
         TokenType.AGENT,
         SupplyConstructionSiteShape,
         SupplyConstructionSiteResponseShape,
     )
     GET_JUMPGATE = (
-        Template('/systems/$param1/waypoints/$param2/jumpgate'), 
+        Template('/systems/$param1/waypoints/$param2/jumpgate'),
         HTTPMethod.GET,
         TokenType.NONE,
         None,
         JumpgateShape,
     )
     GET_MARKET = (
-        Template('/systems/$param1/waypoints/$param2/market'), 
+        Template('/systems/$param1/waypoints/$param2/market'),
         HTTPMethod.GET,
         TokenType.NONE,
         None,
         MarketShape,
     )
     GET_SHIPYARD = (
-        Template('/systems/$param1/waypoints/$param2/shipyard'), 
+        Template('/systems/$param1/waypoints/$param2/shipyard'),
         HTTPMethod.GET,
         TokenType.NONE,
         None,
         ShipyardShape,
     )
 
-
     def with_params(self, params: list[str]) -> str:
         mapping = dict(zip(self.path.get_identifiers(), params))
         return self.path.substitute(mapping)
 
-
     def with_paging(self, page: int, limit: int) -> str:
         return self.path.substitute(page=page, limit=limit)
-

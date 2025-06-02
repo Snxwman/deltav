@@ -1,9 +1,11 @@
 from __future__ import annotations
+
 from datetime import datetime
 
 from deltav.spacetraders.enums.market import ActivityLevel, MarketTradeGoodType, SupplyLevel
 from deltav.spacetraders.enums.ship import ShipType
 from deltav.spacetraders.models import SpaceTradersAPIResShape
+
 
 class CargoItemShape(SpaceTradersAPIResShape):
     symbol: str
@@ -38,4 +40,3 @@ class TradeGoodShape(SpaceTradersAPIResShape):
     activity: ActivityLevel
     purchasePrice: int
     sellPrice: int
-

@@ -2,9 +2,9 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from deltav.spacetraders.models import SpaceTradersAPIResShape
 from deltav.spacetraders.enums.contract import ContractType
 from deltav.spacetraders.enums.faction import FactionSymbol
+from deltav.spacetraders.models import SpaceTradersAPIResShape
 from deltav.spacetraders.models.ship import ShipCargoShape
 
 
@@ -17,6 +17,7 @@ class ContractDeliverShape(SpaceTradersAPIResShape):
     ship_symbol: str
     trade_symbol: str
     units: int
+
 
 class ContractDeliverResponseShape(SpaceTradersAPIResShape):
     contract: ContractShape
@@ -37,4 +38,3 @@ class ContractShape(SpaceTradersAPIResShape):
     accepted: bool
     fulfilled: bool
     deadlineToAccept: datetime
-

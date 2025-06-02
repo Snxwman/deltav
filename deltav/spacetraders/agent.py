@@ -1,12 +1,10 @@
-from typing import cast
-
-from deltav.config import CONFIG
 from deltav.spacetraders.account import Account
+
 # from deltav.spacetraders.api.client import MAX_PAGE_LIMIT
 from deltav.spacetraders.api.request import SpaceTradersAPIRequest
 from deltav.spacetraders.enums.endpoints import SpaceTradersAPIEndpoint
 from deltav.spacetraders.enums.faction import FactionSymbol
-from deltav.spacetraders.models.agent import RegisterAgentData, AgentShape
+from deltav.spacetraders.models.agent import AgentShape, RegisterAgentData
 
 
 class Agent:
@@ -22,31 +20,31 @@ class Agent:
         self.headquarters: str = agent_info['headquarters']
         self.ship_count: int = agent_info['ship_count']
 
-
     @staticmethod
     def my_agent() -> SpaceTradersAPIRequest:
-        return SpaceTradersAPIRequest().builder() \
-            .endpoint(SpaceTradersAPIEndpoint.MY_AGENT) \
-            .with_agent_token() \
-            .build()
-    
-        
+        return SpaceTradersAPIRequest().builder().endpoint(SpaceTradersAPIEndpoint.MY_AGENT).with_agent_token().build()
+
     @staticmethod
     def register(agent_data: RegisterAgentData) -> SpaceTradersAPIRequest:
-        return SpaceTradersAPIRequest().builder() \
-            .endpoint(SpaceTradersAPIEndpoint.REGISTER) \
-            .data(agent_data) \
-            .with_agent_token() \
+        return (
+            SpaceTradersAPIRequest()
+            .builder()
+            .endpoint(SpaceTradersAPIEndpoint.REGISTER)
+            .data(agent_data)
+            .with_agent_token()
             .build()
-
+        )
 
     @staticmethod
     def get_agent(callsign: str) -> SpaceTradersAPIRequest:
-        return SpaceTradersAPIRequest().builder() \
-            .endpoint(SpaceTradersAPIEndpoint.GET_AGENT) \
-            .path_params(callsign) \
-            .with_agent_token() \
+        return (
+            SpaceTradersAPIRequest()
+            .builder()
+            .endpoint(SpaceTradersAPIEndpoint.GET_AGENT)
+            .path_params(callsign)
+            .with_agent_token()
             .build()
+        )
 
     # TODO: snxwman? idk what this is for
     # @staticmethod
@@ -63,7 +61,7 @@ class Agent:
     #     if pages == -1:
     #         res = paged_req()
     #
-    #         pages_remaining: int = int(int(res.spacetraders['meta']['total']) / limit) 
+    #         pages_remaining: int = int(int(res.spacetraders['meta']['total']) / limit)
     #
     #         for page in range(2, pages_remaining+1):
     #             res = paged_req(page)
@@ -76,4 +74,3 @@ class Agent:
     #                 req = paged_req(pages)
     #
     #     return []
-

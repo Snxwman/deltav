@@ -21,7 +21,6 @@ class FactionSymbol(Enum):
     SHADOW = auto()
     ETHEREAL = auto()
 
-
     @property
     def default(self) -> 'FactionSymbol':
         return FactionSymbol.COSMIC
@@ -87,4 +86,3 @@ class FactionTraitSymbol(Enum):
     COMMERCIAL = auto()
     FREE_MARKETS = auto()
     ENTREPRENEURIAL = auto()
-

@@ -59,3 +59,4 @@ class WaypointScanShape(SpaceTradersAPIResShape):
 
 class ShipJumpWaypointShape(SpaceTradersAPIResShape):
     waypointSymbol: str
+

@@ -1,9 +1,10 @@
 from __future__ import annotations
+
 from datetime import datetime
 from typing import Any
 
-from deltav.spacetraders.models import SpaceTradersAPIReqShape, SpaceTradersAPIResShape
 from deltav.spacetraders.enums.faction import FactionSymbol
+from deltav.spacetraders.models import SpaceTradersAPIReqShape, SpaceTradersAPIResShape
 
 
 class RegisterAgentData(SpaceTradersAPIReqShape):
@@ -32,6 +33,5 @@ class AgentEvent(SpaceTradersAPIResShape):
     id: str
     type: str
     message: str
-    data: dict[Any, Any]  # pyright: ignore[reportExplicitAny]
+    data: dict[Any, Any]
     created_at: datetime
-

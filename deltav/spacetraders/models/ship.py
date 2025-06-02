@@ -2,18 +2,17 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from matplotlib.pyplot import cool
 from deltav.spacetraders.enums.faction import FactionSymbol
 from deltav.spacetraders.enums.market import SurveySize, TradeSymbol
 from deltav.spacetraders.enums.ship import (
-    ShipCrewRotation, 
+    ShipCrewRotation,
     ShipEngines,
     ShipFrames,
     ShipModules,
-    ShipMounts,
     ShipMountDeposits,
+    ShipMounts,
     ShipReactors,
-    ShipRole
+    ShipRole,
 )
 from deltav.spacetraders.enums.system import SystemType
 from deltav.spacetraders.enums.waypoint import WaypointModifierSymbol, WaypointType
@@ -22,7 +21,6 @@ from deltav.spacetraders.models.agent import AgentShape
 from deltav.spacetraders.models.event import EventShape
 from deltav.spacetraders.models.market import ShipTransactionShape
 from deltav.spacetraders.models.waypoint import WaypointChartShape
-from deltav.spacetraders.system import SystemWaypointShape
 
 
 class ShipRegistrationShape(SpaceTradersAPIResShape):
@@ -62,7 +60,7 @@ class ShipCrewShape(SpaceTradersAPIResShape):
     morale: int
     wages: int
 
-    
+
 class ShipRequirementsShape(SpaceTradersAPIResShape):
     power: int
     crew: int
@@ -191,6 +189,7 @@ class ShipExtractSurveyShape(SpaceTradersAPIResShape):
     expiration: datetime
     size: SurveySize
 
+
 class ShipExtractSurveyResponseShape(SpaceTradersAPIResShape):
     extraction: ShipExtractionShape
     cooldown: ShipCooldownShape
@@ -240,6 +239,7 @@ class ShipScanShipsShape(SpaceTradersAPIResShape):
     cooldown: ShipCooldownShape
     ships: list[ShipShape]
 
+
 class ShipSystemShape(SpaceTradersAPIResShape):
     symbol: str
     sectorSymbol: str
@@ -247,6 +247,7 @@ class ShipSystemShape(SpaceTradersAPIResShape):
     x: int
     y: int
     distance: int
+
 
 class ShipScanSystemsShape(SpaceTradersAPIResShape):
     cooldown: ShipCooldownShape
@@ -262,7 +263,3 @@ class ShipRefineResponseShape(SpaceTradersAPIResShape):
     cooldown: ShipCooldownShape
     produced: ShipTradeResourceShape
     consumed: ShipTradeResourceShape
-
-
-
-

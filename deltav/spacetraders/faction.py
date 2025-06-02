@@ -12,7 +12,6 @@ class FactionInfo(TypedDict):
 
 class Faction:
     default: str = 'COSMIC'
-    
 
     def __init__(self, faction_info: FactionInfo):
         self.callsign: str
