@@ -4,46 +4,7 @@ from datetime import datetime
 from typing import Any
 
 from deltav.spacetraders.enums.faction import FactionSymbol
-from deltav.spacetraders.models import SpaceTradersAPIReqShape, SpaceTradersAPIResShape
-from deltav.spacetraders.models.contract import ContractShape
-from deltav.spacetraders.models.faction import FactionShape
-from deltav.spacetraders.models.ship import ShipShape
-
-
-class RegisterAgentReqData(SpaceTradersAPIReqShape):
-    """Represents the request data sent when registering an agent.
-
-    symbol: str
-    faction: FactionSymbol
-
-    Inherits `SpaceTradersAPIReqShape(TypeDict)`
-
-    SpaceTraders API endpoints:
-        - SpaceTradersAPIEndpoints.REGISTER (POST /register)
-    """
-    symbol: str
-    faction: FactionSymbol
-
-
-class RegisterAgentResData(SpaceTradersAPIResShape):
-    """Represents the response data returned when registering an agent.
-
-    token: str
-    agent: AgentShape
-    faction: FactionShape
-    contract: ContractShape
-    ships: list[ShipShape]
-
-    Inherits `SpaceTradersAPIResShape(TypeDict)`
-
-    SpaceTraders API endpoints:
-        - SpaceTradersAPIEndpoints.REGISTER (POST /register)
-    """
-    token: str
-    agent: AgentShape
-    faction: FactionShape
-    contract: ContractShape
-    ships: list[ShipShape]
+from deltav.spacetraders.models import SpaceTradersAPIResShape
 
 
 class AgentShape(SpaceTradersAPIResShape):
@@ -64,6 +25,7 @@ class AgentShape(SpaceTradersAPIResShape):
     SpaceTraders API endpoints:
         - SpaceTradersAPIEndpoints.MY_AGENT (GET /my/agent)
     """
+
     account_id: str | None
     symbol: str
     headquarters: str
@@ -87,6 +49,7 @@ class PublicAgentShape(SpaceTradersAPIResShape):
     SpaceTraders API endpoint:
         - SpaceTradersAPIEndpoints.GET_AGENT (GET /agents/{agentSymbol})
     """
+
     symbol: str
     headquarters: str
     credits: int
@@ -108,6 +71,7 @@ class AgentEventShape(SpaceTradersAPIResShape):
     SpaceTraders API endpoints:
         - SpaceTradersAPIEndpoints.MY_AGENT_EVENTS (GET /my/agent/events)
     """
+
     id: str
     type: str
     message: str

@@ -58,7 +58,7 @@ class Ship:
 
     @staticmethod
     def get_ships() -> list[ShipShape] | SpaceTradersAPIError:
-        req = SpaceTradersAPIRequest().builder().endpoint(SpaceTradersAPIEndpoint.MY_SHIPS).with_agent_token().build()
+        req = SpaceTradersAPIRequest().builder().endpoint(SpaceTradersAPIEndpoint.MY_SHIPS).with_token().build()
 
         match res := SpaceTradersAPIClient.call(req):
             case SpaceTradersAPIResponse():
@@ -92,7 +92,7 @@ class Ship:
             .builder()
             .endpoint(SpaceTradersAPIEndpoint.MY_SHIPS_SCAN_SYSTEMS)
             .path_params(shipSymbol)
-            .with_agent_token()
+            .with_token()
             .build()
         )
 
@@ -128,7 +128,7 @@ class Ship:
             .builder()
             .endpoint(SpaceTradersAPIEndpoint.MY_SHIPS_SCAN_SHIPS)
             .path_params(shipSymbol)
-            .with_agent_token()
+            .with_token()
             .build()
         )
 
@@ -296,7 +296,7 @@ class Ship:
             .builder()
             .endpoint(SpaceTradersAPIEndpoint.MY_SHIPS_EXTRACT_SURVEY)
             .path_params(shipSymbol)
-            .with_agent_token()
+            .with_token()
             .data(survey)
             .build()
         )
@@ -351,7 +351,7 @@ class Ship:
             .builder()
             .endpoint(SpaceTradersAPIEndpoint.MY_SHIPS_PURCHASE_SHIP)
             .data(shape)
-            .with_agent_token()
+            .with_token()
             .build()
         )
 
@@ -370,7 +370,7 @@ class Ship:
             .endpoint(SpaceTradersAPIEndpoint.MY_SHIPS_REFUEL)
             .path_params(shipSymbol)
             .data(refuel)
-            .with_agent_token()
+            .with_token()
             .build()
         )
 
@@ -388,7 +388,7 @@ class Ship:
             .builder()
             .endpoint(SpaceTradersAPIEndpoint.MY_SHIPS_CREATE_CHART)
             .path_params(shipSymbol)
-            .with_agent_token()
+            .with_token()
             .build()
         )
 
@@ -406,7 +406,7 @@ class Ship:
             .builder()
             .endpoint(SpaceTradersAPIEndpoint.MY_SHIPS_NEGOTIATE_CONTRACT)
             .path_params(shipSymbol)
-            .with_agent_token()
+            .with_token()
             .build()
         )
 
@@ -425,7 +425,7 @@ class Ship:
             .endpoint(SpaceTradersAPIEndpoint.MY_SHIPS_JUMP)
             .path_params(shipSymbol)
             .data(waypoint)
-            .with_agent_token()
+            .with_token()
             .build()
         )
 
@@ -444,7 +444,7 @@ class Ship:
             .endpoint(SpaceTradersAPIEndpoint.MY_SHIPS_REFINE)
             .path_params(shipSymbol)
             .data(produce)
-            .with_agent_token()
+            .with_token()
             .build()
         )
 

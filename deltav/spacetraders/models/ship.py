@@ -20,7 +20,7 @@ from deltav.spacetraders.models import SpaceTradersAPIResShape
 from deltav.spacetraders.models.agent import AgentShape
 from deltav.spacetraders.models.event import EventShape
 from deltav.spacetraders.models.market import ShipTransactionShape
-from deltav.spacetraders.models.waypoint import WaypointChartShape
+from deltav.spacetraders.models.waypoint import SystemWaypointShape, WaypointChartShape
 
 
 class ShipRegistrationShape(SpaceTradersAPIResShape):

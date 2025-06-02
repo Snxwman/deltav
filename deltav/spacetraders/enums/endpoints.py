@@ -17,14 +17,14 @@ from deltav.spacetraders.models.agent import (
     AgentEventShape,
     AgentShape,
     PublicAgentShape,
-    RegisterAgentReqData,
-    RegisterAgentResData,
 )
 from deltav.spacetraders.models.contract import ContractShape
 from deltav.spacetraders.models.endpoint import (
     AcceptContractShape,
     MarketTransactionShape,
     NavigateResponseShape,
+    RegisterAgentReqData,
+    RegisterAgentResData,
     ShipJumpWaypointShape,
     WaypointScanShape,
 )
@@ -52,9 +52,8 @@ from deltav.spacetraders.models.systems import (
     SupplyConstructionSiteResponseShape,
     SupplyConstructionSiteShape,
     SystemShape,
-    SystemWaypointShape,
 )
-from deltav.spacetraders.models.waypoint import WaypointNavigateShape
+from deltav.spacetraders.models.waypoint import SystemWaypointShape, WaypointNavigateShape
 
 
 @dataclass

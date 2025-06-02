@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from deltav.spacetraders.models import SpaceTradersAPIResShape
+from deltav.spacetraders.enums.faction import FactionSymbol
+from deltav.spacetraders.models import SpaceTradersAPIReqShape, SpaceTradersAPIResShape
 from deltav.spacetraders.models.account import AccountShape
 from deltav.spacetraders.models.agent import AgentShape, PublicAgentShape
 from deltav.spacetraders.models.contract import ContractShape
@@ -15,7 +16,42 @@ class MyAccountShape(SpaceTradersAPIResShape):
     account: AccountShape
 
 
-class RegisterShape(SpaceTradersAPIResShape):
+class RegisterAgentReqData(SpaceTradersAPIReqShape):
+    """Represents the request data sent when registering an agent.
+
+    symbol: str
+    faction: FactionSymbol
+
+    Inherits `SpaceTradersAPIReqShape(TypeDict)`
+
+    SpaceTraders API endpoints:
+        - SpaceTradersAPIEndpoints.REGISTER (POST /register)
+    """
+
+    symbol: str
+    faction: FactionSymbol
+
+
+class RegisterAgentResData(SpaceTradersAPIResShape):
+    """Represents the response data returned when registering an agent.
+
+    token: str
+    agent: AgentShape
+    faction: FactionShape
+    contract: ContractShape
+    ships: list[ShipShape]
+
+    Inherits `SpaceTradersAPIResShape(TypeDict)`
+
+    SpaceTraders API endpoints:
+        - SpaceTradersAPIEndpoints.REGISTER (POST /register)
+    """
+
+    token: str
+    agent: AgentShape
+    faction: FactionShape
+    contract: ContractShape
+    ships: list[ShipShape]
 
 
 class AgentsShape(SpaceTradersAPIResShape):
@@ -54,4 +90,3 @@ class WaypointScanShape(SpaceTradersAPIResShape):
 
 class ShipJumpWaypointShape(SpaceTradersAPIResShape):
     waypointSymbol: str
-

@@ -8,11 +8,8 @@ from deltav.spacetraders.api.response import SpaceTradersAPIResponse
 from deltav.spacetraders.contract import Contract
 from deltav.spacetraders.enums.endpoints import SpaceTradersAPIEndpoint
 from deltav.spacetraders.faction import Faction
-from deltav.spacetraders.models.agent import (
-    AgentShape,
-    RegisterAgentReqData,
-    RegisterAgentResData,
-)
+from deltav.spacetraders.models.agent import AgentShape
+from deltav.spacetraders.models.endpoint import RegisterAgentReqData, RegisterAgentResData
 from deltav.spacetraders.ship import Ship
 
 

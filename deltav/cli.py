@@ -1,25 +1,30 @@
 from datetime import datetime, timedelta
-from typing import Any, Callable, cast
+from typing import cast
 
 from deltav.config import CONFIG
 from deltav.spacetraders.agent import Agent
-from deltav.spacetraders.api.response import SpaceTradersAPIResponse
-from deltav.spacetraders.enums.faction import FactionSymbol
-from deltav.spacetraders.enums.market import TradeSymbol
-from deltav.spacetraders.enums.ship import ShipType
-from deltav.spacetraders.game import SpaceTradersGame
-from deltav.spacetraders.models.agent import AgentShape, RegisterAgentReqData
 from deltav.spacetraders.api.client import SpaceTradersAPIClient
+from deltav.spacetraders.api.error import SpaceTradersAPIError
+from deltav.spacetraders.api.response import SpaceTradersAPIResponse
+from deltav.spacetraders.contract import Contract
+from deltav.spacetraders.enums.error import SpaceTradersAPIErrorCodes
+from deltav.spacetraders.enums.faction import FactionSymbol
+from deltav.spacetraders.game import SpaceTradersGame
+from deltav.spacetraders.models.agent import AgentShape
 from deltav.spacetraders.models.contract import ContractDeliverShape
 from deltav.spacetraders.models.event import EventShape
 from deltav.spacetraders.models.market import CargoItemShape
-from deltav.spacetraders.models.ship import ShipCargoInventoryShape, ShipCooldownShape, ShipFuelShape, ShipNavShape, ShipPurchaseShape, ShipRefuelShape
+from deltav.spacetraders.models.ship import (
+    ShipCargoInventoryShape,
+    ShipCooldownShape,
+    ShipFuelShape,
+    ShipNavShape,
+    ShipPurchaseShape,
+    ShipRefuelShape,
+)
+from deltav.spacetraders.models.systems import MarketShape, ShipyardShape
 from deltav.spacetraders.models.waypoint import WaypointNavigateShape, WaypointShape
 from deltav.spacetraders.ship import Ship
-from deltav.spacetraders.contract import Contract
-from deltav.spacetraders.enums.error import SpaceTradersAPIErrorCodes
-from deltav.spacetraders.api.error import SpaceTradersAPIError
-from deltav.spacetraders.models.systems import MarketShape, ShipyardShape
 from deltav.spacetraders.system import System
 
 DEFAULT_FACTION = 'COSMIC'
@@ -228,7 +233,7 @@ def ships(active_agent: AgentShape | None):
                 print()
         else:
             print(waypoints)
-            print(f'Error: Waypoints data is not in the expected format.')
+            print('Error: Waypoints data is not in the expected format.')
 
 
     def getNavStatus(shipSymbol: str):
@@ -361,7 +366,7 @@ def ships(active_agent: AgentShape | None):
         if isinstance(cooldown, SpaceTradersAPIError):
             print(f'Error getting cooldown for ship {shipSymbol}: {cooldown}')
             print(f'Error code: {cooldown.code}')
-            print(f'Probably means no cooldown?')
+            print('Probably means no cooldown?')
             return
         if 'total_seconds' not in cooldown or 'remaining_seconds' not in cooldown:
             print(f'No Cooldown currently for ship {shipSymbol}.')
@@ -477,7 +482,7 @@ def ships(active_agent: AgentShape | None):
             return
         
         if market:
-            print(f'Market found, refueling from market')
+            print('Market found, refueling from market')
             refuel['fromCargo'] = False
         
         print(f'Current Fuel: {req['fuel']['current']}/{req['fuel']['capacity']} units')
