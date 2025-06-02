@@ -32,9 +32,9 @@ class ContractTermsShape(SpaceTradersAPIResShape):
 
 class ContractShape(SpaceTradersAPIResShape):
     id: str
-    factionSymbol: FactionSymbol
+    faction_symbol: FactionSymbol
     type: ContractType
     terms: ContractTermsShape
     accepted: bool
     fulfilled: bool
-    deadlineToAccept: datetime
+    deadline_to_accept: datetime

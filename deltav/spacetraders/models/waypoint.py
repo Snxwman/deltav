@@ -8,13 +8,13 @@ from deltav.spacetraders.models import SpaceTradersAPIResShape
 
 
 class WaypointNavigateShape(SpaceTradersAPIResShape):
-    waypointSymbol: str
+    waypoint_symbol: str
 
 
 class WaypointChartShape(SpaceTradersAPIResShape):
-    waypointSymbol: str
-    submittedBy: str
-    submittedOn: datetime
+    waypoint_symbol: str
+    submitted_by: str
+    submitted_on: datetime
 
 
 class WaypointShape(SpaceTradersAPIResShape):
@@ -44,13 +44,13 @@ class SystemWaypointModifierShape(SpaceTradersAPIResShape):
 class SystemWaypointShape(SpaceTradersAPIResShape):
     symbol: str
     type: WaypointType
-    systemSymbol: str
+    system_symbol: str
     x: int
     y: int
     orbitals: list[str]
     orbits: str
-    factionSymbol: FactionSymbol
+    faction_symbol: FactionSymbol
     traits: list[WaypointTraitShape]
     modifiers: list[SystemWaypointModifierShape]
     chart: WaypointChartShape
-    isUnderConstruction: bool
+    is_under_construction: bool

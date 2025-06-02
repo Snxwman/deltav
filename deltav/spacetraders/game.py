@@ -40,7 +40,7 @@ class SpaceTradersGame:
 
     @classmethod
     def update_agents(cls) -> SpaceTradersAPIError | None:
-        req = (
+        res = SpaceTradersAPIClient.call(
             SpaceTradersAPIRequest()
             .builder()
             .endpoint(SpaceTradersAPIEndpoint.GET_AGENTS)
@@ -49,7 +49,7 @@ class SpaceTradersGame:
             .build()
         )
 
-        match res := SpaceTradersAPIClient.call(req):
+        match res:
             case SpaceTradersAPIResponse():
                 data: PublicAgentShape = cast(PublicAgentShape, res.spacetraders.data)
             case SpaceTradersAPIError() as err:
@@ -59,9 +59,14 @@ class SpaceTradersGame:
     def fetch_server_status(
         game_instance: 'SpaceTradersGame | None' = None,
     ) -> ServerStatusShape | SpaceTradersAPIError:
-        req = SpaceTradersAPIRequest().builder().endpoint(SpaceTradersAPIEndpoint.SERVER_STATUS).build()
+        res = SpaceTradersAPIClient.call(
+            SpaceTradersAPIRequest()
+            .builder()
+            .endpoint(SpaceTradersAPIEndpoint.SERVER_STATUS)
+            .build()
+        )  # fmt: skip
 
-        match res := SpaceTradersAPIClient.call(req):
+        match res:
             case SpaceTradersAPIResponse():
                 server_status: ServerStatusShape = cast(ServerStatusShape, res.spacetraders.data)
 

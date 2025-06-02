@@ -12,10 +12,10 @@ from deltav.spacetraders.models.waypoint import SystemWaypointShape
 
 class ShipyardShape(SpaceTradersAPIResShape):
     symbol: str
-    shipTypes: list[ShipType]
+    ship_types: list[ShipType]
     transactions: list[ShipTransactionShape]
     ships: list[ShipShape]
-    modificationsFee: int
+    modifications_fee: int
 
 
 class MarketShape(SpaceTradersAPIResShape):
@@ -24,7 +24,7 @@ class MarketShape(SpaceTradersAPIResShape):
     imports: list[CargoItemShape]
     exchange: list[CargoItemShape]
     transactions: list[TransactionShape]
-    tradeGoods: list[TradeGoodShape]
+    trade_goods: list[TradeGoodShape]
 
 
 class JumpgateShape(SpaceTradersAPIResShape):
@@ -35,7 +35,7 @@ class JumpgateShape(SpaceTradersAPIResShape):
 class SystemShape(SpaceTradersAPIResShape):
     constellation: str
     symbol: str
-    sectorSymbol: str
+    sector_symbol: str
     type: SystemType
     x: int
     y: int
@@ -45,7 +45,7 @@ class SystemShape(SpaceTradersAPIResShape):
 
 
 class ConstructionMaterialShape(SpaceTradersAPIResShape):
-    tradeSymbol: TradeSymbol
+    trade_symbol: TradeSymbol
     required: int
     fulfilled: int
 
@@ -53,12 +53,12 @@ class ConstructionMaterialShape(SpaceTradersAPIResShape):
 class ConstructionSiteShape(SpaceTradersAPIResShape):
     symbol: str
     materials: list[ConstructionMaterialShape]
-    isComplete: bool
+    is_complete: bool
 
 
 class SupplyConstructionSiteShape(SpaceTradersAPIResShape):
-    shipSymbol: str
-    tradeSymbol: TradeSymbol
+    ship_symbol: str
+    trade_symbol: TradeSymbol
     units: int
 
 

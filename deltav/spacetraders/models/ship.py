@@ -40,16 +40,16 @@ class ShipNavRouteLocationShape(SpaceTradersAPIResShape):
 class ShipNavRouteShape(SpaceTradersAPIResShape):
     destination: ShipNavRouteLocationShape
     origin: ShipNavRouteLocationShape
-    departureTime: datetime
+    departure_time: datetime
     arrival: datetime
 
 
 class ShipNavShape(SpaceTradersAPIResShape):
-    systemSymbol: str
-    waypointSymbol: str
+    system_symbol: str
+    waypoint_symbol: str
     route: ShipNavRouteShape
     status: str
-    flightMode: str
+    flight_mode: str
 
 
 class ShipCrewShape(SpaceTradersAPIResShape):
@@ -199,8 +199,8 @@ class ShipExtractSurveyResponseShape(SpaceTradersAPIResShape):
 
 
 class ShipPurchaseShape(SpaceTradersAPIResShape):
-    shipType: str
-    waypointSymbol: str
+    ship_type: str
+    waypoint_symbol: str
 
 
 class SuccessfulShipPurchaseShape(SpaceTradersAPIResShape):
@@ -211,7 +211,7 @@ class SuccessfulShipPurchaseShape(SpaceTradersAPIResShape):
 
 class ShipRefuelShape(SpaceTradersAPIResShape):
     units: int
-    fromCargo: bool | None
+    from_cargo: bool | None
 
 
 class ShipRefuelResponseShape(SpaceTradersAPIResShape):
@@ -242,7 +242,7 @@ class ShipScanShipsShape(SpaceTradersAPIResShape):
 
 class ShipSystemShape(SpaceTradersAPIResShape):
     symbol: str
-    sectorSymbol: str
+    sector_symbol: str
     type: SystemType
     x: int
     y: int

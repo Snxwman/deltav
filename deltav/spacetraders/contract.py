@@ -12,21 +12,24 @@ from deltav.spacetraders.models.endpoint import AcceptContractShape
 class Contract:
     @classmethod
     def get_contracts(cls) -> list[ContractShape] | SpaceTradersAPIError:
-        req = SpaceTradersAPIRequest().builder() \
-            .endpoint(SpaceTradersAPIEndpoint.MY_CONTRACTS) \
-            .with_token() \
+        res = SpaceTradersAPIClient.call(
+            SpaceTradersAPIRequest()
+            .builder()
+            .endpoint(SpaceTradersAPIEndpoint.MY_CONTRACTS)
+            .with_token()
             .build()
-         
-        match SpaceTradersAPIClient.call(req):
-            case SpaceTradersAPIResponse() as res:
+        )  # fmt: skip
+
+        match res:
+            case SpaceTradersAPIResponse():
                 data: list[ContractShape] = cast(list[ContractShape], res.spacetraders.data)
                 return data
             case SpaceTradersAPIError() as err:
                 return err
 
     @staticmethod
-    def get_contract(contract_id) -> ContractShape | SpaceTradersAPIError:
-        req = (
+    def get_contract(contract_id: str) -> ContractShape | SpaceTradersAPIError:
+        res = SpaceTradersAPIClient.call(
             SpaceTradersAPIRequest()
             .builder()
             .endpoint(SpaceTradersAPIEndpoint.MY_CONTRACT)
@@ -35,7 +38,7 @@ class Contract:
             .build()
         )
 
-        match res := SpaceTradersAPIClient.call(req):
+        match res:
             case SpaceTradersAPIResponse():
                 data: ContractShape = cast(ContractShape, res.spacetraders.data)
                 return data
@@ -64,17 +67,17 @@ class Contract:
     def deliver(
         contract_id: str, contract: ContractDeliverShape
     ) -> ContractDeliverResponseShape | SpaceTradersAPIError:
-        req = (
+        res = SpaceTradersAPIClient.call(
             SpaceTradersAPIRequest()
             .builder()
             .endpoint(SpaceTradersAPIEndpoint.DELIVER_CONTRACT)
             .path_params(contract_id)
-            .with_agent_token()
+            .with_token()
             .data(contract)
             .build()
         )
 
-        match res := SpaceTradersAPIClient.call(req):
+        match res:
             case SpaceTradersAPIResponse():
                 data: ContractDeliverResponseShape = cast(ContractDeliverResponseShape, res.spacetraders.data)
                 return data

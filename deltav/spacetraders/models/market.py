@@ -14,29 +14,29 @@ class CargoItemShape(SpaceTradersAPIResShape):
 
 
 class TransactionShape(SpaceTradersAPIResShape):
-    waypointSymbol: str
-    shipSymbol: str
-    tradeSymbol: str
+    waypoint_symbol: str
+    ship_symbol: str
+    trade_symbol: str
     type: str
     units: int
-    pricePerUnit: int
-    totalPrice: int
+    price_per_unit: int
+    total_price: int
     timestamp: datetime
 
 
 class ShipTransactionShape(SpaceTradersAPIResShape):
-    waypointSymbol: str
-    shipType: ShipType
+    waypoint_symbol: str
+    ship_type: ShipType
     price: int
-    agentSymbol: str
+    agent_symbol: str
     timestamp: datetime
 
 
 class TradeGoodShape(SpaceTradersAPIResShape):
     symbol: str
     type: MarketTradeGoodType
-    tradeVolume: int
+    trade_volume: int
     supply: SupplyLevel
     activity: ActivityLevel
-    purchasePrice: int
-    sellPrice: int
+    purchase_price: int
+    sell_price: int
