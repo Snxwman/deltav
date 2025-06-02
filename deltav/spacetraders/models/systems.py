@@ -11,6 +11,15 @@ from deltav.spacetraders.models.waypoint import SystemWaypointShape
 
 
 class ShipyardShape(SpaceTradersAPIResShape):
+    """
+    symbol: str
+    ship_types: list[ShipType]
+    transactions: list[ShipTransactionShape]
+    ships: list[ShipShape]
+    modifications_fee: int
+
+    """
+
     symbol: str
     ship_types: list[ShipType]
     transactions: list[ShipTransactionShape]
@@ -19,6 +28,16 @@ class ShipyardShape(SpaceTradersAPIResShape):
 
 
 class MarketShape(SpaceTradersAPIResShape):
+    """
+
+    symbol: str
+    exports: list[CargoItemShape]
+    imports: list[CargoItemShape]
+    exchange: list[CargoItemShape]
+    transactions: list[TransactionShape]
+    trade_goods: list[TradeGoodShape]
+    """
+
     symbol: str
     exports: list[CargoItemShape]
     imports: list[CargoItemShape]
@@ -28,11 +47,30 @@ class MarketShape(SpaceTradersAPIResShape):
 
 
 class JumpgateShape(SpaceTradersAPIResShape):
+    """
+
+    symbol: str
+    connections: list[str]
+    """
+
     symbol: str
     connections: list[str]
 
 
 class SystemShape(SpaceTradersAPIResShape):
+    """
+
+    constellation: str
+    symbol: str
+    sector_symbol: str
+    type: SystemType
+    x: int
+    y: int
+    waypoints: list[SystemWaypointShape]
+    factions: list[FactionSymbol]
+    name: str
+    """
+
     constellation: str
     symbol: str
     sector_symbol: str
@@ -45,23 +83,51 @@ class SystemShape(SpaceTradersAPIResShape):
 
 
 class ConstructionMaterialShape(SpaceTradersAPIResShape):
+    """
+
+    trade_symbol: TradeSymbol
+    required: int
+    fulfilled: int
+    """
+
     trade_symbol: TradeSymbol
     required: int
     fulfilled: int
 
 
 class ConstructionSiteShape(SpaceTradersAPIResShape):
+    """
+
+
+    symbol: str
+    materials: list[ConstructionMaterialShape]
+    is_complete: bool
+    """
+
     symbol: str
     materials: list[ConstructionMaterialShape]
     is_complete: bool
 
 
 class SupplyConstructionSiteShape(SpaceTradersAPIResShape):
+    """
+
+    ship_symbol: str
+    trade_symbol: TradeSymbol
+    units: int
+    """
+
     ship_symbol: str
     trade_symbol: TradeSymbol
     units: int
 
 
 class SupplyConstructionSiteResponseShape(SpaceTradersAPIResShape):
+    """
+
+    construction: ConstructionSiteShape
+    cargo: ShipCargoShape
+    """
+
     construction: ConstructionSiteShape
     cargo: ShipCargoShape

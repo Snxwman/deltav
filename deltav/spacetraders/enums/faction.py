@@ -2,24 +2,48 @@ from enum import Enum, auto
 
 
 class FactionSymbol(Enum):
-    COSMIC = auto()
-    VOID = auto()
-    GALACTIC = auto()
-    QUANTUM = auto()
-    DOMINION = auto()
-    ASTRO = auto()
-    CORSAIRS = auto()
+    """
+    AEGIS
+    ANCIENTS
+    ASTRO
+    COBALT
+    CORSAIRS
+    COSMIC
+    CULT
+    DOMINION
+    ECHO
+    ETHEREAL
+    GALACTIC
+    LORDS
+    OMEGA
+    QUANTUM
+    SHADOW
+    SOLITARY
+    UNITED
+    VOID
+
+    Methods:
+    default() -> 'FactionSymbol'
+    """
+
     AEGIS = auto()
-    UNITED = auto()
-    SOLITARY = auto()
-    COBALT = auto()
-    OMEGA = auto()
-    ECHO = auto()
-    LORDS = auto()
-    CULT = auto()
     ANCIENTS = auto()
-    SHADOW = auto()
+    ASTRO = auto()
+    COBALT = auto()
+    CORSAIRS = auto()
+    COSMIC = auto()
+    CULT = auto()
+    DOMINION = auto()
+    ECHO = auto()
     ETHEREAL = auto()
+    GALACTIC = auto()
+    LORDS = auto()
+    OMEGA = auto()
+    QUANTUM = auto()
+    SHADOW = auto()
+    SOLITARY = auto()
+    UNITED = auto()
+    VOID = auto()
 
     @property
     def default(self) -> 'FactionSymbol':
@@ -27,62 +51,124 @@ class FactionSymbol(Enum):
 
 
 class FactionTraitSymbol(Enum):
-    BUREAUCRATIC = auto()
-    SECRETIVE = auto()
-    CAPITALISTIC = auto()
-    INDUSTRIOUS = auto()
-    PEACEFUL = auto()
-    DISTRUSTFUL = auto()
-    WELCOMING = auto()
-    SMUGGLERS = auto()
-    SCAVENGERS = auto()
-    REBELLIOUS = auto()
-    EXILES = auto()
-    PIRATES = auto()
-    RAIDERS = auto()
-    CLAN = auto()
-    GUILD = auto()
-    DOMINION = auto()
-    FRINGE = auto()
-    FORSAKEN = auto()
-    ISOLATED = auto()
-    LOCALIZED = auto()
-    ESTABLISHED = auto()
-    NOTABLE = auto()
-    DOMINANT = auto()
-    INESCAPABLE = auto()
-    INNOVATIVE = auto()
+    """
+    ADAPTABLE
+    AGGRESSIVE
+    BOLD
+    BRUTAL
+    BUREAUCRATIC
+    CAPITALISTIC
+    CLAN
+    COLLABORATIVE
+    COMMERCIAL
+    COOPERATIVE
+    CURIOUS
+    DARING
+    DEFENSIVE
+    DEXTEROUS
+    DISTRUSTFUL
+    DIVERSE
+    DOMINANT
+    DOMINION
+    ENTREPRENEURIAL
+    ESTABLISHED
+    EXILES
+    EXPLORATORY
+    FLEETING
+    FLEXIBLE
+    FORSAKEN
+    FRAGMENTED
+    FREE_MARKETS
+    FRINGE
+    GUILD
+    IMPERIALISTIC
+    INDEPENDENT
+    INDUSTRIOUS
+    INESCAPABLE
+    INNOVATIVE
+    INTELLIGENT
+    ISOLATED
+    LOCALIZED
+    MILITARISTIC
+    NOTABLE
+    PEACEFUL
+    PIRATES
+    PROGRESSIVE
+    PROUD
+    RAIDERS
+    REBELLIOUS
+    RESEARCH_FOCUSED
+    RESOURCEFUL
+    SCAVENGERS
+    SECRETIVE
+    SELF_INTERESTED
+    SELF_SUFFICIENT
+    SMUGGLERS
+    STRATEGIC
+    TECHNOLOGICALLY_ADVANCED
+    TREASURE_HUNTERS
+    UNITED
+    UNPREDICTABLE
+    VISIONARY
+    WELCOMING
+    """
+
+    ADAPTABLE = auto()
+    AGGRESSIVE = auto()
     BOLD = auto()
-    VISIONARY = auto()
+    BRUTAL = auto()
+    BUREAUCRATIC = auto()
+    CAPITALISTIC = auto()
+    CLAN = auto()
+    COLLABORATIVE = auto()
+    COMMERCIAL = auto()
+    COOPERATIVE = auto()
     CURIOUS = auto()
     DARING = auto()
-    EXPLORATORY = auto()
-    RESOURCEFUL = auto()
-    FLEXIBLE = auto()
-    COOPERATIVE = auto()
-    UNITED = auto()
-    STRATEGIC = auto()
-    INTELLIGENT = auto()
-    RESEARCH_FOCUSED = auto()
-    COLLABORATIVE = auto()
-    PROGRESSIVE = auto()
-    MILITARISTIC = auto()
-    TECHNOLOGICALLY_ADVANCED = auto()
-    AGGRESSIVE = auto()
-    IMPERIALISTIC = auto()
-    TREASURE_HUNTERS = auto()
-    DEXTEROUS = auto()
-    UNPREDICTABLE = auto()
-    BRUTAL = auto()
-    FLEETING = auto()
-    ADAPTABLE = auto()
-    SELF_SUFFICIENT = auto()
     DEFENSIVE = auto()
-    PROUD = auto()
+    DEXTEROUS = auto()
+    DISTRUSTFUL = auto()
     DIVERSE = auto()
-    INDEPENDENT = auto()
-    SELF_INTERESTED = auto()
-    FRAGMENTED = auto()
-    COMMERCIAL = auto()
-    FREE_MARKETS = auto()
+    DOMINANT = auto()
+    DOMINION = auto()
     ENTREPRENEURIAL = auto()
+    ESTABLISHED = auto()
+    EXILES = auto()
+    EXPLORATORY = auto()
+    FLEETING = auto()
+    FLEXIBLE = auto()
+    FORSAKEN = auto()
+    FRAGMENTED = auto()
+    FREE_MARKETS = auto()
+    FRINGE = auto()
+    GUILD = auto()
+    IMPERIALISTIC = auto()
+    INDEPENDENT = auto()
+    INDUSTRIOUS = auto()
+    INESCAPABLE = auto()
+    INNOVATIVE = auto()
+    INTELLIGENT = auto()
+    ISOLATED = auto()
+    LOCALIZED = auto()
+    MILITARISTIC = auto()
+    NOTABLE = auto()
+    PEACEFUL = auto()
+    PIRATES = auto()
+    PROGRESSIVE = auto()
+    PROUD = auto()
+    RAIDERS = auto()
+    REBELLIOUS = auto()
+    RESEARCH_FOCUSED = auto()
+    RESOURCEFUL = auto()
+    SCAVENGERS = auto()
+    SECRETIVE = auto()
+    SELF_INTERESTED = auto()
+    SELF_SUFFICIENT = auto()
+    SMUGGLERS = auto()
+    STRATEGIC = auto()
+    TECHNOLOGICALLY_ADVANCED = auto()
+    TREASURE_HUNTERS = auto()
+    UNITED = auto()
+    UNPREDICTABLE = auto()
+    VISIONARY = auto()
+    WELCOMING = auto()

@@ -6,6 +6,14 @@ from deltav.spacetraders.models import SpaceTradersAPIResShape
 
 
 class ErrorShape(SpaceTradersAPIResShape):
+    """
+
+    code: int
+    message: str
+    data: dict[Any, Any]
+    request_id: str
+    """
+
     code: int
     message: str
     data: dict[Any, Any]
@@ -13,6 +21,13 @@ class ErrorShape(SpaceTradersAPIResShape):
 
 
 class HttpErrorShape(SpaceTradersAPIResShape):
+    """
+
+    message: str
+    error: str
+    status_code: int
+    """
+
     message: str
     error: str
     status_code: int

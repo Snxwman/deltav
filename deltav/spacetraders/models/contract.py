@@ -9,28 +9,65 @@ from deltav.spacetraders.models.ship import ShipCargoShape
 
 
 class ContractPaymentShape(SpaceTradersAPIResShape):
+    """
+
+    on_accepted: int
+    on_fulfilled: int
+    """
+
     on_accepted: int
     on_fulfilled: int
 
 
 class ContractDeliverShape(SpaceTradersAPIResShape):
+    """
+
+    ship_symbol: str
+    trade_symbol: str
+    units: int
+    """
+
     ship_symbol: str
     trade_symbol: str
     units: int
 
 
 class ContractDeliverResponseShape(SpaceTradersAPIResShape):
+    """
+
+    contract: ContractShape
+    cargo: ShipCargoShape
+    """
+
     contract: ContractShape
     cargo: ShipCargoShape
 
 
 class ContractTermsShape(SpaceTradersAPIResShape):
+    """
+
+    deadline: datetime
+    payment: ContractPaymentShape
+    deliver: list[ContractDeliverShape]
+    """
+
     deadline: datetime
     payment: ContractPaymentShape
     deliver: list[ContractDeliverShape]
 
 
 class ContractShape(SpaceTradersAPIResShape):
+    """
+
+    id: str
+    faction_symbol: FactionSymbol
+    type: ContractType
+    terms: ContractTermsShape
+    accepted: bool
+    fulfilled: bool
+    deadline_to_accept: datetime
+    """
+
     id: str
     faction_symbol: FactionSymbol
     type: ContractType

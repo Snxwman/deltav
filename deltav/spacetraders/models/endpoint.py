@@ -55,38 +55,84 @@ class RegisterAgentResData(SpaceTradersAPIResShape):
 
 
 class AgentsShape(SpaceTradersAPIResShape):
+    """
+
+    agents: list[PublicAgentShape]
+    """
+
     agents: list[PublicAgentShape]
 
 
 class MyAgentEventsShape(SpaceTradersAPIResShape):
+    """
+
+    events: list[EventShape]
+    """
+
     events: list[EventShape]
 
 
 class MyContractsShape(SpaceTradersAPIResShape):
+    """
+
+    contracts: list[ContractShape]
+    """
+
     contracts: list[ContractShape]
 
 
 class AcceptContractShape(SpaceTradersAPIResShape):
+    """
+
+    contract: ContractShape
+    agent: AgentShape
+    """
+
     contract: ContractShape
     agent: AgentShape
 
 
 class MarketTransactionShape(SpaceTradersAPIResShape):
+    """
+
+    cargo: ShipCargoShape
+    transaction: TransactionShape
+    agent: AgentShape
+    """
+
     cargo: ShipCargoShape
     transaction: TransactionShape
     agent: AgentShape
 
 
 class NavigateResponseShape(SpaceTradersAPIResShape):
+    """
+
+    nav: ShipNavShape
+    fuel: ShipFuelShape
+    event: EventShape | None
+    """
+
     nav: ShipNavShape
     fuel: ShipFuelShape
     event: EventShape | None
 
 
 class WaypointScanShape(SpaceTradersAPIResShape):
+    """
+
+    cooldown: ShipCooldownShape
+    waypoints: list[WaypointShape]
+    """
+
     cooldown: ShipCooldownShape
     waypoints: list[WaypointShape]
 
 
 class ShipJumpWaypointShape(SpaceTradersAPIResShape):
+    """
+
+    waypointSymbol: str
+    """
+
     waypointSymbol: str

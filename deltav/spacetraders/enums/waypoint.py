@@ -2,97 +2,197 @@ from enum import Enum, auto
 
 
 class WaypointModifierSymbol(Enum):
+    """
+
+    CIVIL_UNREST
+    CRITICAL_LIMIT
+    RADIATION_LEAK
+    STRIPPED
+    UNSTABLE
+    """
+
+    CIVIL_UNREST = auto()
+    CRITICAL_LIMIT = auto()
+    RADIATION_LEAK = auto()
     STRIPPED = auto()
     UNSTABLE = auto()
-    RADIATION_LEAK = auto()
-    CRITICAL_LIMIT = auto()
-    CIVIL_UNREST = auto()
 
 
 class WaypointTraitSymbol(Enum):
-    UNCHARTED = auto()
-    UNDER_CONSTRUCTION = auto()
-    MARKETPLACE = auto()
-    SHIPYARD = auto()
-    OUTPOST = auto()
-    SCATTERED_SETTLEMENTS = auto()
-    SPRAWLING_CITIES = auto()
-    MEGA_STRUCTURES = auto()
-    PIRATE_BASE = auto()
-    OVERCROWDED = auto()
-    HIGH_TECH = auto()
-    CORRUPT = auto()
-    BUREAUCRATIC = auto()
-    TRADING_HUB = auto()
-    INDUSTRIAL = auto()
-    BLACK_MARKET = auto()
-    RESEARCH_FACILITY = auto()
-    MILITARY_BASE = auto()
-    SURVEILLANCE_OUTPOST = auto()
-    EXPLORATION_OUTPOST = auto()
-    MINERAL_DEPOSITS = auto()
-    COMMON_METAL_DEPOSITS = auto()
-    PRECIOUS_METAL_DEPOSITS = auto()
-    RARE_METAL_DEPOSITS = auto()
-    METHANE_POOLS = auto()
-    ICE_CRYSTALS = auto()
-    EXPLOSIVE_GASES = auto()
-    STRONG_MAGNETOSPHERE = auto()
-    VIBRANT_AURORAS = auto()
-    SALT_FLATS = auto()
-    CANYONS = auto()
-    PERPETUAL_DAYLIGHT = auto()
-    PERPETUAL_OVERCAST = auto()
-    DRY_SEABEDS = auto()
-    MAGMA_SEAS = auto()
-    SUPERVOLCANOES = auto()
+    """
+
+    ASH_CLOUDS
+    BARREN
+    BLACK_MARKET
+    BREATHABLE_ATMOSPHERE
+    BUREAUCRATIC
+    CANYONS
+    COMMON_METAL_DEPOSITS
+    CORROSIVE_ATMOSPHERE
+    CORRUPT
+    CRUSHING_GRAVITY
+    DEBRIS_CLUSTER
+    DEEP_CRATERS
+    DIVERSE_LIFE
+    DRY_SEABEDS
+    EXPLORATION_OUTPOST
+    EXPLOSIVE_GASES
+    EXTREME_PRESSURE
+    EXTREME_TEMPERATURES
+    FOSSILS
+    FROZEN
+    HIGH_TECH
+    HOLLOWED_INTERIOR
+    ICE_CRYSTALS
+    INDUSTRIAL
+    JOVIAN
+    JUNGLE
+    MAGMA_SEAS
+    MARKETPLACE
+    MEGA_STRUCTURES
+    METHANE_POOLS
+    MICRO_GRAVITY_ANOMALIES
+    MILITARY_BASE
+    MINERAL_DEPOSITS
+    MUTATED_FLORA
+    OCEAN
+    OUTPOST
+    OVERCROWDED
+    PERPETUAL_DAYLIGHT
+    PERPETUAL_OVERCAST
+    PIRATE_BASE
+    PRECIOUS_METAL_DEPOSITS
+    RADIOACTIVE
+    RARE_METAL_DEPOSITS
+    RESEARCH_FACILITY
+    ROCKY
+    SALT_FLATS
+    SCARCE_LIFE
+    SCATTERED_SETTLEMENTS
+    SHALLOW_CRATERS
+    SHIPYARD
+    SPRAWLING_CITIES
+    STRIPPED
+    STRONG_GRAVITY
+    STRONG_MAGNETOSPHERE
+    SUPERVOLCANOES
+    SURVEILLANCE_OUTPOST
+    SWAMP
+    TEMPERATE
+    TERRAFORMED
+    THIN_ATMOSPHERE
+    TOXIC_ATMOSPHERE
+    TRADING_HUB
+    UNCHARTED
+    UNDER_CONSTRUCTION
+    UNSTABLE_COMPOSITION
+    VAST_RUINS
+    VIBRANT_AURORAS
+    VOLCANIC
+    WEAK_GRAVITY
+    """
+
     ASH_CLOUDS = auto()
-    VAST_RUINS = auto()
-    MUTATED_FLORA = auto()
-    TERRAFORMED = auto()
-    EXTREME_TEMPERATURES = auto()
-    EXTREME_PRESSURE = auto()
-    DIVERSE_LIFE = auto()
-    SCARCE_LIFE = auto()
-    FOSSILS = auto()
-    WEAK_GRAVITY = auto()
-    STRONG_GRAVITY = auto()
-    CRUSHING_GRAVITY = auto()
-    TOXIC_ATMOSPHERE = auto()
-    CORROSIVE_ATMOSPHERE = auto()
-    BREATHABLE_ATMOSPHERE = auto()
-    THIN_ATMOSPHERE = auto()
-    JOVIAN = auto()
-    ROCKY = auto()
-    VOLCANIC = auto()
-    FROZEN = auto()
-    SWAMP = auto()
     BARREN = auto()
-    TEMPERATE = auto()
-    JUNGLE = auto()
-    OCEAN = auto()
-    RADIOACTIVE = auto()
-    MICRO_GRAVITY_ANOMALIES = auto()
+    BLACK_MARKET = auto()
+    BREATHABLE_ATMOSPHERE = auto()
+    BUREAUCRATIC = auto()
+    CANYONS = auto()
+    COMMON_METAL_DEPOSITS = auto()
+    CORROSIVE_ATMOSPHERE = auto()
+    CORRUPT = auto()
+    CRUSHING_GRAVITY = auto()
     DEBRIS_CLUSTER = auto()
     DEEP_CRATERS = auto()
-    SHALLOW_CRATERS = auto()
-    UNSTABLE_COMPOSITION = auto()
+    DIVERSE_LIFE = auto()
+    DRY_SEABEDS = auto()
+    EXPLORATION_OUTPOST = auto()
+    EXPLOSIVE_GASES = auto()
+    EXTREME_PRESSURE = auto()
+    EXTREME_TEMPERATURES = auto()
+    FOSSILS = auto()
+    FROZEN = auto()
+    HIGH_TECH = auto()
     HOLLOWED_INTERIOR = auto()
+    ICE_CRYSTALS = auto()
+    INDUSTRIAL = auto()
+    JOVIAN = auto()
+    JUNGLE = auto()
+    MAGMA_SEAS = auto()
+    MARKETPLACE = auto()
+    MEGA_STRUCTURES = auto()
+    METHANE_POOLS = auto()
+    MICRO_GRAVITY_ANOMALIES = auto()
+    MILITARY_BASE = auto()
+    MINERAL_DEPOSITS = auto()
+    MUTATED_FLORA = auto()
+    OCEAN = auto()
+    OUTPOST = auto()
+    OVERCROWDED = auto()
+    PERPETUAL_DAYLIGHT = auto()
+    PERPETUAL_OVERCAST = auto()
+    PIRATE_BASE = auto()
+    PRECIOUS_METAL_DEPOSITS = auto()
+    RADIOACTIVE = auto()
+    RARE_METAL_DEPOSITS = auto()
+    RESEARCH_FACILITY = auto()
+    ROCKY = auto()
+    SALT_FLATS = auto()
+    SCARCE_LIFE = auto()
+    SCATTERED_SETTLEMENTS = auto()
+    SHALLOW_CRATERS = auto()
+    SHIPYARD = auto()
+    SPRAWLING_CITIES = auto()
     STRIPPED = auto()
+    STRONG_GRAVITY = auto()
+    STRONG_MAGNETOSPHERE = auto()
+    SUPERVOLCANOES = auto()
+    SURVEILLANCE_OUTPOST = auto()
+    SWAMP = auto()
+    TEMPERATE = auto()
+    TERRAFORMED = auto()
+    THIN_ATMOSPHERE = auto()
+    TOXIC_ATMOSPHERE = auto()
+    TRADING_HUB = auto()
+    UNCHARTED = auto()
+    UNDER_CONSTRUCTION = auto()
+    UNSTABLE_COMPOSITION = auto()
+    VAST_RUINS = auto()
+    VIBRANT_AURORAS = auto()
+    VOLCANIC = auto()
+    WEAK_GRAVITY = auto()
 
 
 class WaypointType(Enum):
-    PLANET = auto()
-    GAS_GIANT = auto()
-    MOON = auto()
-    ORBITAL_STATION = auto()
-    JUMP_GATE = auto()
-    ASTEROID_FIELD = auto()
-    ASTEROID = auto()
-    ENGINEERED_ASTEROID = auto()
-    ASTEROID_BASE = auto()
-    NEBULA = auto()
-    DEBRIS_FIELD = auto()
-    GRAVITY_WELL = auto()
+    """
+
+    ARTIFICIAL_GRAVITY_WELL
+    ASTEROID
+    ASTEROID_BASE
+    ASTEROID_FIELD
+    DEBRIS_FIELD
+    ENGINEERED_ASTEROID
+    FUEL_STATION
+    GAS_GIANT
+    GRAVITY_WELL
+    JUMP_GATE
+    MOON
+    NEBULA
+    ORBITAL_STATION
+    PLANET
+    """
+
     ARTIFICIAL_GRAVITY_WELL = auto()
+    ASTEROID = auto()
+    ASTEROID_BASE = auto()
+    ASTEROID_FIELD = auto()
+    DEBRIS_FIELD = auto()
+    ENGINEERED_ASTEROID = auto()
     FUEL_STATION = auto()
+    GAS_GIANT = auto()
+    GRAVITY_WELL = auto()
+    JUMP_GATE = auto()
+    MOON = auto()
+    NEBULA = auto()
+    ORBITAL_STATION = auto()
+    PLANET = auto()
