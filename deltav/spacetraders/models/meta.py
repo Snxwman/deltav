@@ -7,4 +7,3 @@ class MetaShape(SpaceTradersAPIResShape):
     total: int
     page: int
     limit: int
-

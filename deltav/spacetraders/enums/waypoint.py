@@ -96,4 +96,3 @@ class WaypointType(Enum):
     GRAVITY_WELL = auto()
     ARTIFICIAL_GRAVITY_WELL = auto()
     FUEL_STATION = auto()
-

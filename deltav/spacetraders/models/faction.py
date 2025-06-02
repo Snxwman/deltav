@@ -17,4 +17,3 @@ class FactionShape(SpaceTradersAPIResShape):
     headquarters: str
     traits: list[FactionTrait]
     is_recruiting: bool
-

@@ -4,8 +4,8 @@ from datetime import datetime
 
 from deltav.spacetraders.enums.contract import ContractType
 from deltav.spacetraders.enums.faction import FactionSymbol
-from deltav.spacetraders.enums.market import TradeSymbol
 from deltav.spacetraders.models import SpaceTradersAPIResShape
+from deltav.spacetraders.models.ship import ShipCargoShape
 
 
 class ContractPaymentShape(SpaceTradersAPIResShape):
@@ -19,6 +19,11 @@ class ContractDeliverShape(SpaceTradersAPIResShape):
     units: int
 
 
+class ContractDeliverResponseShape(SpaceTradersAPIResShape):
+    contract: ContractShape
+    cargo: ShipCargoShape
+
+
 class ContractTermsShape(SpaceTradersAPIResShape):
     deadline: datetime
     payment: ContractPaymentShape
@@ -27,10 +32,9 @@ class ContractTermsShape(SpaceTradersAPIResShape):
 
 class ContractShape(SpaceTradersAPIResShape):
     id: str
-    faction_symbol: FactionSymbol
+    factionSymbol: FactionSymbol
     type: ContractType
     terms: ContractTermsShape
     accepted: bool
     fulfilled: bool
-    deadline_to_accept: datetime
-
+    deadlineToAccept: datetime

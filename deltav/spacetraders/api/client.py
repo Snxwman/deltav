@@ -9,7 +9,6 @@ from deltav.spacetraders.api.ratelimit import Ratelimit
 from deltav.spacetraders.api.request import SpaceTradersAPIRequest
 from deltav.spacetraders.api.response import SpaceTradersAPIResponse
 
-
 MAX_PAGE_LIMIT = 20
 
 

@@ -41,11 +41,6 @@ class MarketTransactionShape(SpaceTradersAPIResShape):
     agent: AgentShape
 
 
-class ContractSuccessfulDeliveryShape(SpaceTradersAPIResShape):
-    contract: ContractShape
-    cargo: ShipCargoShape
-
-
 class NavigateResponseShape(SpaceTradersAPIResShape):
     nav: ShipNavShape
     fuel: ShipFuelShape
@@ -55,4 +50,8 @@ class NavigateResponseShape(SpaceTradersAPIResShape):
 class WaypointScanShape(SpaceTradersAPIResShape):
     cooldown: ShipCooldownShape
     waypoints: list[WaypointShape]
+
+
+class ShipJumpWaypointShape(SpaceTradersAPIResShape):
+    waypointSymbol: str
 

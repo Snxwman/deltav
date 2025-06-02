@@ -1,9 +1,10 @@
 from __future__ import annotations
+
 from datetime import datetime
 from typing import Any
 
-from deltav.spacetraders.models import SpaceTradersAPIReqShape, SpaceTradersAPIResShape
 from deltav.spacetraders.enums.faction import FactionSymbol
+from deltav.spacetraders.models import SpaceTradersAPIReqShape, SpaceTradersAPIResShape
 from deltav.spacetraders.models.contract import ContractShape
 from deltav.spacetraders.models.faction import FactionShape
 from deltav.spacetraders.models.ship import ShipShape

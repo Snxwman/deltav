@@ -178,4 +178,3 @@ class ShipType(Enum):
     SHIP_REFINING_FREIGHTER = auto()
     SHIP_SURVEYOR = auto()
     SHIP_BULK_FREIGHTER = auto()
-

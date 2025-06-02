@@ -1,7 +1,7 @@
 # pyright: reportPrivateUsage=false
 
-from http import HTTPMethod, HTTPStatus
 import json
+from http import HTTPMethod, HTTPStatus
 
 from deltav.config import CONFIG
 from deltav.spacetraders.api import SPACETRADERS_API_URL
