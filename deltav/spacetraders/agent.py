@@ -59,7 +59,7 @@ class Agent:
         # TODO: Verify token is valid
         self._token = token
 
-    def fetch_agent(self, callsign: str | None = None) -> AgentShape | SpaceTradersAPIError:
+    def fetch_agent(self, symbol: str | None = None) -> AgentShape | SpaceTradersAPIError:
         """Fetch the details for an agent from the SpaceTrader API.
 
         If callsign is None, fetch_agent will fetch the details for this Agent instance.
@@ -73,8 +73,10 @@ class Agent:
         res = SpaceTradersAPIClient.call(
             SpaceTradersAPIRequest()
             .builder()
-            .endpoint(SpaceTradersAPIEndpoint.MY_AGENT if callsign is None else SpaceTradersAPIEndpoint.GET_AGENT)
-            .path_params(callsign or '')
+            .endpoint(
+                SpaceTradersAPIEndpoint.MY_AGENT if symbol is None else SpaceTradersAPIEndpoint.GET_AGENT
+            )  # fmt: skip
+            .path_params(symbol or '')
             .with_token()
             .build()
         )
@@ -98,8 +100,12 @@ class Agent:
             RegisterAgentReqData | SpaceTradersAPIError
         """
         res = SpaceTradersAPIClient.call(
-            SpaceTradersAPIRequest().builder().endpoint(SpaceTradersAPIEndpoint.REGISTER).data(data).build()
-        )
+            SpaceTradersAPIRequest()
+            .builder()
+            .endpoint(SpaceTradersAPIEndpoint.REGISTER)
+            .data(data)
+            .build()
+        )  # fmt: skip
 
         match res:
             case SpaceTradersAPIResponse():

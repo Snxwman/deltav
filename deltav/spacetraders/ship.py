@@ -64,7 +64,7 @@ class Ship:
             .endpoint(SpaceTradersAPIEndpoint.MY_SHIPS)
             .with_token()
             .build()
-        )
+        )  # fmt: skip
 
         match res:
             case SpaceTradersAPIResponse():
@@ -391,7 +391,7 @@ class Ship:
         res = SpaceTradersAPIClient.call(
             SpaceTradersAPIRequest()
             .builder()
-            .endpoint(SpaceTradersAPIEndpoint.MY_SHIPS_NEGOTIATE_CONTRACT)
+            .endpoint(SpaceTradersAPIEndpoint.NEGOTIATE_CONTRACT)
             .path_params(ship_symbol)
             .with_token()
             .build()
@@ -438,4 +438,3 @@ class Ship:
                 return cast(ShipRefineResponseShape, res.spacetraders.data)
             case SpaceTradersAPIError() as err:
                 return err
-

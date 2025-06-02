@@ -157,7 +157,7 @@ def accept_contract():
 def get_contracts():
     # TODO: likely unneeded, as the game only allows for one contract at a time
     print('Getting contracts for active agent...')
-    contracts = Contract.get_contracts()
+    contracts = Contract.fetch_contracts()
 
     if not contracts:
         print('No contracts found.')
@@ -168,7 +168,7 @@ def get_contracts():
 
 def get_contract(contract_id: str):
     print('Getting contracts for active agent...')
-    contract = Contract.get_contract(contract_id)
+    contract = Contract.fetch_contract(contract_id)
     if not contract:
         print('No contracts found.')
         return
@@ -337,7 +337,7 @@ def ships(active_agent: AgentShape | None):
                 'trade_symbol': trade_symbol,
                 'units': units
             }
-            delivery = Contract.deliver(contract_id, deliver)
+            delivery = Contract.fulfill(contract_id, deliver)
             print(f'Cargo delivered for ship {ship_symbol}:')
             print(delivery)
         except ValueError as e:

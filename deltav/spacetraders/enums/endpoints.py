@@ -356,7 +356,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
         WaypointNavigateShape,
         NavigateResponseShape,
     )
-    MY_SHIPS_NEGOTIATE_CONTRACT = (
+    NEGOTIATE_CONTRACT = (
         Template('/my/ships/$param1/negotiate'),
         HTTPMethod.POST,
         TokenType.AGENT,
