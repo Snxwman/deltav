@@ -1,77 +1,111 @@
 from typing import cast
 
-from deltav.config import CONFIG
 from deltav.spacetraders.account import Account
-from deltav.spacetraders.api.client import MAX_PAGE_LIMIT
+from deltav.spacetraders.api.client import SpaceTradersAPIClient
+from deltav.spacetraders.api.error import SpaceTradersAPIError
 from deltav.spacetraders.api.request import SpaceTradersAPIRequest
+from deltav.spacetraders.api.response import SpaceTradersAPIResponse
+from deltav.spacetraders.contract import Contract
 from deltav.spacetraders.enums.endpoints import SpaceTradersAPIEndpoint
-from deltav.spacetraders.enums.faction import FactionSymbol
-from deltav.spacetraders.models.agent import RegisterAgentData, AgentShape
+from deltav.spacetraders.faction import Faction
+from deltav.spacetraders.models.agent import (
+    AgentShape,
+    RegisterAgentReqData,
+    RegisterAgentResData,
+)
+from deltav.spacetraders.ship import Ship
 
 
-
-
+# TODO: Convert token to an actual JWT type
 class Agent:
-    def __init__(self, token: str, agent_info: AgentShape) -> None:
-        self.token: str = token
+    def __init__(self, token: str, data: AgentShape) -> None:
+        self._token: str
+        # TODO: Track sold and scrapped ships
+        self._ships: list[Ship]
+        self._ship_count: int
+        self._active_contract: Contract
+        self._past_contracts: list[Contract]
 
-        if agent_info['account_id'] is not None:
-            self.account: Account = Account(agent_info['account_id'])
+        self.account: Account | None
+        if data['account_id'] is not None:
+            self.account = Account(data['account_id'])
+        else:
+            self.account = None
 
-        self.callsign: str = agent_info['symbol']
-        self.credits: int = agent_info['credits']
-        self.faction: FactionSymbol = agent_info['starting_faction']
-        self.headquarters: str = agent_info['headquarters']
-        self.ship_count: int = agent_info['ship_count']
+        self.symbol: str = data['symbol']
+        self.credits: int = data['credits']
+        self.faction: Faction = Faction.get_by_symbol(data['starting_faction'])
+        self.headquarters: str = data['headquarters']
 
+        self.token = token
 
-    def my_agent(self) -> SpaceTradersAPIRequest:
-        return SpaceTradersAPIRequest().builder() \
-            .endpoint(SpaceTradersAPIEndpoint.MY_AGENT) \
+    @property
+    def ships(self) -> list[Ship]:
+        return self._ships
+
+    @ships.setter
+    def ships(self, ships: list[Ship]) -> None:
+        # TODO: Verify that a ship is actually owned by this agent
+        self._ships = ships
+        self._ship_count = len(self._ships)
+
+    @property
+    def ship_count(self) -> int:
+        return self._ship_count
+
+    @property
+    def token(self) -> str:
+        return self._token
+
+    @token.setter
+    def token(self, token: str) -> None:
+        # TODO: Verify token is valid
+        self._token = token
+
+    def fetch_agent(self, callsign: str | None = None) -> AgentShape | SpaceTradersAPIError:
+        """Fetch the details for an agent from the SpaceTrader API.
+
+        If callsign is None, fetch_agent will fetch the details for this Agent instance.
+
+        Args:
+            callsign: The callsign of the public agent to get.
+
+        Returns:
+            AgentShape | SpaceTradersAPIError
+        """
+        res = SpaceTradersAPIClient.call(
+            SpaceTradersAPIRequest()
+            .builder()
+            .endpoint(SpaceTradersAPIEndpoint.MY_AGENT if callsign is None else SpaceTradersAPIEndpoint.GET_AGENT)
+            .path_params(callsign or '')
+            .with_token()
             .build()
-    
-        
+        )
+
+        match res:
+            case SpaceTradersAPIResponse():
+                return cast(AgentShape, res.spacetraders.data)
+            case SpaceTradersAPIError() as err:
+                return err
+
     @staticmethod
-    def register(agent_data: RegisterAgentData) -> SpaceTradersAPIRequest:
-        return SpaceTradersAPIRequest().builder() \
-            .endpoint(SpaceTradersAPIEndpoint.REGISTER) \
-            .data(agent_data) \
-            .build()
+    def register(
+        data: RegisterAgentReqData,
+    ) -> RegisterAgentResData | SpaceTradersAPIError:
+        """Register a new agent
 
+        Args:
+            data (RegisterAgentReqData): The data to be sent in the request
 
-    @staticmethod
-    def get_agent(callsign: str) -> SpaceTradersAPIRequest:
-        return SpaceTradersAPIRequest().builder() \
-            .endpoint(SpaceTradersAPIEndpoint.GET_AGENT) \
-            .path_params(callsign) \
-            .build()
+        Returns:
+            RegisterAgentReqData | SpaceTradersAPIError
+        """
+        res = SpaceTradersAPIClient.call(
+            SpaceTradersAPIRequest().builder().endpoint(SpaceTradersAPIEndpoint.REGISTER).data(data).build()
+        )
 
-    # TODO: snxwman? idk what this is for
-    # @staticmethod
-    # def get_agents(
-    #     pages: int | range = -1,
-    #     limit: int = MAX_PAGE_LIMIT
-    # ) -> SpaceTradersAPIRequest:
-    #
-    #     paged_req = lambda p=1: SpaceTradersAPIRequest() \
-    #         .endpoint(SpaceTradersAPIEndpoint.GET_AGENTS) \
-    #         .page_number(p) \
-    #
-    #     # Here, -1 implies all pages, think res_pages[:-1]
-    #     if pages == -1:
-    #         res = paged_req()
-    #
-    #         pages_remaining: int = int(int(res.spacetraders['meta']['total']) / limit) 
-    #
-    #         for page in range(2, pages_remaining+1):
-    #             res = paged_req(page)
-    #
-    #     match pages:
-    #         case int():
-    #             req = paged_req(pages)
-    #         case range():
-    #             for page in pages:
-    #                 req = paged_req(pages)
-    #
-    #     return []
-
+        match res:
+            case SpaceTradersAPIResponse():
+                return cast(RegisterAgentResData, res.spacetraders.data)
+            case SpaceTradersAPIError() as err:
+                return err

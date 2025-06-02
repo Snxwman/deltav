@@ -27,21 +27,18 @@ class Ship:
         self.cargo: ShipCargoShape
         self.fuel: ShipFuelShape
         self.cooldown: ShipCooldownShape
-        ...
 
 
     @staticmethod
     def my_ships() -> ShipShape | SpaceTradersAPIError:
         req = SpaceTradersAPIRequest().builder() \
             .endpoint(SpaceTradersAPIEndpoint.MY_SHIPS) \
-            .with_agent_token() \
+            .with_token() \
             .build()
     
         match (res := SpaceTradersAPIClient.call(req)):
             case SpaceTradersAPIResponse():
                 data: ShipShape = cast(ShipShape, res.spacetraders.data)
-
-
                 return data
             case SpaceTradersAPIError() as err:
                 return err
@@ -51,7 +48,7 @@ class Ship:
         res = SpaceTradersAPIRequest().builder() \
             .endpoint(SpaceTradersAPIEndpoint.MY_SHIPS_SCAN_WAYPOINTS) \
             .path_params(shipSymbol) \
-            .with_agent_token() \
+            .with_token() \
             .build()
         
         match (res := SpaceTradersAPIClient().call(res)):
@@ -59,7 +56,7 @@ class Ship:
                 data: WaypointScanShape = cast(WaypointScanShape, res.spacetraders.data)
                 return data
             case SpaceTradersAPIError() as err:
-                return err;
+                return err
 
 
     @staticmethod
@@ -67,7 +64,7 @@ class Ship:
         req = SpaceTradersAPIRequest().builder() \
             .endpoint(SpaceTradersAPIEndpoint.MY_SHIPS_NAV) \
             .path_params(shipSymbol) \
-            .with_agent_token() \
+            .with_token() \
             .build()
         
         match (res := SpaceTradersAPIClient().call(req)):
@@ -75,7 +72,7 @@ class Ship:
                 data: ShipNavShape = cast(ShipNavShape, res.spacetraders.data)
                 return data
             case SpaceTradersAPIError() as err:
-                return err;
+                return err
     
 
     @staticmethod
@@ -84,7 +81,7 @@ class Ship:
             .endpoint(SpaceTradersAPIEndpoint.MY_SHIP_NAVIGATE) \
             .path_params(shipSymbol) \
             .data(waypoint) \
-            .with_agent_token() \
+            .with_token() \
             .build()
         
         match (res := SpaceTradersAPIClient().call(req)):
@@ -92,7 +89,7 @@ class Ship:
                 data: NavigateResponseShape = cast(NavigateResponseShape, res.spacetraders.data)
                 return data
             case SpaceTradersAPIError() as err:
-                return err;
+                return err
     
 
     @staticmethod
@@ -100,7 +97,7 @@ class Ship:
         req = SpaceTradersAPIRequest().builder() \
             .endpoint(SpaceTradersAPIEndpoint.MY_SHIPS_ORBIT) \
             .path_params(shipSymbol) \
-            .with_agent_token() \
+            .with_token() \
             .build()
         
         match (res := SpaceTradersAPIClient().call(req)):
@@ -108,7 +105,7 @@ class Ship:
                 data: ShipNavShape = cast(ShipNavShape, res.spacetraders.data)
                 return data
             case SpaceTradersAPIError() as err:
-                return err;
+                return err
     
 
     @staticmethod
@@ -116,7 +113,7 @@ class Ship:
         req = SpaceTradersAPIRequest().builder() \
             .endpoint(SpaceTradersAPIEndpoint.MY_SHIPS_DOCK) \
             .path_params(shipSymbol) \
-            .with_agent_token() \
+            .with_token() \
             .build()
         
         match (res := SpaceTradersAPIClient().call(req)):
@@ -124,7 +121,7 @@ class Ship:
                 data: ShipNavShape = cast(ShipNavShape, res.spacetraders.data)
                 return data
             case SpaceTradersAPIError() as err:
-                return err;
+                return err
     
     
     @staticmethod
@@ -133,7 +130,7 @@ class Ship:
             .endpoint(SpaceTradersAPIEndpoint.DELIVER_CONTRACT) \
             .path_params(contract_id) \
             .data(deliver) \
-            .with_agent_token() \
+            .with_token() \
             .build()
         
         match (res := SpaceTradersAPIClient().call(req)):
@@ -141,7 +138,7 @@ class Ship:
                 data: ContractSuccessfulDeliveryShape = cast(ContractSuccessfulDeliveryShape, res.spacetraders.data)
                 return data
             case SpaceTradersAPIError() as err:
-                return err;
+                return err
     
 
     @staticmethod
@@ -150,7 +147,7 @@ class Ship:
             .endpoint(SpaceTradersAPIEndpoint.MY_SHIPS_PURCHASE_CARGO) \
             .path_params(shipSymbol) \
             .data(purchase) \
-            .with_agent_token() \
+            .with_token() \
             .build()
         
         match (res := SpaceTradersAPIClient().call(req)):
@@ -158,7 +155,7 @@ class Ship:
                 data: MarketTransactionShape = cast(MarketTransactionShape, res.spacetraders.data)
                 return data
             case SpaceTradersAPIError() as err:
-                return err;
+                return err
 
     @staticmethod
     def sell_cargo(shipSymbol: str, cargo: CargoItemShape) -> MarketTransactionShape | SpaceTradersAPIError:
@@ -166,7 +163,7 @@ class Ship:
             .endpoint(SpaceTradersAPIEndpoint.MY_SHIPS_SELL) \
             .path_params(shipSymbol) \
             .data(cargo) \
-            .with_agent_token() \
+            .with_token() \
             .build()
         
         match (res := SpaceTradersAPIClient().call(req)):
@@ -183,7 +180,7 @@ class Ship:
             .endpoint(SpaceTradersAPIEndpoint.MY_SHIPS_JETTISON) \
             .path_params(shipSymbol) \
             .data(cargo) \
-            .with_agent_token() \
+            .with_token() \
             .build()
         
         match (res := SpaceTradersAPIClient().call(req)):
@@ -191,14 +188,14 @@ class Ship:
                 data: ShipCargoShape = cast(ShipCargoShape, res.spacetraders.data)
                 return data
             case SpaceTradersAPIError() as err:
-                return err;
+                return err
 
     @staticmethod
     def extract(shipSymbol: str) -> ShipExtractShape | SpaceTradersAPIError:
         res = SpaceTradersAPIRequest().builder() \
             .endpoint(SpaceTradersAPIEndpoint.MY_SHIPS_EXTRACT) \
             .path_params(shipSymbol) \
-            .with_agent_token() \
+            .with_token() \
             .build()
         
         match (res := SpaceTradersAPIClient().call(res)):
@@ -206,7 +203,7 @@ class Ship:
                 data: ShipExtractShape = cast(ShipExtractShape, res.spacetraders.data)
                 return data
             case SpaceTradersAPIError() as err:
-                return err;
+                return err
 
 
     @staticmethod
@@ -214,7 +211,7 @@ class Ship:
         req = SpaceTradersAPIRequest().builder() \
             .endpoint(SpaceTradersAPIEndpoint.MY_SHIPS_COOLDOWN) \
             .path_params(shipSymbol) \
-            .with_agent_token() \
+            .with_token() \
             .build()
         
         match (res := SpaceTradersAPIClient().call(req)):
@@ -222,7 +219,7 @@ class Ship:
                 data: ShipCooldownShape = cast(ShipCooldownShape, res.spacetraders.data)
                 return data
             case SpaceTradersAPIError() as err:
-                return err;
+                return err
 
     
     @staticmethod
@@ -230,7 +227,7 @@ class Ship:
         req = SpaceTradersAPIRequest().builder() \
             .endpoint(SpaceTradersAPIEndpoint.MY_SHIPS_CARGO) \
             .path_params(shipSymbol) \
-            .with_agent_token() \
+            .with_token() \
             .build()
         
         match (res := SpaceTradersAPIClient().call(req)):
@@ -238,4 +235,4 @@ class Ship:
                 data: ShipCargoShape = cast(ShipCargoShape, res.spacetraders.data)
                 return data
             case SpaceTradersAPIError() as err:
-                return err;
+                return err

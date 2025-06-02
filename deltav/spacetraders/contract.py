@@ -19,7 +19,7 @@ class Contract:
     def get_contracts(cls) -> list[ContractShape] | SpaceTradersAPIError:
         req =  SpaceTradersAPIRequest().builder() \
             .endpoint(SpaceTradersAPIEndpoint.MY_CONTRACTS) \
-            .with_agent_token() \
+            .with_token() \
             .build()
          
         match (res := SpaceTradersAPIClient.call(req)):
@@ -34,7 +34,7 @@ class Contract:
         req = SpaceTradersAPIRequest().builder() \
             .endpoint(SpaceTradersAPIEndpoint.MY_CONTRACT) \
             .path_params(contract_id) \
-            .with_agent_token() \
+            .with_token() \
             .build()
     
         match (res := SpaceTradersAPIClient.call(req)):
@@ -50,7 +50,7 @@ class Contract:
         req = SpaceTradersAPIRequest().builder() \
             .endpoint(SpaceTradersAPIEndpoint.ACCEPT_CONTRACT) \
             .path_params(contract_id) \
-            .with_agent_token() \
+            .with_token() \
             .build()
     
         match (res := SpaceTradersAPIClient.call(req)):
