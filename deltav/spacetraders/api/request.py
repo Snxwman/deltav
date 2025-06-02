@@ -79,7 +79,7 @@ class SpaceTradersAPIRequestBuilder:
         return self
 
     def path_params(self, *params: str) -> 'SpaceTradersAPIRequestBuilder':
-        self.req._params = [str(param) for param in params]
+        self.req._params = [param for param in params if param != '']
         return self
 
     # TODO: implement
@@ -95,12 +95,7 @@ class SpaceTradersAPIRequestBuilder:
         self.req._retries = times
         return self
 
-    def with_account_token(self) -> 'SpaceTradersAPIRequestBuilder':
-        self.req._token = CONFIG.token if self.req._token is None else self.req._token
-        self.req._headers['Authorization'] = f'Bearer {self.req._token}'
-        return self
-
-    def with_agent_token(self) -> 'SpaceTradersAPIRequestBuilder':
+    def with_token(self) -> 'SpaceTradersAPIRequestBuilder':
         self.req._token = CONFIG.token if self.req._token is None else self.req._token
         self.req._headers['Authorization'] = f'Bearer {self.req._token}'
         return self
@@ -109,8 +104,10 @@ class SpaceTradersAPIRequestBuilder:
         self.req._cancel_on_ratelimit = True
         return self
 
+    # TODO: implement
     def cancel_on_http_errors(self, *status: HTTPStatus) -> 'SpaceTradersAPIRequestBuilder': ...
 
+    # TODO: implement
     def cancel_on_spacetrader_errors(self, *codes: SpaceTradersAPIErrorCodes) -> 'SpaceTradersAPIRequestBuilder': ...
 
     def build(self) -> SpaceTradersAPIRequest:

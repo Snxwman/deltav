@@ -4,6 +4,7 @@ from typing import Any, cast
 from requests import Response
 from requests.structures import CaseInsensitiveDict
 
+from deltav.spacetraders.api.ratelimit import Ratelimit
 from deltav.spacetraders.enums.endpoints import SpaceTradersAPIEndpoint
 from deltav.spacetraders.models import SpaceTradersAPIResShape
 from deltav.spacetraders.models.meta import MetaShape
@@ -23,20 +24,12 @@ class SpaceTradersAPIResData:
 
 
 class SpaceTradersAPIResponse:
-    x_headers: list[str] = [
-        'X-Ratelimit-Limit-Burst',
-        'X-Ratelimit-Limit-Per-Second',
-        'X-Ratelimit-Remaining',
-        'X-Ratelimit-Reset',
-        'X-Ratelimit-Type',
-    ]
-
     def __init__(self, endpoint: SpaceTradersAPIEndpoint, res: Response):
         http_headers = res.headers.copy()
         spacetraders_headers = res.headers.copy()
 
         for header in res.headers.keys():
-            if header in SpaceTradersAPIResponse.x_headers:
+            if header in Ratelimit.X_HEADERS:
                 _ = http_headers.pop(header)
             else:
                 _ = spacetraders_headers.pop(header)
@@ -52,7 +45,10 @@ class SpaceTradersAPIResponse:
         )
         meta = None if 'meta' not in json_data else cast(MetaShape, json_data['meta'])
 
-        self.http: HttpResponse = HttpResponse(status_code=res.status_code, headers=http_headers)
+        self.http: HttpResponse = HttpResponse(
+            status_code=res.status_code, 
+            headers=http_headers
+        )  # fmt: skip
         self.spacetraders: SpaceTradersAPIResData = SpaceTradersAPIResData(
             data=data,
             meta=meta,

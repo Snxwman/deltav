@@ -12,12 +12,13 @@ from deltav.spacetraders.models.endpoint import AcceptContractShape
 class Contract:
     @classmethod
     def get_contracts(cls) -> list[ContractShape] | SpaceTradersAPIError:
-        req = (
-            SpaceTradersAPIRequest().builder().endpoint(SpaceTradersAPIEndpoint.MY_CONTRACTS).with_agent_token().build()
-        )
-
-        match res := SpaceTradersAPIClient.call(req):
-            case SpaceTradersAPIResponse():
+        req = SpaceTradersAPIRequest().builder() \
+            .endpoint(SpaceTradersAPIEndpoint.MY_CONTRACTS) \
+            .with_token() \
+            .build()
+         
+        match SpaceTradersAPIClient.call(req):
+            case SpaceTradersAPIResponse() as res:
                 data: list[ContractShape] = cast(list[ContractShape], res.spacetraders.data)
                 return data
             case SpaceTradersAPIError() as err:
@@ -30,7 +31,7 @@ class Contract:
             .builder()
             .endpoint(SpaceTradersAPIEndpoint.MY_CONTRACT)
             .path_params(contract_id)
-            .with_agent_token()
+            .with_token()
             .build()
         )
 
@@ -48,7 +49,7 @@ class Contract:
             .builder()
             .endpoint(SpaceTradersAPIEndpoint.ACCEPT_CONTRACT)
             .path_params(contract_id)
-            .with_agent_token()
+            .with_token()
             .build()
         )
 

@@ -8,7 +8,7 @@ from deltav.spacetraders.enums.faction import FactionSymbol
 from deltav.spacetraders.enums.market import TradeSymbol
 from deltav.spacetraders.enums.ship import ShipType
 from deltav.spacetraders.game import SpaceTradersGame
-from deltav.spacetraders.models.agent import AgentShape, RegisterAgentData
+from deltav.spacetraders.models.agent import AgentShape, RegisterAgentReqData
 from deltav.spacetraders.api.client import SpaceTradersAPIClient
 from deltav.spacetraders.models.contract import ContractDeliverShape
 from deltav.spacetraders.models.event import EventShape

@@ -6,8 +6,20 @@ from http import HTTPMethod
 from string import Template
 
 from deltav.spacetraders.enums.token import TokenType
-from deltav.spacetraders.models import ServerStatusShape, SpaceTradersAPIReqShape, SpaceTradersAPIResShape
-from deltav.spacetraders.models.agent import AgentShape
+from deltav.spacetraders.models import (
+    ErrorCodesShape,
+    ServerStatusShape,
+    SpaceTradersAPIReqShape,
+    SpaceTradersAPIResShape,
+)
+from deltav.spacetraders.models.account import AccountShape
+from deltav.spacetraders.models.agent import (
+    AgentEventShape,
+    AgentShape,
+    PublicAgentShape,
+    RegisterAgentReqData,
+    RegisterAgentResData,
+)
 from deltav.spacetraders.models.contract import ContractShape
 from deltav.spacetraders.models.endpoint import (
     AcceptContractShape,
@@ -52,10 +64,22 @@ class EndpointDataMixin:
     token_type: TokenType
     request_shape: type[SpaceTradersAPIReqShape] | None
     response_shape: type[SpaceTradersAPIResShape] | None  # TODO: Remove None from type
+    # TODO: Add success response codes in?
+    # TODO: Add a paginated: bool field?
 
 
 @unique
 class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
+    """Enum of all the SpaceTrader API endpoints.
+
+    Mixin:
+    path: Template
+    method: HTTPMethod
+    token_type: TokenType
+    request_shape: type[SpaceTradersAPIReqShape] | None
+    response_shape: type[SpaceTradersAPIResShape] | None
+    """
+
     SERVER_STATUS = (
         Template('/'),
         HTTPMethod.GET,
@@ -63,6 +87,69 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
         None,
         ServerStatusShape,
     )
+    """Return the status of the game server. This also includes a few global
+    elements, such as announcements, server reset dates and leaderboards.
+
+    Endpoint: GET /
+    Required token: TokenType.NONE
+    Request shape: none
+    Response shape: ServerStatusShape
+    """
+    ERROR_CODES = (
+        Template('/error-codes'),
+        HTTPMethod.GET,
+        TokenType.NONE,
+        None,
+        ErrorCodesShape,
+    )
+    """Return a list of all possible error codes thrown by the game server.
+
+    Endpoint: GET /error-codes
+    Required token: TokenType.None
+    Request shape: none
+    Response shape: ErrorCodesShape
+    """
+    GET_ACCOUNT = (
+        Template('/my/account'),
+        HTTPMethod.GET,
+        TokenType.ACCOUNT,
+        None,
+        AccountShape,
+    )
+    """Fetch your account details.
+
+    Endpoint: GET /my/account
+    Required token: TokenType.ACCOUNT
+    Request shape: none
+    Response shape: AccountShape
+    Response codes: 200 Ok
+    """
+    REGISTER = (
+        Template('/register'),
+        HTTPMethod.POST,
+        TokenType.ACCOUNT,
+        RegisterAgentReqData,
+        RegisterAgentResData,
+    )
+    """Creates a new agent and ties it to an account.
+
+    Endpoint: GET /register
+    Required token: TokenType.ACCOUNT
+    Request shape: RegisterAgentReqData
+    Response shape: RegisterAgentResData
+    Response codes: 201 Created
+
+    Additional details:
+    The agent symbol must consist of a 3-14 character string, and will be used
+    to represent your agent. This symbol will prefix the symbol of every ship
+    you own. Agent symbols will be cast to all uppercase characters.
+
+    This new agent will be tied to a starting faction of your choice, which
+    determines your starting location, and will be granted an authorization
+    token, a contract with their starting faction, a command ship that can fly
+    across space with advanced capabilities, a small probe ship that can be
+    used for reconnaissance, and 175,000 credits.
+    """
     GET_AGENTS = (
         Template('/agents?page=$page&limit=$limit'),
         HTTPMethod.GET,
@@ -70,13 +157,33 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
         None,
         AgentShape,
     )
+    """List all public agent details.
+
+    Endpoint: GET /agents?page={page}&limit={limit}
+    Required token: TokenType.NONE
+    Request shape: none
+    Response shape: ErrorCodesShape
+    Response codes: 200 Ok
+
+    Additional details:
+    Page - default: 1, min: 1
+    Limit - default: 10, min: 1, max: 20
+    """
     GET_AGENT = (
         Template('/agents/$param'),
         HTTPMethod.GET,
         TokenType.NONE,
         None,
-        AgentShape,
+        PublicAgentShape,
     )
+    """Get public details for a specific agent.
+
+    Endpoint: GET /agents/{agentSymbol}
+    Required token: TokenType.NONE
+    Request shape: none
+    Response shape: PublicAgentShape
+    Response codes: 200 Ok
+    """
     GET_FACTIONS = (
         Template('/factions'),
         HTTPMethod.GET,
@@ -98,6 +205,29 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
         None,
         None,
     )
+    """Fetch your agent's details.
+
+    Endpoint: GET /my/agent
+    Required token: TokenType.AGENT
+    Request shape: none
+    Response shape: AgentShape
+    Response codes: 200 Ok
+    """
+    MY_AGENT_EVENTS = (
+        Template('/my/agent/events'),
+        HTTPMethod.GET,
+        TokenType.AGENT,
+        None,
+        AgentEventShape,
+    )
+    """Get recent events for your agent.
+
+    Endpoint: GET /my/agent/events
+    Required token: TokenType.AGENT
+    Request shape: none
+    Response shape: AgentEventShape
+    Response codes: 200 Ok
+    """
     MY_CONTRACTS = (
         Template('/my/contracts'),
         HTTPMethod.GET,
@@ -290,18 +420,10 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
         CargoItemShape,
         TransactionShape,
     )
-
     # Template('/my/ships/$param1/siphon')
     # Template('/my/ships/$param1/survey')
     # Template('/my/ships/$param1/transfer')
     # Template('/my/ships/$param1/warp')
-    REGISTER = (
-        Template('/register'),
-        HTTPMethod.POST,
-        TokenType.NONE,
-        None,
-        None,
-    )
     SYSTEM_GET_SYSTEMS = (
         Template('/systems'),
         HTTPMethod.GET,

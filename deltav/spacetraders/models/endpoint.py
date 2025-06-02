@@ -16,11 +16,6 @@ class MyAccountShape(SpaceTradersAPIResShape):
 
 
 class RegisterShape(SpaceTradersAPIResShape):
-    token: str
-    agent: AgentShape
-    faction: FactionShape
-    contract: ContractShape
-    ships: list[ShipShape]
 
 
 class AgentsShape(SpaceTradersAPIResShape):

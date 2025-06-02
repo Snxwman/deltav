@@ -1,20 +1,46 @@
 from datetime import datetime
+from typing import TypedDict
 
 from deltav.spacetraders.enums.ratelimit import RateLimitType
 
 
-class Ratelimit:
-    # TODO: Evaluate if x_headers should get its own type
-    def __init__(self) -> None:
-        self.type: RateLimitType = RateLimitType.IP_ADDRESS
-        self.reset: datetime = datetime.now()
-        self.burst: int = 30
-        self.per_second: int = 2
-        self.remaining: int = 2
+class RatelimitHeaders(TypedDict):
+    x_ratelimit_limit_burst: int
+    x_ratelimit_limit_per_second: int
+    x_ratelimit_remaining: int
+    x_ratelimit_reset: str
+    x_ratelimit_type: str
 
-    def update(self, x_headers: dict[str, str]) -> None:
-        self.type = RateLimitType(x_headers['X-Ratelimit-Type'])
-        self.reset = datetime.fromisoformat(x_headers['X-Ratelimit-Reset'])
-        self.burst = int(x_headers['X-Ratelimit-Limit-Burst'])
-        self.per_second = int(x_headers['X-Ratelimit-Limit-Per-Second'])
-        self.remaining = int(x_headers['X-Ratelimit-Remaining'])
+
+class Ratelimit:
+    IP_ADDRESS_LIMIT_PER_SECOND: int = 2
+    IP_ADDRESS_BURST_LIMIT: int = 30
+    IP_ADDRESS_BURST_DURATION: int = 60
+
+    ACCOUNT_LIMIT_PER_SECOND: int = 2
+    ACCOUNT_BURST_LIMIT: int = 30
+    ACCOUNT_BURST_DURATION: int = 60
+
+    X_HEADERS: list[str] = [
+        'X-Ratelimit-Limit-Burst',
+        'X-Ratelimit-Limit-Per-Second',
+        'X-Ratelimit-Remaining',
+        'X-Ratelimit-Reset',
+        'X-Ratelimit-Type',
+    ]
+
+    def __init__(self) -> None:
+        self.limit_burst: int = 30
+        self.limit_per_second: int = 2
+        self.remaining: int = 2
+        self.reset: datetime = datetime.now()
+        self.type: RateLimitType = RateLimitType.IP_ADDRESS
+
+    def update(self, x_headers: RatelimitHeaders) -> None:
+        self.limit_burst = x_headers['x_ratelimit_limit_burst']
+        self.limit_per_second = x_headers['x_ratelimit_limit_per_second']
+        self.remaining = x_headers['x_ratelimit_remaining']
+        self.reset = datetime.fromisoformat(x_headers['x_ratelimit_reset'])
+
+        if x_headers['x_ratelimit_type'] != self.type.value:
+            self.type = RateLimitType(x_headers['x_ratelimit_type'])

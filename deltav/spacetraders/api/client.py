@@ -1,3 +1,4 @@
+from typing import TypeVar
 from dataclasses import dataclass
 from http import HTTPMethod
 
@@ -21,8 +22,11 @@ class SpaceTradersAPIClient:
     def __init__(self):
         self.ratelimit: Ratelimit = Ratelimit()
 
+    # QUESTION: How to handle partial success for paged requests
     @staticmethod
-    def call(req: SpaceTradersAPIRequest) -> SpaceTradersAPIResponse | SpaceTradersAPIError:
+    def call(
+        req: SpaceTradersAPIRequest,
+    ) -> SpaceTradersAPIResponse | SpaceTradersAPIError:
         # TODO: Log the request and response properly
 
         res = requests.request(

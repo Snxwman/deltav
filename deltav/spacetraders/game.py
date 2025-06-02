@@ -44,7 +44,7 @@ class SpaceTradersGame:
             SpaceTradersAPIRequest()
             .builder()
             .endpoint(SpaceTradersAPIEndpoint.GET_AGENTS)
-            .with_account_token()
+            .with_token()
             .all_pages()
             .build()
         )
