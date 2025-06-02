@@ -1,13 +1,38 @@
 [project]
 name = "deltav"
 version = "0.0.1-dev"
+license = { file = "LICENSE" }
 description = "A typed python client for the SpaceTraders.io game API"
 readme = "readme.md"
 requires-python = ">=3.13"
 dependencies = [
     "requests>=2.32.3",
+    "textual[syntax]>=3.2.0",
     "tomlkit>=0.13.2",
 ]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3.5",
+    "textual-dev>=1.7.0",
+]
+lint = [
+    "ruff>=0.11.12",
+]
+
+[project.scripts]
+cli = "deltav.__main__:main"
+
+[project.gui-scripts]
+tui = "deltav.vantage.__main__:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.uv]
+default-groups = ["dev", "lint"]
+package = true
 
 [tool.basedpyright]
 reportExplicitAny = false
@@ -17,3 +42,8 @@ line-length = 120
 
 [tool.ruff.format]
 quote-style = "single"
+
+[tool.pytest-watcher]
+runner = "textual"
+runner_args = [ "run", "--dev", "deltav.vantage.__main__"]
+
