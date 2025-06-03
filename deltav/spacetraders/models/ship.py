@@ -3,28 +3,49 @@ from __future__ import annotations
 from datetime import datetime
 
 from deltav.spacetraders.enums.faction import FactionSymbol
-from deltav.spacetraders.enums.market import TradeSymbol
+from deltav.spacetraders.enums.market import SurveySize, TradeSymbol
 from deltav.spacetraders.enums.ship import (
-    ShipCrewRotation, 
+    ShipCrewRotation,
     ShipEngines,
     ShipFrames,
     ShipModules,
-    ShipMounts,
     ShipMountDeposits,
+    ShipMounts,
     ShipReactors,
-    ShipRole
+    ShipRole,
 )
-from deltav.spacetraders.enums.waypoint import WaypointType
+from deltav.spacetraders.enums.system import SystemType
+from deltav.spacetraders.enums.waypoint import WaypointModifierSymbol, WaypointType
 from deltav.spacetraders.models import SpaceTradersAPIResShape
+from deltav.spacetraders.models.agent import AgentShape
+from deltav.spacetraders.models.event import EventShape
+from deltav.spacetraders.models.market import ShipTransactionShape
+from deltav.spacetraders.models.waypoint import SystemWaypointShape, WaypointChartShape
 
 
 class ShipRegistrationShape(SpaceTradersAPIResShape):
+    """
+
+    name: str
+    faction_symbol: FactionSymbol
+    role: ShipRole
+    """
+
     name: str
     faction_symbol: FactionSymbol
     role: ShipRole
 
 
 class ShipNavRouteLocationShape(SpaceTradersAPIResShape):
+    """
+
+    symbol: str
+    type: WaypointType
+    system_symbol: str
+    x: int
+    y: int
+    """
+
     symbol: str
     type: WaypointType
     system_symbol: str
@@ -33,21 +54,48 @@ class ShipNavRouteLocationShape(SpaceTradersAPIResShape):
 
 
 class ShipNavRouteShape(SpaceTradersAPIResShape):
+    """
+
     destination: ShipNavRouteLocationShape
     origin: ShipNavRouteLocationShape
-    departureTime: datetime
+    departure_time: datetime
+    arrival: datetime
+    """
+
+    destination: ShipNavRouteLocationShape
+    origin: ShipNavRouteLocationShape
+    departure_time: datetime
     arrival: datetime
 
 
 class ShipNavShape(SpaceTradersAPIResShape):
-    systemSymbol: str
-    waypointSymbol: str
+    """
+
+    system_symbol: str
+    waypoint_symbol: str
     route: ShipNavRouteShape
     status: str
-    flightMode: str
+    flight_mode: str
+    """
+
+    system_symbol: str
+    waypoint_symbol: str
+    route: ShipNavRouteShape
+    status: str
+    flight_mode: str
 
 
 class ShipCrewShape(SpaceTradersAPIResShape):
+    """
+
+    current: int
+    required: int
+    capacity: int
+    rotation: ShipCrewRotation
+    morale: int
+    wages: int
+    """
+
     current: int
     required: int
     capacity: int
@@ -55,14 +103,35 @@ class ShipCrewShape(SpaceTradersAPIResShape):
     morale: int
     wages: int
 
-    
+
 class ShipRequirementsShape(SpaceTradersAPIResShape):
+    """
+
+    power: int
+    crew: int
+    slots: int
+    """
+
     power: int
     crew: int
     slots: int
 
 
 class ShipFrameShape(SpaceTradersAPIResShape):
+    """
+
+    symbol: ShipFrames
+    name: str
+    condition: int
+    integrity: int
+    description: str
+    module_slots: int
+    mounting_points: int
+    fuel_capacity: int
+    requirements: ShipRequirementsShape
+    quality: int
+    """
+
     symbol: ShipFrames
     name: str
     condition: int
@@ -76,6 +145,18 @@ class ShipFrameShape(SpaceTradersAPIResShape):
 
 
 class ShipReactorShape(SpaceTradersAPIResShape):
+    """
+
+    symbol: ShipReactors
+    name: str
+    condition: int
+    integrity: int
+    description: str
+    power_output: int
+    requirements: ShipRequirementsShape
+    quality: int
+    """
+
     symbol: ShipReactors
     name: str
     condition: int
@@ -87,6 +168,18 @@ class ShipReactorShape(SpaceTradersAPIResShape):
 
 
 class ShipEngineShape(SpaceTradersAPIResShape):
+    """
+
+    symbol: ShipEngines
+    name: str
+    condition: int
+    integrity: int
+    description: str
+    speed: int
+    requirements: ShipRequirementsShape
+    quality: int
+    """
+
     symbol: ShipEngines
     name: str
     condition: int
@@ -98,6 +191,16 @@ class ShipEngineShape(SpaceTradersAPIResShape):
 
 
 class ShipModulesShape(SpaceTradersAPIResShape):
+    """
+
+    symbol: ShipModules
+    name: str
+    description: str
+    capacity: int
+    range: int
+    requirements: ShipRequirementsShape
+    """
+
     symbol: ShipModules
     name: str
     description: str
@@ -107,6 +210,16 @@ class ShipModulesShape(SpaceTradersAPIResShape):
 
 
 class ShipMountsShape(SpaceTradersAPIResShape):
+    """
+
+    symbol: ShipMounts
+    name: str
+    description: str
+    strength: int
+    deposits: list[ShipMountDeposits]
+    requirements: ShipRequirementsShape
+    """
+
     symbol: ShipMounts
     name: str
     description: str
@@ -116,6 +229,14 @@ class ShipMountsShape(SpaceTradersAPIResShape):
 
 
 class ShipCargoInventoryShape(SpaceTradersAPIResShape):
+    """
+
+    symbol: TradeSymbol
+    name: str
+    description: str
+    units: int
+    """
+
     symbol: TradeSymbol
     name: str
     description: str
@@ -123,23 +244,52 @@ class ShipCargoInventoryShape(SpaceTradersAPIResShape):
 
 
 class ShipCargoShape(SpaceTradersAPIResShape):
+    """
+
+    capacity: int
+    units: int
+    inventory: ShipCargoInventoryShape
+    """
+
     capacity: int
     units: int
     inventory: ShipCargoInventoryShape
 
 
 class ShipFuelConsumedShape(SpaceTradersAPIResShape):
+    """
+
+    amount: int
+    timestamp: datetime
+    """
+
     amount: int
     timestamp: datetime
 
 
 class ShipFuelShape(SpaceTradersAPIResShape):
+    """
+
+    current: int
+    capacity: int
+    consumed: ShipFuelConsumedShape
+    """
+
     current: int
     capacity: int
     consumed: ShipFuelConsumedShape
 
 
 class ShipCooldownShape(SpaceTradersAPIResShape):
+    """
+
+
+    ship_symbol: str
+    total_seconds: int
+    remaining_seconds: int
+    expiration: datetime
+    """
+
     ship_symbol: str
     total_seconds: int
     remaining_seconds: int
@@ -147,6 +297,22 @@ class ShipCooldownShape(SpaceTradersAPIResShape):
 
 
 class ShipShape(SpaceTradersAPIResShape):
+    """
+
+    symbol: str
+    registration: ShipRegistrationShape
+    nav: ShipNavShape
+    crew: ShipCrewShape
+    frame: ShipFrameShape
+    reactor: ShipReactorShape
+    engine: ShipEngineShape
+    modules: ShipModulesShape
+    mounts: ShipMountsShape
+    cargo: ShipCargoShape
+    fuel: ShipFuelShape
+    cooldown: ShipCooldownShape
+    """
+
     symbol: str
     registration: ShipRegistrationShape
     nav: ShipNavShape
@@ -161,21 +327,215 @@ class ShipShape(SpaceTradersAPIResShape):
     cooldown: ShipCooldownShape
 
 
-class ShipExtractResourceShape(SpaceTradersAPIResShape):
+class ShipTradeResourceShape(SpaceTradersAPIResShape):
+    """
+
+    symbol: TradeSymbol
+    units: int
+    """
+
     symbol: TradeSymbol
     units: int
 
 
 class ShipExtractionShape(SpaceTradersAPIResShape):
+    """
+
     symbol: str
-    result: ShipExtractResourceShape
+    result: ShipTradeResourceShape
+    """
+
+    symbol: str
+    result: ShipTradeResourceShape
 
 
 class ShipExtractShape(SpaceTradersAPIResShape):
+    """
+
+    extraction: ShipExtractionShape
+    cooldown: ShipCooldownShape
+    cargo: ShipCargoShape
+    """
+
     extraction: ShipExtractionShape
     cooldown: ShipCooldownShape
     cargo: ShipCargoShape
 
 
+class ShipExtractSurveyShape(SpaceTradersAPIResShape):
+    """
+
+    signature: str
+    symbol: str
+    deposits: list[str]
+    expiration: datetime
+    size: SurveySize
+    """
+
+    signature: str
+    symbol: str
+    deposits: list[str]
+    expiration: datetime
+    size: SurveySize
 
 
+class ShipExtractSurveyResponseShape(SpaceTradersAPIResShape):
+    """
+
+    extraction: ShipExtractionShape
+    cooldown: ShipCooldownShape
+    cargo: ShipCargoShape
+    modifiers: list[WaypointModifierSymbol]
+    events: list[EventShape]
+    """
+
+    extraction: ShipExtractionShape
+    cooldown: ShipCooldownShape
+    cargo: ShipCargoShape
+    modifiers: list[WaypointModifierSymbol]
+    events: list[EventShape]
+
+
+class ShipPurchaseShape(SpaceTradersAPIResShape):
+    """
+
+    ship_type: str
+    waypoint_symbol: str
+    """
+
+    ship_type: str
+    waypoint_symbol: str
+
+
+class SuccessfulShipPurchaseShape(SpaceTradersAPIResShape):
+    """
+
+    ship: ShipShape
+    agent: AgentShape
+    transaction: ShipTransactionShape
+    """
+
+    ship: ShipShape
+    agent: AgentShape
+    transaction: ShipTransactionShape
+
+
+class ShipRefuelShape(SpaceTradersAPIResShape):
+    """
+
+    units: int
+    from_cargo: bool | None
+    """
+
+    units: int
+    from_cargo: bool | None
+
+
+class ShipRefuelResponseShape(SpaceTradersAPIResShape):
+    """
+
+    agent: AgentShape
+    fuel: ShipFuelShape
+    cargo: ShipCargoShape
+    transaction: ShipTransactionShape
+    """
+
+    agent: AgentShape
+    fuel: ShipFuelShape
+    cargo: ShipCargoShape
+    transaction: ShipTransactionShape
+
+
+class ShipCreateChartShape(SpaceTradersAPIResShape):
+    """
+
+    chart: WaypointChartShape
+    waypoint: SystemWaypointShape
+    transaction: ShipTransactionShape
+    agent: AgentShape
+    """
+
+    chart: WaypointChartShape
+    waypoint: SystemWaypointShape
+    transaction: ShipTransactionShape
+    agent: AgentShape
+
+
+class ShipJumpShape(SpaceTradersAPIResShape):
+    """
+
+    nav: ShipNavShape
+    cooldown: ShipCooldownShape
+    transaction: ShipTransactionShape
+    agent: AgentShape
+    """
+
+    nav: ShipNavShape
+    cooldown: ShipCooldownShape
+    transaction: ShipTransactionShape
+    agent: AgentShape
+
+
+class ShipScanShipsShape(SpaceTradersAPIResShape):
+    """
+
+    cooldown: ShipCooldownShape
+    ships: list[ShipShape]
+    """
+
+    cooldown: ShipCooldownShape
+    ships: list[ShipShape]
+
+
+class ShipSystemShape(SpaceTradersAPIResShape):
+    """
+
+    symbol: str
+    sector_symbol: str
+    type: SystemType
+    x: int
+    y: int
+    distance: int
+    """
+
+    symbol: str
+    sector_symbol: str
+    type: SystemType
+    x: int
+    y: int
+    distance: int
+
+
+class ShipScanSystemsShape(SpaceTradersAPIResShape):
+    """
+
+    cooldown: ShipCooldownShape
+    systems: list[ShipSystemShape]
+    """
+
+    cooldown: ShipCooldownShape
+    systems: list[ShipSystemShape]
+
+
+class ShipRefineShape(SpaceTradersAPIResShape):
+    """
+
+    produce: TradeSymbol
+    """
+
+    produce: TradeSymbol
+
+
+class ShipRefineResponseShape(SpaceTradersAPIResShape):
+    """
+
+    cargo: ShipCargoShape
+    cooldown: ShipCooldownShape
+    produced: ShipTradeResourceShape
+    consumed: ShipTradeResourceShape
+    """
+
+    cargo: ShipCargoShape
+    cooldown: ShipCooldownShape
+    produced: ShipTradeResourceShape
+    consumed: ShipTradeResourceShape

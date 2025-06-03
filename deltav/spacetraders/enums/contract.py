@@ -2,6 +2,13 @@ from enum import Enum, auto
 
 
 class ContractType(Enum):
+    """
+
+    PROCUREMENT
+    SHUTTLE
+    TRANSPORT
+    """
+
     PROCUREMENT = auto()
-    TRANSPORT = auto()
     SHUTTLE = auto()
+    TRANSPORT = auto()

@@ -2,6 +2,14 @@ from enum import Enum, auto
 
 
 class ActivityLevel(Enum):
+    """
+
+    WEAK
+    GROWING
+    STRONG
+    RESTRICTED
+    """
+
     WEAK = auto()
     GROWING = auto()
     STRONG = auto()
@@ -9,17 +17,38 @@ class ActivityLevel(Enum):
 
 
 class MarketTransactionType(Enum):
+    """
+
+    PURCHASE
+    SELL
+    """
+
     PURCHASE = auto()
     SELL = auto()
 
 
 class MarketTradeGoodType(Enum):
+    """
+
+    EXPORT
+    IMPORT
+    EXCHANGE
+    """
+
     EXPORT = auto()
     IMPORT = auto()
     EXCHANGE = auto()
 
 
 class SupplyLevel(Enum):
+    """
+    SCARCE
+    LIMITED
+    MODERATE
+    HIGH
+    ABUNDANT
+    """
+
     SCARCE = auto()
     LIMITED = auto()
     MODERATE = auto()
@@ -28,6 +57,12 @@ class SupplyLevel(Enum):
 
 
 class SurveySize(Enum):
+    """
+    SMALL
+    MODERATE
+    LARGE
+    """
+
     SMALL = auto()
     MODERATE = auto()
     LARGE = auto()
@@ -35,149 +70,297 @@ class SurveySize(Enum):
 
 # Also used by ShipCargoItem, TradeGood
 class TradeSymbol(Enum):
-    PRECIOUS_STONES = auto()
-    QUARTZ_SAND = auto()
-    SILICON_CRYSTALS = auto()
-    AMMONIA_ICE = auto()
-    LIQUID_HYDROGEN = auto()
-    LIQUID_NITROGEN = auto()
-    ICE_WATER = auto()
-    EXOTIC_MATTER = auto()
+    """
+
+    ADVANCED_CIRCUITRY
+    AI_MAINFRAMES
+    ALUMINUM
+    ALUMINUM_ORE
+    AMMONIA_ICE
+    AMMUNITION
+    ANTIMATTER
+    ASSAULT_RIFLES
+    BIOCOMPOSITES
+    BOTANICAL_SPECIMENS
+    CLOTHING
+    COPPER
+    COPPER_ORE
+    CULTURAL_ARTIFACTS
+    CYBER_IMPLANTS
+    DIAMONDS
+    DRUGS
+    ELECTRONICS
+    ENGINE_HYPER_DRIVE_I
+    ENGINE_IMPULSE_DRIVE_I
+    ENGINE_ION_DRIVE_I
+    ENGINE_ION_DRIVE_II
+    EQUIPMENT
+    EXOTIC_MATTER
+    EXPLOSIVES
+    FABRICS
+    FAB_MATS
+    FERTILIZERS
+    FIREARMS
+    FOOD
+    FRAME_BULK_FREIGHTER
+    FRAME_CARRIER
+    FRAME_CRUISER
+    FRAME_DESTROYER
+    FRAME_DRONE
+    FRAME_EXPLORER
+    FRAME_FIGHTER
+    FRAME_FRIGATE
+    FRAME_HEAVY_FREIGHTER
+    FRAME_INTERCEPTOR
+    FRAME_LIGHT_FREIGHTER
+    FRAME_MINER
+    FRAME_PROBE
+    FRAME_RACER
+    FRAME_SHUTTLE
+    FRAME_TRANSPORT
+    FUEL
+    GENE_THERAPEUTICS
+    GOLD
+    GOLD_ORE
+    GRAVITON_EMITTERS
+    HOLOGRAPHICS
+    HYDROCARBON
+    ICE_WATER
+    IRON
+    IRON_ORE
+    JEWELRY
+    LAB_INSTRUMENTS
+    LASER_RIFLES
+    LIQUID_HYDROGEN
+    LIQUID_NITROGEN
+    MACHINERY
+    MEDICINE
+    MERITIUM
+    MERITIUM_ORE
+    MICROPROCESSORS
+    MICRO_FUSION_GENERATORS
+    MILITARY_EQUIPMENT
+    MODULE_CARGO_HOLD_I
+    MODULE_CARGO_HOLD_II
+    MODULE_CARGO_HOLD_III
+    MODULE_CREW_QUARTERS_I
+    MODULE_ENVOY_QUARTERS_I
+    MODULE_FUEL_REFINERY_I
+    MODULE_GAS_PROCESSOR_I
+    MODULE_JUMP_DRIVE_I
+    MODULE_JUMP_DRIVE_II
+    MODULE_JUMP_DRIVE_III
+    MODULE_MICRO_REFINERY_I
+    MODULE_MINERAL_PROCESSOR_I
+    MODULE_ORE_REFINERY_I
+    MODULE_PASSENGER_CABIN_I
+    MODULE_SCIENCE_LAB_I
+    MODULE_SHIELD_GENERATOR_I
+    MODULE_SHIELD_GENERATOR_II
+    MODULE_WARP_DRIVE_I
+    MODULE_WARP_DRIVE_II
+    MODULE_WARP_DRIVE_III
+    MOOD_REGULATORS
+    MOUNT_GAS_SIPHON_I
+    MOUNT_GAS_SIPHON_II
+    MOUNT_GAS_SIPHON_III
+    MOUNT_LASER_CANNON_I
+    MOUNT_MINING_LASER_I
+    MOUNT_MINING_LASER_II
+    MOUNT_MINING_LASER_III
+    MOUNT_MISSILE_LAUNCHER_I
+    MOUNT_SENSOR_ARRAY_I
+    MOUNT_SENSOR_ARRAY_II
+    MOUNT_SENSOR_ARRAY_III
+    MOUNT_SURVEYOR_I
+    MOUNT_SURVEYOR_II
+    MOUNT_SURVEYOR_III
+    MOUNT_TURRET_I
+    NANOBOTS
+    NEURAL_CHIPS
+    NOVEL_LIFEFORMS
+    PLASTICS
+    PLATINUM
+    PLATINUM_ORE
+    POLYNUCLEOTIDES
+    PRECIOUS_STONES
+    QUANTUM_DRIVES
+    QUANTUM_STABILIZERS
+    QUARTZ_SAND
+    REACTOR_ANTIMATTER_I
+    REACTOR_CHEMICAL_I
+    REACTOR_FISSION_I
+    REACTOR_FUSION_I
+    REACTOR_SOLAR_I
+    RELIC_TECH
+    ROBOTIC_DRONES
+    SHIP_BULK_FREIGHTER
+    SHIP_COMMAND_FRIGATE
+    SHIP_EXPLORER
+    SHIP_HEAVY_FREIGHTER
+    SHIP_INTERCEPTOR
+    SHIP_LIGHT_HAULER
+    SHIP_LIGHT_SHUTTLE
+    SHIP_MINING_DRONE
+    SHIP_ORE_HOUND
+    SHIP_PARTS
+    SHIP_PLATING
+    SHIP_PROBE
+    SHIP_REFINING_FREIGHTER
+    SHIP_SALVAGE
+    SHIP_SIPHON_DRONE
+    SHIP_SURVEYOR
+    SILICON_CRYSTALS
+    SILVER
+    SILVER_ORE
+    SUPERGRAINS
+    URANITE
+    URANITE_ORE
+    VIRAL_AGENTS
+    """
+
     ADVANCED_CIRCUITRY = auto()
-    GRAVITON_EMITTERS = auto()
-    IRON = auto()
-    IRON_ORE = auto()
-    COPPER = auto()
-    COPPER_ORE = auto()
+    AI_MAINFRAMES = auto()
     ALUMINUM = auto()
     ALUMINUM_ORE = auto()
-    SILVER = auto()
-    SILVER_ORE = auto()
-    GOLD = auto()
-    GOLD_ORE = auto()
-    PLATINUM = auto()
-    PLATINUM_ORE = auto()
-    DIAMONDS = auto()
-    URANITE = auto()
-    URANITE_ORE = auto()
-    MERITIUM = auto()
-    MERITIUM_ORE = auto()
-    HYDROCARBON = auto()
-    ANTIMATTER = auto()
-    FAB_MATS = auto()
-    FERTILIZERS = auto()
-    FABRICS = auto()
-    FOOD = auto()
-    JEWELRY = auto()
-    MACHINERY = auto()
-    FIREARMS = auto()
-    ASSAULT_RIFLES = auto()
-    MILITARY_EQUIPMENT = auto()
-    EXPLOSIVES = auto()
-    LAB_INSTRUMENTS = auto()
+    AMMONIA_ICE = auto()
     AMMUNITION = auto()
-    ELECTRONICS = auto()
-    SHIP_PLATING = auto()
-    SHIP_PARTS = auto()
-    EQUIPMENT = auto()
-    FUEL = auto()
-    MEDICINE = auto()
-    DRUGS = auto()
-    CLOTHING = auto()
-    MICROPROCESSORS = auto()
-    PLASTICS = auto()
-    POLYNUCLEOTIDES = auto()
+    ANTIMATTER = auto()
+    ASSAULT_RIFLES = auto()
     BIOCOMPOSITES = auto()
-    QUANTUM_STABILIZERS = auto()
-    NANOBOTS = auto()
-    AI_MAINFRAMES = auto()
-    QUANTUM_DRIVES = auto()
-    ROBOTIC_DRONES = auto()
-    CYBER_IMPLANTS = auto()
-    GENE_THERAPEUTICS = auto()
-    NEURAL_CHIPS = auto()
-    MOOD_REGULATORS = auto()
-    VIRAL_AGENTS = auto()
-    MICRO_FUSION_GENERATORS = auto()
-    SUPERGRAINS = auto()
-    LASER_RIFLES = auto()
-    HOLOGRAPHICS = auto()
-    SHIP_SALVAGE = auto()
-    RELIC_TECH = auto()
-    NOVEL_LIFEFORMS = auto()
     BOTANICAL_SPECIMENS = auto()
+    CLOTHING = auto()
+    COPPER = auto()
+    COPPER_ORE = auto()
     CULTURAL_ARTIFACTS = auto()
-    FRAME_PROBE = auto()
-    FRAME_DRONE = auto()
-    FRAME_INTERCEPTOR = auto()
-    FRAME_RACER = auto()
-    FRAME_FIGHTER = auto()
-    FRAME_FRIGATE = auto()
-    FRAME_SHUTTLE = auto()
-    FRAME_EXPLORER = auto()
-    FRAME_MINER = auto()
-    FRAME_LIGHT_FREIGHTER = auto()
-    FRAME_HEAVY_FREIGHTER = auto()
-    FRAME_TRANSPORT = auto()
-    FRAME_DESTROYER = auto()
-    FRAME_CRUISER = auto()
-    FRAME_CARRIER = auto()
-    FRAME_BULK_FREIGHTER = auto()
-    REACTOR_SOLAR_I = auto()
-    REACTOR_FUSION_I = auto()
-    REACTOR_FISSION_I = auto()
-    REACTOR_CHEMICAL_I = auto()
-    REACTOR_ANTIMATTER_I = auto()
+    CYBER_IMPLANTS = auto()
+    DIAMONDS = auto()
+    DRUGS = auto()
+    ELECTRONICS = auto()
+    ENGINE_HYPER_DRIVE_I = auto()
     ENGINE_IMPULSE_DRIVE_I = auto()
     ENGINE_ION_DRIVE_I = auto()
     ENGINE_ION_DRIVE_II = auto()
-    ENGINE_HYPER_DRIVE_I = auto()
-    MODULE_MINERAL_PROCESSOR_I = auto()
-    MODULE_GAS_PROCESSOR_I = auto()
+    EQUIPMENT = auto()
+    EXOTIC_MATTER = auto()
+    EXPLOSIVES = auto()
+    FABRICS = auto()
+    FAB_MATS = auto()
+    FERTILIZERS = auto()
+    FIREARMS = auto()
+    FOOD = auto()
+    FRAME_BULK_FREIGHTER = auto()
+    FRAME_CARRIER = auto()
+    FRAME_CRUISER = auto()
+    FRAME_DESTROYER = auto()
+    FRAME_DRONE = auto()
+    FRAME_EXPLORER = auto()
+    FRAME_FIGHTER = auto()
+    FRAME_FRIGATE = auto()
+    FRAME_HEAVY_FREIGHTER = auto()
+    FRAME_INTERCEPTOR = auto()
+    FRAME_LIGHT_FREIGHTER = auto()
+    FRAME_MINER = auto()
+    FRAME_PROBE = auto()
+    FRAME_RACER = auto()
+    FRAME_SHUTTLE = auto()
+    FRAME_TRANSPORT = auto()
+    FUEL = auto()
+    GENE_THERAPEUTICS = auto()
+    GOLD = auto()
+    GOLD_ORE = auto()
+    GRAVITON_EMITTERS = auto()
+    HOLOGRAPHICS = auto()
+    HYDROCARBON = auto()
+    ICE_WATER = auto()
+    IRON = auto()
+    IRON_ORE = auto()
+    JEWELRY = auto()
+    LAB_INSTRUMENTS = auto()
+    LASER_RIFLES = auto()
+    LIQUID_HYDROGEN = auto()
+    LIQUID_NITROGEN = auto()
+    MACHINERY = auto()
+    MEDICINE = auto()
+    MERITIUM = auto()
+    MERITIUM_ORE = auto()
+    MICROPROCESSORS = auto()
+    MICRO_FUSION_GENERATORS = auto()
+    MILITARY_EQUIPMENT = auto()
     MODULE_CARGO_HOLD_I = auto()
     MODULE_CARGO_HOLD_II = auto()
     MODULE_CARGO_HOLD_III = auto()
     MODULE_CREW_QUARTERS_I = auto()
     MODULE_ENVOY_QUARTERS_I = auto()
-    MODULE_PASSENGER_CABIN_I = auto()
-    MODULE_MICRO_REFINERY_I = auto()
-    MODULE_SCIENCE_LAB_I = auto()
+    MODULE_FUEL_REFINERY_I = auto()
+    MODULE_GAS_PROCESSOR_I = auto()
     MODULE_JUMP_DRIVE_I = auto()
     MODULE_JUMP_DRIVE_II = auto()
     MODULE_JUMP_DRIVE_III = auto()
+    MODULE_MICRO_REFINERY_I = auto()
+    MODULE_MINERAL_PROCESSOR_I = auto()
+    MODULE_ORE_REFINERY_I = auto()
+    MODULE_PASSENGER_CABIN_I = auto()
+    MODULE_SCIENCE_LAB_I = auto()
+    MODULE_SHIELD_GENERATOR_I = auto()
+    MODULE_SHIELD_GENERATOR_II = auto()
     MODULE_WARP_DRIVE_I = auto()
     MODULE_WARP_DRIVE_II = auto()
     MODULE_WARP_DRIVE_III = auto()
-    MODULE_SHIELD_GENERATOR_I = auto()
-    MODULE_SHIELD_GENERATOR_II = auto()
-    MODULE_ORE_REFINERY_I = auto()
-    MODULE_FUEL_REFINERY_I = auto()
+    MOOD_REGULATORS = auto()
     MOUNT_GAS_SIPHON_I = auto()
     MOUNT_GAS_SIPHON_II = auto()
     MOUNT_GAS_SIPHON_III = auto()
-    MOUNT_SURVEYOR_I = auto()
-    MOUNT_SURVEYOR_II = auto()
-    MOUNT_SURVEYOR_III = auto()
-    MOUNT_SENSOR_ARRAY_I = auto()
-    MOUNT_SENSOR_ARRAY_II = auto()
-    MOUNT_SENSOR_ARRAY_III = auto()
+    MOUNT_LASER_CANNON_I = auto()
     MOUNT_MINING_LASER_I = auto()
     MOUNT_MINING_LASER_II = auto()
     MOUNT_MINING_LASER_III = auto()
-    MOUNT_LASER_CANNON_I = auto()
     MOUNT_MISSILE_LAUNCHER_I = auto()
+    MOUNT_SENSOR_ARRAY_I = auto()
+    MOUNT_SENSOR_ARRAY_II = auto()
+    MOUNT_SENSOR_ARRAY_III = auto()
+    MOUNT_SURVEYOR_I = auto()
+    MOUNT_SURVEYOR_II = auto()
+    MOUNT_SURVEYOR_III = auto()
     MOUNT_TURRET_I = auto()
-    SHIP_PROBE = auto()
-    SHIP_MINING_DRONE = auto()
-    SHIP_SIPHON_DRONE = auto()
-    SHIP_INTERCEPTOR = auto()
-    SHIP_LIGHT_HAULER = auto()
+    NANOBOTS = auto()
+    NEURAL_CHIPS = auto()
+    NOVEL_LIFEFORMS = auto()
+    PLASTICS = auto()
+    PLATINUM = auto()
+    PLATINUM_ORE = auto()
+    POLYNUCLEOTIDES = auto()
+    PRECIOUS_STONES = auto()
+    QUANTUM_DRIVES = auto()
+    QUANTUM_STABILIZERS = auto()
+    QUARTZ_SAND = auto()
+    REACTOR_ANTIMATTER_I = auto()
+    REACTOR_CHEMICAL_I = auto()
+    REACTOR_FISSION_I = auto()
+    REACTOR_FUSION_I = auto()
+    REACTOR_SOLAR_I = auto()
+    RELIC_TECH = auto()
+    ROBOTIC_DRONES = auto()
+    SHIP_BULK_FREIGHTER = auto()
     SHIP_COMMAND_FRIGATE = auto()
     SHIP_EXPLORER = auto()
     SHIP_HEAVY_FREIGHTER = auto()
+    SHIP_INTERCEPTOR = auto()
+    SHIP_LIGHT_HAULER = auto()
     SHIP_LIGHT_SHUTTLE = auto()
+    SHIP_MINING_DRONE = auto()
     SHIP_ORE_HOUND = auto()
+    SHIP_PARTS = auto()
+    SHIP_PLATING = auto()
+    SHIP_PROBE = auto()
     SHIP_REFINING_FREIGHTER = auto()
+    SHIP_SALVAGE = auto()
+    SHIP_SIPHON_DRONE = auto()
     SHIP_SURVEYOR = auto()
-    SHIP_BULK_FREIGHTER = auto()
-
+    SILICON_CRYSTALS = auto()
+    SILVER = auto()
+    SILVER_ORE = auto()
+    SUPERGRAINS = auto()
+    URANITE = auto()
+    URANITE_ORE = auto()
+    VIRAL_AGENTS = auto()

@@ -14,7 +14,7 @@ from deltav.spacetraders.system import System
 from deltav.spacetraders.waypoint import Waypoint
 
 
-class SpaceTradersGame():
+class SpaceTradersGame:
     """The current state of the official SpaceTraders public game servers.
 
     Attributes:
@@ -35,34 +35,38 @@ class SpaceTradersGame():
         self.next_restart: datetime
         self.restart_freq: str
 
-
     @classmethod
-    def update_server_status(cls, server_status: ServerStatusShape) -> None:
-        ...
-
+    def update_server_status(cls, server_status: ServerStatusShape) -> None: ...
 
     @classmethod
     def update_agents(cls) -> SpaceTradersAPIError | None:
-        req = SpaceTradersAPIRequest().builder() \
-            .endpoint(SpaceTradersAPIEndpoint.GET_AGENTS) \
-            .with_account_token() \
-            .all_pages() \
+        res = SpaceTradersAPIClient.call(
+            SpaceTradersAPIRequest()
+            .builder()
+            .endpoint(SpaceTradersAPIEndpoint.GET_AGENTS)
+            .with_token()
+            .all_pages()
             .build()
+        )
 
-        match (res := SpaceTradersAPIClient.call(req)):
+        match res:
             case SpaceTradersAPIResponse():
                 data: PublicAgentShape = cast(PublicAgentShape, res.spacetraders.data)
             case SpaceTradersAPIError() as err:
                 return err
 
-
     @staticmethod
-    def fetch_server_status(game_instance: 'SpaceTradersGame | None' = None) -> ServerStatusShape | SpaceTradersAPIError:
-        req = SpaceTradersAPIRequest().builder() \
-            .endpoint(SpaceTradersAPIEndpoint.SERVER_STATUS) \
+    def fetch_server_status(
+        game_instance: 'SpaceTradersGame | None' = None,
+    ) -> ServerStatusShape | SpaceTradersAPIError:
+        res = SpaceTradersAPIClient.call(
+            SpaceTradersAPIRequest()
+            .builder()
+            .endpoint(SpaceTradersAPIEndpoint.SERVER_STATUS)
             .build()
+        )  # fmt: skip
 
-        match (res := SpaceTradersAPIClient.call(req)):
+        match res:
             case SpaceTradersAPIResponse():
                 server_status: ServerStatusShape = cast(ServerStatusShape, res.spacetraders.data)
 
@@ -72,4 +76,3 @@ class SpaceTradersGame():
                 return server_status
             case SpaceTradersAPIError() as err:
                 return err
-
