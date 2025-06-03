@@ -1,3 +1,4 @@
+import pprint
 from typing import TypeVar
 from dataclasses import dataclass
 from http import HTTPMethod
@@ -37,8 +38,13 @@ class SpaceTradersAPIClient:
         )
 
         print(
+            """
+            ========== REQUEST ==========
+            """
+        )
+        print(
             f"""
-            --- START REQ ---
+            --- URL ---------
             {req.endpoint.method} {req.url}
             --- HEADERS -----
             {req.headers}
@@ -47,6 +53,21 @@ class SpaceTradersAPIClient:
             --- END REQ -----
             """
         )
+
+        # print(
+        #     """
+        #     ========== RESPONSE ==========
+        #     """
+        # )
+        # pprint.pp(
+        #     f"""
+        #     --- HEADERS -----
+        #     {res.headers}
+        #     --- DATA --------
+        #     {res.json()}
+        #     --- END RES -----
+        #     """
+        # )
 
         if res.ok:
             return SpaceTradersAPIResponse(req.endpoint, res)

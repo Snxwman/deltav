@@ -25,24 +25,13 @@ class SpaceTradersAPIResData:
 
 class SpaceTradersAPIResponse:
     def __init__(self, endpoint: SpaceTradersAPIEndpoint, res: Response):
-        http_headers = res.headers.copy()
-        spacetraders_headers = res.headers.copy()
+        self.__res = res
 
-        for header in res.headers.keys():
-            if header in Ratelimit.X_HEADERS:
-                _ = http_headers.pop(header)
-            else:
-                _ = spacetraders_headers.pop(header)
+        http_headers, spacetraders_headers = self.__extract_headers()
 
-        if res.status_code == 204:
-            json_data: dict[Any, Any] = {}
-        else:
-            json_data: dict[Any, Any] = res.json()
+        json_data: dict[Any, Any] = {} if res.status_code == 204 else res.json()
 
-        data: SpaceTradersAPIResShape = cast(  # pyright: ignore[reportUnknownVariableType]
-            endpoint.value.response_shape,  # pyright: ignore[reportInvalidTypeForm]
-            json_data if 'data' not in json_data else json_data['data'],
-        )
+        data = endpoint.response_shape.model_validate(json_data, by_alias=True)
         meta = None if 'meta' not in json_data else cast(MetaShape, json_data['meta'])
 
         self.http: HttpResponse = HttpResponse(
@@ -54,3 +43,15 @@ class SpaceTradersAPIResponse:
             meta=meta,
             headers=spacetraders_headers,
         )
+
+    def __extract_headers(self) -> tuple[CaseInsensitiveDict[str], CaseInsensitiveDict[str]]:
+        http_headers = self.__res.headers.copy()
+        spacetraders_headers = self.__res.headers.copy()
+
+        for header in self.__res.headers.keys():
+            if header in Ratelimit.X_HEADERS:
+                _ = http_headers.pop(header)
+            else:
+                _ = spacetraders_headers.pop(header)
+
+        return (http_headers, spacetraders_headers)

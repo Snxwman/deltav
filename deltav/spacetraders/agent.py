@@ -24,15 +24,15 @@ class Agent:
         self._past_contracts: list[Contract]
 
         self.account: Account | None
-        if data['account_id'] is not None:
-            self.account = Account(data['account_id'])
+        if data.account_id is not None:
+            self.account = Account(data.account_id)
         else:
             self.account = None
 
-        self.symbol: str = data['symbol']
-        self.credits: int = data['credits']
-        self.faction: Faction = Faction.get_by_symbol(data['starting_faction'])
-        self.headquarters: str = data['headquarters']
+        self.symbol: str = data.symbol
+        self.credits: int = data.credits
+        self.faction: Faction = Faction.get_by_symbol(data.starting_faction)
+        self.headquarters: str = data.headquarters
 
         self.token = token
 

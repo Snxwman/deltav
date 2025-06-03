@@ -10,8 +10,8 @@ from deltav.spacetraders.enums.endpoints import SpaceTradersAPIEndpoint
 from deltav.spacetraders.enums.market import TradeSymbol
 from deltav.spacetraders.faction import Faction
 from deltav.spacetraders.models.contract import (
-    ContractDeliverResponseShape,
-    ContractDeliverShape,
+    ContractDeliverReqShape,
+    ContractDeliverResShape,
     ContractShape,
     ContractTermsShape,
 )
@@ -20,13 +20,13 @@ from deltav.spacetraders.models.endpoint import AcceptContractShape
 
 class Contract:
     def __init__(self, data: ContractShape) -> None:
-        self.id: str = data['id']
-        self.faction: Faction = Faction.get_by_symbol(data['faction_symbol'])
-        self.type: ContractType = data['type']
-        self.terms: ContractTermsShape = data['terms']
-        self.accepted: bool = data['accepted']
-        self.fulfilled: bool = data['fulfilled']
-        self.deadline_to_accept: datetime = data['deadline_to_accept']
+        self.id: str = data.id
+        self.faction: Faction = Faction.get_by_symbol(data.faction_symbol)
+        self.type: ContractType = data.type
+        self.terms: ContractTermsShape = data.terms
+        self.accepted: bool = data.accepted
+        self.fulfilled: bool = data.fulfilled
+        self.deadline_to_accept: datetime = data.deadline_to_accept
 
         self._negotiated_at: datetime
         self._accepted_at: datetime
@@ -34,13 +34,13 @@ class Contract:
         # self._closed_reason:  # fulfilled, abandonded, expired, ...
 
     def update(self, data: ContractShape) -> None:
-        self.terms = data['terms']
-        self.accepted = data['accepted']
-        self.fulfilled = data['fulfilled']
+        self.terms = data.terms
+        self.accepted = data.accepted
+        self.fulfilled = data.fulfilled
 
     @property
     def deadline(self) -> datetime:
-        return self.terms['deadline']
+        return self.terms.deadline
 
     @property
     def time_to_deadline(self) -> timedelta:
@@ -48,19 +48,19 @@ class Contract:
 
     @property
     def payment_on_accept(self) -> int:
-        return self.terms['payment']['on_accepted']
+        return self.terms.payment.on_accepted
 
     @property
     def payment_on_fulfilled(self) -> int:
-        return self.terms['payment']['on_fulfilled']
+        return self.terms.payment.on_fulfilled
 
     @property
-    def deliverables(self) -> list[ContractDeliverShape]:
-        return [deliverable for deliverable in self.terms['deliver']]
+    def deliverables(self) -> list[ContractDeliverResShape]:
+        return [deliverable for deliverable in self.terms.deliver]
 
-    def get_deliverable_by_trade_symbol(self, symbol: TradeSymbol) -> ContractDeliverShape | None:
+    def get_deliverable_by_trade_symbol(self, symbol: TradeSymbol) -> ContractDeliverResShape | None:
         for deliverable in self.deliverables:
-            if deliverable['trade_symbol'] == symbol:
+            if deliverable.trade_symbol == symbol:
                 return deliverable
 
     # QUESTION: Should this be in Agent?
@@ -80,14 +80,14 @@ class Contract:
             case SpaceTradersAPIError() as err:
                 return err
 
-    def deliver(self, symbol: TradeSymbol, units: int = 0) -> ContractDeliverResponseShape | SpaceTradersAPIError:
+    def deliver(self, symbol: TradeSymbol, units: int = 0) -> ContractDeliverResShape | SpaceTradersAPIError:
         # FIX: Move out of this method
         # FIX: Data should be acquired from ship instances
-        deliverable: ContractDeliverShape = {
-            'ship_symbol': '',
-            'trade_symbol': symbol.name,
-            'units': units,
-        }
+        deliverable = ContractDeliverReqShape(
+            ship_symbol='',
+            trade_symbol=symbol.name,
+            units=units,
+        )
 
         res = SpaceTradersAPIClient.call(
             SpaceTradersAPIRequest()
@@ -101,7 +101,7 @@ class Contract:
 
         match res:
             case SpaceTradersAPIResponse():
-                return cast(ContractDeliverResponseShape, res.spacetraders.data)
+                return cast(ContractDeliverResShape, res.spacetraders.data)
             case SpaceTradersAPIError() as err:
                 return err
 

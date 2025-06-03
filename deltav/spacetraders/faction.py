@@ -15,12 +15,12 @@ class Faction:
     _FACTIONS: dict[FactionSymbol, 'Faction'] = {}
 
     def __init__(self, data: FactionShape):
-        self.symbol: FactionSymbol = data['symbol']
-        self.name: str = data['name']
-        self.description: str = data['description']
-        self.headquarters: str = data['headquarters']
-        self.traits: list[FactionTrait] = data['traits']
-        self.is_recruiting: bool = data['is_recruiting']
+        self.symbol: FactionSymbol = data.symbol
+        self.name: str = data.name
+        self.description: str = data.description
+        self.headquarters: str = data.headquarters
+        self.traits: list[FactionTrait] = data.traits
+        self.is_recruiting: bool = data.is_recruiting
 
     @classmethod
     def hydrate_factions(cls) -> None | SpaceTradersAPIError:
@@ -66,7 +66,7 @@ class Faction:
 
     @classmethod
     def _add_faction_to_cache(cls, data: FactionShape) -> None:
-        symbol, faction = data['symbol'], Faction(data)
+        symbol, faction = data.symbol, Faction(data)
         cls._FACTIONS[symbol] = faction
 
     @staticmethod
@@ -99,6 +99,6 @@ class Faction:
         # FIX: Needs pagination handling to be built
         match res:
             case SpaceTradersAPIResponse():
-                return cast(list[FactionShape], res.spacetraders.data)  # FIX:
+                return cast(list[FactionShape], res.spacetraders.data)
             case SpaceTradersAPIError() as err:
                 return err

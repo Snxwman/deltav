@@ -11,7 +11,7 @@ from deltav.spacetraders.enums.error import SpaceTradersAPIErrorCodes
 from deltav.spacetraders.enums.faction import FactionSymbol
 from deltav.spacetraders.game import SpaceTradersGame
 from deltav.spacetraders.models.agent import AgentShape
-from deltav.spacetraders.models.contract import ContractDeliverShape
+from deltav.spacetraders.models.contract import ContractDeliverReqShape
 from deltav.spacetraders.models.event import EventShape
 from deltav.spacetraders.models.market import CargoItemShape
 from deltav.spacetraders.models.ship import (
@@ -332,7 +332,7 @@ def ships(active_agent: AgentShape | None):
             contract_id = input('Enter contract ID to deliver cargo for: ')
             trade_symbol = input('Enter trade symbol: ').upper()
             units = int(input('Enter number of units to deliver: '))
-            deliver: ContractDeliverShape = {
+            deliver: ContractDeliverReqShape = {
                 'ship_symbol': ship_symbol,
                 'trade_symbol': trade_symbol,
                 'units': units
@@ -684,7 +684,7 @@ def run(client: SpaceTradersAPIClient):
                 usage()
             case 'game':
                 from pprint import pp
-                pp(SpaceTradersGame().fetch_server_status())
+                pp(SpaceTradersGame().fetch_server_status().__dict__)
             # case 'new' | 'new-agent':
             #     make_new_agent(args)
             # case 'current' | 'agent' | 'me':

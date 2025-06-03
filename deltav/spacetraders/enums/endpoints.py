@@ -26,6 +26,7 @@ from deltav.spacetraders.models.endpoint import (
     RegisterAgentReqData,
     RegisterAgentResData,
     ShipJumpWaypointShape,
+    UnknownShape,
     WaypointScanShape,
 )
 from deltav.spacetraders.models.faction import FactionShape
@@ -62,7 +63,7 @@ class EndpointDataMixin:
     method: HTTPMethod
     token_type: TokenType
     request_shape: type[SpaceTradersAPIReqShape] | None
-    response_shape: type[SpaceTradersAPIResShape] | None  # TODO: Remove None from type
+    response_shape: type[SpaceTradersAPIResShape]
     # TODO: Add success response codes in?
     # TODO: Add a paginated: bool field?
 
@@ -188,7 +189,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
         HTTPMethod.GET,
         TokenType.NONE,
         None,
-        None,
+        UnknownShape,
     )
     GET_FACTION = (
         Template('/factions/$param'),
@@ -202,7 +203,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
         HTTPMethod.GET,
         TokenType.AGENT,
         None,
-        None,
+        UnknownShape,
     )
     """Fetch your agent's details.
 
@@ -232,7 +233,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
         HTTPMethod.GET,
         TokenType.AGENT,
         None,
-        None,
+        UnknownShape,
     )
     MY_CONTRACT = (
         Template('/my/contracts/$param'),
@@ -253,14 +254,14 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
         HTTPMethod.POST,
         TokenType.AGENT,
         None,
-        None,
+        UnknownShape,
     )
     FULFILL_CONTRACT = (
         Template('/my/contracts/$param1/fulfill'),
         HTTPMethod.POST,
         TokenType.AGENT,
         None,
-        None,
+        UnknownShape,
     )
     MY_SHIPS = (
         Template('/my/ships'),
@@ -309,7 +310,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
         HTTPMethod.POST,
         TokenType.AGENT,
         None,
-        None,
+        UnknownShape,
     )
     MY_SHIPS_EXTRACT = (
         Template('/my/ships/$param1/extract'),
@@ -322,21 +323,24 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
         Template('/my/ships/$param1/extract/survey'),
         HTTPMethod.POST,
         TokenType.AGENT,
-        ShipExtractSurveyShape,
+        # ShipExtractSurveyShape,
+        None,
         ShipExtractSurveyResponseShape,
     )
     MY_SHIPS_JETTISON = (
         Template('/my/ships/$param1/jettison'),
         HTTPMethod.POST,
         TokenType.AGENT,
-        CargoItemShape,
+        # CargoItemShape,
         None,
+        UnknownShape,
     )
     MY_SHIPS_JUMP = (
         Template('/my/ships/$param1/jump'),
         HTTPMethod.POST,
         TokenType.AGENT,
-        ShipJumpWaypointShape,
+        # ShipJumpWaypointShape,
+        None,
         ShipJumpShape,
     )
     # Template('/my/ships/$param1/mounts')
@@ -347,13 +351,14 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
         HTTPMethod.GET,
         TokenType.AGENT,
         None,
-        None,
+        UnknownShape,
     )
     MY_SHIP_NAVIGATE = (
         Template('/my/ships/$param1/navigate'),
         HTTPMethod.POST,
         TokenType.AGENT,
-        WaypointNavigateShape,
+        # WaypointNavigateShape,
+        None,
         NavigateResponseShape,
     )
     NEGOTIATE_CONTRACT = (
@@ -361,34 +366,37 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
         HTTPMethod.POST,
         TokenType.AGENT,
         None,
-        None,
+        UnknownShape,
     )
     MY_SHIPS_ORBIT = (
         Template('/my/ships/$param1/orbit'),
         HTTPMethod.POST,
         TokenType.AGENT,
         None,
-        None,
+        UnknownShape,
     )
     MY_SHIPS_PURCHASE_CARGO = (
         Template('/my/ships/$param1/purchase'),
         HTTPMethod.POST,
         TokenType.AGENT,
-        CargoItemShape,
+        # CargoItemShape,
+        None,
         MarketTransactionShape,
     )
     MY_SHIPS_REFINE = (
         Template('/my/ships/$param1/refine'),
         HTTPMethod.POST,
         TokenType.AGENT,
-        ShipRefineShape,
+        # ShipRefineShape,
+        None,
         ShipRefineResponseShape,
     )
     MY_SHIPS_REFUEL = (
         Template('/my/ships/$param1/refuel'),
         HTTPMethod.POST,
         TokenType.AGENT,
-        ShipRefuelShape,
+        # ShipRefuelShape,
+        None,
         ShipRefuelResponseShape,
     )
     MY_SHIPS_SCAN_SHIPS = (
@@ -396,14 +404,14 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
         HTTPMethod.POST,
         TokenType.AGENT,
         None,
-        None,
+        UnknownShape,
     )
     MY_SHIPS_SCAN_SYSTEMS = (
         Template('/my/ships/$param1/scan/systems'),
         HTTPMethod.POST,
         TokenType.AGENT,
         None,
-        None,
+        UnknownShape,
     )
     MY_SHIPS_SCAN_WAYPOINTS = (
         Template('/my/ships/$param1/scan/waypoints'),
@@ -416,7 +424,8 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
         Template('/my/ships/$param1/sell'),
         HTTPMethod.POST,
         TokenType.AGENT,
-        CargoItemShape,
+        # CargoItemShape,
+        None,
         TransactionShape,
     )
     # Template('/my/ships/$param1/siphon')
@@ -428,7 +437,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
         HTTPMethod.GET,
         TokenType.NONE,
         None,
-        None,
+        UnknownShape,
     )
     SYSTEM_GET_SYSTEM = (
         Template('/systems/$param'),
@@ -442,7 +451,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
         HTTPMethod.GET,
         TokenType.NONE,
         None,
-        None,
+        UnknownShape,
     )
     SYSTEM_GET_WAYPOINT = (
         Template('/systems/$param1/waypoints/$param2'),
@@ -462,7 +471,8 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
         Template('/systems/$param1/waypoints/$param2/construction/supply'),
         HTTPMethod.POST,
         TokenType.AGENT,
-        SupplyConstructionSiteShape,
+        # SupplyConstructionSiteShape,
+        None,
         SupplyConstructionSiteResponseShape,
     )
     GET_JUMPGATE = (

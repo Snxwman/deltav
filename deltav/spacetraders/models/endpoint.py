@@ -1,4 +1,5 @@
 from __future__ import annotations
+from typing import Any
 
 from deltav.spacetraders.enums.faction import FactionSymbol
 from deltav.spacetraders.models import SpaceTradersAPIReqShape, SpaceTradersAPIResShape
@@ -10,6 +11,10 @@ from deltav.spacetraders.models.faction import FactionShape
 from deltav.spacetraders.models.market import TransactionShape
 from deltav.spacetraders.models.ship import ShipCargoShape, ShipCooldownShape, ShipFuelShape, ShipNavShape, ShipShape
 from deltav.spacetraders.models.waypoint import WaypointShape
+
+
+class UnknownShape(SpaceTradersAPIResShape):
+    data: Any
 
 
 class MyAccountShape(SpaceTradersAPIResShape):
