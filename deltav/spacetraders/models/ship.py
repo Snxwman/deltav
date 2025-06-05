@@ -47,6 +47,11 @@ class CargoItemResShape(SpaceTradersAPIResShape):
     units: int
 
 
+class ExtractionShape(SpaceTradersAPIResShape):
+    ship_symbol: str
+    extration_yield: CargoItemResShape
+
+
 class ShipShape(SpaceTradersAPIResShape):
     """
 
@@ -226,7 +231,7 @@ class ShipExtractionShape(SpaceTradersAPIResShape):
     events: list[ShipEventShape]
     """
 
-    extraction: ShipExtractionShape
+    extraction: ExtractionShape
     cooldown: ShipCooldownShape
     cargo: ShipCargoShape
     modifiers: list[WaypointModifierSymbol]

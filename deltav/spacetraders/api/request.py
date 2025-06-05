@@ -245,7 +245,7 @@ class SpaceTradersAPIRequestBuilder:
         if not self.__called_endpoint:
             raise InvalidRequestError('')
 
-        if self.req.endpoint and not self.__called_path_params:
+        if self.req.endpoint.get_query_params() and not self.__called_path_params:
             raise InvalidRequestError('')
 
         if self.req.endpoint.request_shape is not NoDataReqShape and not self.__called_data:
