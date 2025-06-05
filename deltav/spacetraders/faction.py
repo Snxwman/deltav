@@ -1,12 +1,9 @@
-from typing import cast
-
 from deltav.spacetraders.api.client import SpaceTradersAPIClient
 from deltav.spacetraders.api.error import SpaceTradersAPIError
 from deltav.spacetraders.api.request import SpaceTradersAPIRequest
-from deltav.spacetraders.api.response import SpaceTradersAPIResponse
 from deltav.spacetraders.enums.endpoints import SpaceTradersAPIEndpoint
 from deltav.spacetraders.enums.faction import FactionSymbol
-from deltav.spacetraders.models.faction import FactionShape, FactionTrait
+from deltav.spacetraders.models.faction import FactionShape, FactionTraitShape
 
 
 class Faction:
@@ -19,7 +16,7 @@ class Faction:
         self.name: str = data.name
         self.description: str = data.description
         self.headquarters: str = data.headquarters
-        self.traits: list[FactionTrait] = data.traits
+        self.traits: list[FactionTraitShape] = data.traits
         self.is_recruiting: bool = data.is_recruiting
 
     @classmethod
@@ -71,34 +68,23 @@ class Faction:
 
     @staticmethod
     def _fetch_faction(name: FactionSymbol) -> FactionShape | SpaceTradersAPIError:
-        res = SpaceTradersAPIClient.call(
+        return SpaceTradersAPIClient.call(
             SpaceTradersAPIRequest()
             .builder()
             .endpoint(SpaceTradersAPIEndpoint.GET_FACTION)
             .path_params(name.name)
-            .build()
-        )
-
-        match res:
-            case SpaceTradersAPIResponse():
-                return cast(FactionShape, res.spacetraders.data)
-            case SpaceTradersAPIError() as err:
-                return err
+            .build(),
+            FactionShape,
+        ).unwrap()
 
     @staticmethod
     def _fetch_factions() -> list[FactionShape] | SpaceTradersAPIError:
-        res = SpaceTradersAPIClient.call(
+        return SpaceTradersAPIClient.call(
             SpaceTradersAPIRequest()
             .builder()
-            .endpoint(SpaceTradersAPIEndpoint.GET_FACTIONS)
-            .with_token()
+            .endpoint(SpaceTradersAPIEndpoint.GET_ALL_FACTIONS)
+            .token()
             .all_pages()
-            .build()
-        )
-
-        # FIX: Needs pagination handling to be built
-        match res:
-            case SpaceTradersAPIResponse():
-                return cast(list[FactionShape], res.spacetraders.data)
-            case SpaceTradersAPIError() as err:
-                return err
+            .build(),
+            list[FactionShape],
+        ).unwrap()

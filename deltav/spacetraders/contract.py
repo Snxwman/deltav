@@ -1,21 +1,19 @@
 from datetime import datetime, timedelta
-from typing import cast
 
 from deltav.spacetraders.api.client import SpaceTradersAPIClient
 from deltav.spacetraders.api.error import SpaceTradersAPIError
 from deltav.spacetraders.api.request import SpaceTradersAPIRequest
-from deltav.spacetraders.api.response import SpaceTradersAPIResponse
 from deltav.spacetraders.enums.contract import ContractType
 from deltav.spacetraders.enums.endpoints import SpaceTradersAPIEndpoint
 from deltav.spacetraders.enums.market import TradeSymbol
 from deltav.spacetraders.faction import Faction
 from deltav.spacetraders.models.contract import (
+    ContractAcceptShape,
     ContractDeliverReqShape,
     ContractDeliverResShape,
     ContractShape,
     ContractTermsShape,
 )
-from deltav.spacetraders.models.endpoint import AcceptContractShape
 
 
 class Contract:
@@ -58,29 +56,27 @@ class Contract:
     def deliverables(self) -> list[ContractDeliverResShape]:
         return [deliverable for deliverable in self.terms.deliver]
 
-    def get_deliverable_by_trade_symbol(self, symbol: TradeSymbol) -> ContractDeliverResShape | None:
+    def get_deliverable_by_trade_symbol(
+        self, symbol: TradeSymbol
+    ) -> ContractDeliverResShape | None:
         for deliverable in self.deliverables:
             if deliverable.trade_symbol == symbol:
                 return deliverable
 
-    # QUESTION: Should this be in Agent?
-    def accept(self) -> AcceptContractShape | SpaceTradersAPIError:
-        res = SpaceTradersAPIClient.call(
+    def accept(self) -> ContractAcceptShape | SpaceTradersAPIError:
+        return SpaceTradersAPIClient.call(
             SpaceTradersAPIRequest()
             .builder()
             .endpoint(SpaceTradersAPIEndpoint.ACCEPT_CONTRACT)
             .path_params(self.id)
-            .with_token()
-            .build()
-        )
+            .token()
+            .build(),
+            ContractAcceptShape,
+        ).unwrap()
 
-        match res:
-            case SpaceTradersAPIResponse():
-                return cast(AcceptContractShape, res.spacetraders.data)
-            case SpaceTradersAPIError() as err:
-                return err
-
-    def deliver(self, symbol: TradeSymbol, units: int = 0) -> ContractDeliverResShape | SpaceTradersAPIError:
+    def deliver(
+        self, symbol: TradeSymbol, units: int = 0
+    ) -> ContractDeliverResShape | SpaceTradersAPIError:
         # FIX: Move out of this method
         # FIX: Data should be acquired from ship instances
         deliverable = ContractDeliverReqShape(
@@ -89,67 +85,47 @@ class Contract:
             units=units,
         )
 
-        res = SpaceTradersAPIClient.call(
+        return SpaceTradersAPIClient.call(
             SpaceTradersAPIRequest()
             .builder()
             .endpoint(SpaceTradersAPIEndpoint.DELIVER_CONTRACT)
             .path_params(self.id)
-            .with_token()
+            .token()
             .data(deliverable)
-            .build()
-        )
-
-        match res:
-            case SpaceTradersAPIResponse():
-                return cast(ContractDeliverResShape, res.spacetraders.data)
-            case SpaceTradersAPIError() as err:
-                return err
+            .build(),
+            ContractDeliverResShape,
+        ).unwrap()
 
     def fulfill(self) -> ContractShape | SpaceTradersAPIError:
-        res = SpaceTradersAPIClient.call(
+        return SpaceTradersAPIClient.call(
             SpaceTradersAPIRequest()
             .builder()
             .endpoint(SpaceTradersAPIEndpoint.FULFILL_CONTRACT)
             .path_params(self.id)
-            .with_token()
-            .build()
-        )
-
-        match res:
-            case SpaceTradersAPIResponse():
-                return cast(ContractShape, res.spacetraders.data)
-            case SpaceTradersAPIError() as err:
-                return err
+            .token()
+            .build(),
+            ContractShape,
+        ).unwrap()
 
     # QUESTION: Should this be in Agent?
     def fetch_contracts(self) -> list[ContractShape] | SpaceTradersAPIError:
-        res = SpaceTradersAPIClient.call(
+        return SpaceTradersAPIClient.call(
             SpaceTradersAPIRequest()
             .builder()
             .endpoint(SpaceTradersAPIEndpoint.MY_CONTRACTS)
-            .with_token()
-            .build()
-        )  # fmt: skip
-
-        match res:
-            case SpaceTradersAPIResponse():
-                return cast(list[ContractShape], res.spacetraders.data)
-            case SpaceTradersAPIError() as err:
-                return err
+            .token()
+            .build(),
+            list[ContractShape],
+        ).unwrap()  # fmt: skip
 
     @staticmethod
     def fetch_contract(contract_id: str) -> ContractShape | SpaceTradersAPIError:
-        res = SpaceTradersAPIClient.call(
+        return SpaceTradersAPIClient.call(
             SpaceTradersAPIRequest()
             .builder()
-            .endpoint(SpaceTradersAPIEndpoint.MY_CONTRACT)
+            .endpoint(SpaceTradersAPIEndpoint.GET_CONTRACT)
             .path_params(contract_id)
-            .with_token()
-            .build()
-        )
-
-        match res:
-            case SpaceTradersAPIResponse():
-                return cast(ContractShape, res.spacetraders.data)
-            case SpaceTradersAPIError() as err:
-                return err
+            .token()
+            .build(),
+            ContractShape,
+        ).unwrap()

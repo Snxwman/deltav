@@ -1,5 +1,6 @@
 from dataclasses import dataclass
-from typing import Any, cast
+from http import HTTPStatus
+from typing import Any, Generic, TypeVar, cast
 
 from requests import Response
 from requests.structures import CaseInsensitiveDict
@@ -23,16 +24,26 @@ class SpaceTradersAPIResData:
     headers: CaseInsensitiveDict[str]
 
 
-class SpaceTradersAPIResponse:
+T = TypeVar('T', bound=SpaceTradersAPIResShape)
+
+
+class SpaceTradersAPIResponse(Generic[T]):
     def __init__(self, endpoint: SpaceTradersAPIEndpoint, res: Response):
-        self.__res = res
+        self.__res: Response = res
+
+        shape = endpoint.response_shapes.get(HTTPStatus(res.status_code))
+        if shape is None:
+            raise ValueError(f'Got unexpected http status code {res.status_code}')
+        self.__shape: type[SpaceTradersAPIResShape] = shape
 
         http_headers, spacetraders_headers = self.__extract_headers()
 
         json_data: dict[Any, Any] = {} if res.status_code == 204 else res.json()
 
-        data = endpoint.response_shape.model_validate(json_data, by_alias=True)
+        data = self.__shape.model_validate(json_data, by_alias=True)
         meta = None if 'meta' not in json_data else cast(MetaShape, json_data['meta'])
+
+        self.__data: T = cast(T, data)
 
         self.http: HttpResponse = HttpResponse(
             status_code=res.status_code, 
@@ -43,6 +54,9 @@ class SpaceTradersAPIResponse:
             meta=meta,
             headers=spacetraders_headers,
         )
+
+    def unwrap(self) -> T:
+        return self.__data
 
     def __extract_headers(self) -> tuple[CaseInsensitiveDict[str], CaseInsensitiveDict[str]]:
         http_headers = self.__res.headers.copy()

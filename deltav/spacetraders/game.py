@@ -1,11 +1,9 @@
 from datetime import datetime
-from typing import cast
 
 from deltav.spacetraders.agent import Agent
 from deltav.spacetraders.api.client import SpaceTradersAPIClient
 from deltav.spacetraders.api.error import SpaceTradersAPIError
 from deltav.spacetraders.api.request import SpaceTradersAPIRequest
-from deltav.spacetraders.api.response import SpaceTradersAPIResponse
 from deltav.spacetraders.enums.endpoints import SpaceTradersAPIEndpoint
 from deltav.spacetraders.models import ServerStatusShape
 from deltav.spacetraders.models.agent import PublicAgentShape
@@ -18,10 +16,10 @@ class SpaceTradersGame:
     """The current state of the official SpaceTraders public game servers.
 
     Attributes:
-        agents (list[Agent]): A list containing all known public agents.
-        ships (list[Ship]): A list containing all known ships.
-        systems (list[System]): A list containing all known systems.
-        waypoints (list[Waypoint]): A list containing all knonw waypoints.
+        agents: All known public agents.
+        ships: All known ships.
+        systems: All known systems.
+        waypoints: All knonw waypoints.
     """
 
     def __init__(self) -> None:
@@ -35,44 +33,35 @@ class SpaceTradersGame:
         self.next_restart: datetime
         self.restart_freq: str
 
-    @classmethod
-    def update_server_status(cls, server_status: ServerStatusShape) -> None: ...
+    @property
+    def server_status(self) -> ServerStatusShape | SpaceTradersAPIError:
+        return SpaceTradersGame._fetch_server_status()
 
-    @classmethod
-    def update_agents(cls) -> SpaceTradersAPIError | None:
-        res = SpaceTradersAPIClient.call(
-            SpaceTradersAPIRequest()
-            .builder()
-            .endpoint(SpaceTradersAPIEndpoint.GET_AGENTS)
-            .with_token()
-            .all_pages()
-            .build()
-        )
+    def update_server_status(self, status: ServerStatusShape | None = None) -> None:
+        if status is None:
+            _status = SpaceTradersGame._fetch_server_status()
+            print(_status)
 
-        match res:
-            case SpaceTradersAPIResponse():
-                data: PublicAgentShape = cast(PublicAgentShape, res.spacetraders.data)
-            case SpaceTradersAPIError() as err:
-                return err
+    def update_agents(self) -> None: ...
 
     @staticmethod
-    def fetch_server_status(
-        game_instance: 'SpaceTradersGame | None' = None,
-    ) -> ServerStatusShape | SpaceTradersAPIError:
-        res = SpaceTradersAPIClient.call(
+    def _fetch_public_agents() -> list[PublicAgentShape] | SpaceTradersAPIError:
+        return SpaceTradersAPIClient.call(
             SpaceTradersAPIRequest()
             .builder()
-            .endpoint(SpaceTradersAPIEndpoint.SERVER_STATUS)
-            .build()
-        )  # fmt: skip
+            .endpoint(SpaceTradersAPIEndpoint.GET_ALL_AGENTS)
+            .token()
+            .all_pages()
+            .build(),
+            list[PublicAgentShape],
+        ).unwrap()
 
-        match res:
-            case SpaceTradersAPIResponse():
-                server_status: ServerStatusShape = cast(ServerStatusShape, res.spacetraders.data)
-
-                if game_instance is not None:
-                    game_instance.update_server_status(server_status)
-
-                return server_status
-            case SpaceTradersAPIError() as err:
-                return err
+    @staticmethod
+    def _fetch_server_status() -> ServerStatusShape | SpaceTradersAPIError:
+        return SpaceTradersAPIClient.call(
+            SpaceTradersAPIRequest()
+            .builder()
+            .endpoint(SpaceTradersAPIEndpoint.GET_SERVER_STATUS)
+            .build(),
+            ServerStatusShape
+        ).unwrap()  # fmt: skip

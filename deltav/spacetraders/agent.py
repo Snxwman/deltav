@@ -1,21 +1,18 @@
-from typing import cast
-
 from deltav.spacetraders.account import Account
 from deltav.spacetraders.api.client import SpaceTradersAPIClient
 from deltav.spacetraders.api.error import SpaceTradersAPIError
 from deltav.spacetraders.api.request import SpaceTradersAPIRequest
-from deltav.spacetraders.api.response import SpaceTradersAPIResponse
 from deltav.spacetraders.contract import Contract
 from deltav.spacetraders.enums.endpoints import SpaceTradersAPIEndpoint
 from deltav.spacetraders.faction import Faction
-from deltav.spacetraders.models.agent import AgentShape
-from deltav.spacetraders.models.endpoint import RegisterAgentReqData, RegisterAgentResData
+from deltav.spacetraders.models.agent import AgentShape, PublicAgentShape
+from deltav.spacetraders.models.endpoint import AgentRegisterReqData, AgentRegisterResData
 from deltav.spacetraders.ship import Ship
 
 
 # TODO: Convert token to an actual JWT type
 class Agent:
-    def __init__(self, token: str, data: AgentShape) -> None:
+    def __init__(self, token: str, data: AgentShape | PublicAgentShape) -> None:
         self._token: str
         # TODO: Track sold and scrapped ships
         self._ships: list[Ship]
@@ -24,7 +21,7 @@ class Agent:
         self._past_contracts: list[Contract]
 
         self.account: Account | None
-        if data.account_id is not None:
+        if isinstance(data, AgentShape):
             self.account = Account(data.account_id)
         else:
             self.account = None
@@ -70,27 +67,24 @@ class Agent:
         Returns:
             AgentShape | SpaceTradersAPIError
         """
-        res = SpaceTradersAPIClient.call(
+        return SpaceTradersAPIClient.call(
             SpaceTradersAPIRequest()
             .builder()
             .endpoint(
-                SpaceTradersAPIEndpoint.MY_AGENT if symbol is None else SpaceTradersAPIEndpoint.GET_AGENT
-            )  # fmt: skip
+                SpaceTradersAPIEndpoint.GET_AGENT  # fmt: skip
+                if symbol is None
+                else SpaceTradersAPIEndpoint.GET_PUBLIC_AGENT  # fmt: skip
+            )
             .path_params(symbol or '')
-            .with_token()
-            .build()
-        )
-
-        match res:
-            case SpaceTradersAPIResponse():
-                return cast(AgentShape, res.spacetraders.data)
-            case SpaceTradersAPIError() as err:
-                return err
+            .token()
+            .build(),
+            AgentShape,
+        ).unwrap()
 
     @staticmethod
     def register(
-        data: RegisterAgentReqData,
-    ) -> RegisterAgentResData | SpaceTradersAPIError:
+        data: AgentRegisterReqData,
+    ) -> AgentRegisterResData | SpaceTradersAPIError:
         """Register a new agent
 
         Args:
@@ -99,16 +93,11 @@ class Agent:
         Returns:
             RegisterAgentReqData | SpaceTradersAPIError
         """
-        res = SpaceTradersAPIClient.call(
+        return SpaceTradersAPIClient.call(
             SpaceTradersAPIRequest()
             .builder()
-            .endpoint(SpaceTradersAPIEndpoint.REGISTER)
+            .endpoint(SpaceTradersAPIEndpoint.REGISTER_AGENT)
             .data(data)
-            .build()
-        )  # fmt: skip
-
-        match res:
-            case SpaceTradersAPIResponse():
-                return cast(RegisterAgentResData, res.spacetraders.data)
-            case SpaceTradersAPIError() as err:
-                return err
+            .build(),
+            AgentRegisterResData,
+        ).unwrap()

@@ -1,20 +1,27 @@
 from __future__ import annotations
 
+from datetime import datetime
+
 from deltav.spacetraders.enums.faction import FactionSymbol
-from deltav.spacetraders.enums.market import TradeSymbol
 from deltav.spacetraders.enums.ship import ShipType
 from deltav.spacetraders.enums.system import SystemType
+from deltav.spacetraders.enums.waypoint import WaypointType
 from deltav.spacetraders.models import SpaceTradersAPIResShape
-from deltav.spacetraders.models.market import CargoItemShape, ShipTransactionShape, TradeGoodShape, TransactionShape
-from deltav.spacetraders.models.ship import ShipCargoShape, ShipShape
-from deltav.spacetraders.models.waypoint import SystemWaypointShape
+from deltav.spacetraders.models.chart import ChartShape
+from deltav.spacetraders.models.faction import FactionSymbolShape
+from deltav.spacetraders.models.ship import ShipShape
+from deltav.spacetraders.models.waypoint import (
+    WaypointModifierShape,
+    WaypointOrbitalShape,
+    WaypointTraitShape,
+)
 
 
 class ShipyardShape(SpaceTradersAPIResShape):
     """
     symbol: str
     ship_types: list[ShipType]
-    transactions: list[ShipTransactionShape]
+    transactions: list[ShipyardTransactionShape]
     ships: list[ShipShape]
     modifications_fee: int
 
@@ -22,28 +29,25 @@ class ShipyardShape(SpaceTradersAPIResShape):
 
     symbol: str
     ship_types: list[ShipType]
-    transactions: list[ShipTransactionShape]
+    transactions: list[ShipyardTransactionShape]
     ships: list[ShipShape]
     modifications_fee: int
 
 
-class MarketShape(SpaceTradersAPIResShape):
+class ShipyardTransactionShape(SpaceTradersAPIResShape):
     """
 
-    symbol: str
-    exports: list[CargoItemShape]
-    imports: list[CargoItemShape]
-    exchange: list[CargoItemShape]
-    transactions: list[TransactionShape]
-    trade_goods: list[TradeGoodShape]
+    waypoint_symbol: str
+    ship_type: ShipType
+    price: int
+    agent_symbol: str
+    timestamp: datetime
     """
-
-    symbol: str
-    exports: list[CargoItemShape]
-    imports: list[CargoItemShape]
-    exchange: list[CargoItemShape]
-    transactions: list[TransactionShape]
-    trade_goods: list[TradeGoodShape]
+    waypoint_symbol: str
+    ship_type: ShipType
+    price: int
+    agent_symbol: str
+    timestamp: datetime
 
 
 class JumpgateShape(SpaceTradersAPIResShape):
@@ -82,52 +86,41 @@ class SystemShape(SpaceTradersAPIResShape):
     name: str
 
 
-class ConstructionMaterialShape(SpaceTradersAPIResShape):
-    """
-
-    trade_symbol: TradeSymbol
-    required: int
-    fulfilled: int
-    """
-
-    trade_symbol: TradeSymbol
-    required: int
-    fulfilled: int
-
-
-class ConstructionSiteShape(SpaceTradersAPIResShape):
-    """
-
-
-    symbol: str
-    materials: list[ConstructionMaterialShape]
-    is_complete: bool
+class SystemSymbolShape(SpaceTradersAPIResShape):
     """
 
     symbol: str
-    materials: list[ConstructionMaterialShape]
-    is_complete: bool
-
-
-class SupplyConstructionSiteShape(SpaceTradersAPIResShape):
     """
 
-    ship_symbol: str
-    trade_symbol: TradeSymbol
-    units: int
+    symbol: str
+
+
+class SystemWaypointShape(SpaceTradersAPIResShape):
     """
 
-    ship_symbol: str
-    trade_symbol: TradeSymbol
-    units: int
-
-
-class SupplyConstructionSiteResponseShape(SpaceTradersAPIResShape):
+    symbol: str
+    type: WaypointType
+    system_symbol: str
+    x: int
+    y: int
+    orbitals: list[WaypointOrbitalShape]
+    orbits: str
+    faction: FactionSymbolShape
+    traits: list[WaypointTraitShape]
+    modifiers: list[SystemWaypointModifierShape]
+    chart: ChartShape
+    is_under_construction: bool
     """
 
-    construction: ConstructionSiteShape
-    cargo: ShipCargoShape
-    """
-
-    construction: ConstructionSiteShape
-    cargo: ShipCargoShape
+    symbol: str
+    type: WaypointType
+    system_symbol: str
+    x: int
+    y: int
+    orbitals: list[WaypointOrbitalShape]
+    orbits: str
+    faction: FactionSymbolShape
+    traits: list[WaypointTraitShape]
+    modifiers: list[WaypointModifierShape]
+    chart: ChartShape
+    is_under_construction: bool

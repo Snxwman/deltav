@@ -1,11 +1,13 @@
 from __future__ import annotations
 
+from collections.abc import Mapping
 from datetime import date, datetime
-from typing import Callable
+from typing import Any, override
 
 from pydantic import AliasGenerator, BaseModel, ConfigDict
-from pydantic.alias_generators import to_camel, to_snake
+from pydantic.alias_generators import to_camel
 
+from deltav.spacetraders.enums.market import TradeSymbol
 
 # TODO: Look into the following model config fields for ConfigDict
 #   - str_to_upper
@@ -17,7 +19,10 @@ from pydantic.alias_generators import to_camel, to_snake
 
 # Inherited super type used for type annotations
 class SpaceTradersAPIReqShape(BaseModel):
-    """Base type for all request data sent in an SpaceTraders API request."""
+    """Base class for all request data sent in an SpaceTraders API request.
+
+    Inherits from pydantic.BaseModel.
+    """
 
     model_config = ConfigDict(  # pyright: ignore[reportUnannotatedClassAttribute]
         alias_generator=AliasGenerator(
@@ -27,19 +32,157 @@ class SpaceTradersAPIReqShape(BaseModel):
         revalidate_instances='always',
     )
 
+    @override
+    def __str__(self) -> str:
+        return self._render(self, 0).expandtabs(4)
+
+    def _render(self, value: Any, tabs: int) -> str:  # pyright: ignore[reportAny]
+        MAX_WIDTH = 80
+        pad = '\t' * tabs
+
+        match value:
+            case BaseModel():
+                lines = [f'{pad}{value.__class__.__name__}']
+                for k, v in value.__dict__.items():  # pyright: ignore[reportAny]
+                    lines.append(f'{pad}\t{k}: {self._render(v, tabs + 1).lstrip()}')
+                return '\n'.join(lines)
+            case list():
+                if not value:
+                    return '[]'
+                inline = f'[{", ".join(self._short(v) for v in value)}]'
+
+                if len(inline) <= MAX_WIDTH:
+                    return inline
+
+                return '[\n' + '\n'.join(self._render(v, tabs + 1) for v in value) + f'\n{pad}]'
+            case datetime():
+                return value.strftime('%Y-%m-%d %H:%M:%S')
+            case date():
+                return value.strftime('%Y-%m-%d')
+            case str():
+                if len(pad) + len(value) > MAX_WIDTH:
+                    ...
+                return value
+
+        return repr(value)  # pyright: ignore[reportAny]
+
+    def _short(self, value: Any) -> str:  # pyright: ignore[reportAny]
+        match value:
+            case BaseModel():
+                return value.__class__.__name__
+            case datetime():
+                return value.strftime('%Y-%m-%d %H:%M:%S')
+            case date():
+                return value.strftime('%Y-%m-%d')
+            case str():
+                return value
+
+        return repr(value)  # pyright: ignore[reportAny]
+
 
 # Inherited super type used for type annotations
 class SpaceTradersAPIResShape(BaseModel):
-    """Base type for all response data received by a SpaceTraders API call."""
+    """Base class for all response data received by a SpaceTraders API call.
+
+    Inherits from pydantic.BaseModel.
+    """
 
     model_config = ConfigDict(  # pyright: ignore[reportUnannotatedClassAttribute]
         alias_generator=to_camel,
-        # alias_generator=AliasGenerator(
-        #     validation_alias=to_snake,
-        #     serialization_alias=to_camel,
-        # ),
         revalidate_instances='always',
     )
+
+    @override
+    def __str__(self) -> str:
+        return self._render(self, 0).expandtabs(4)
+
+    def _render(self, value: Any, tabs: int) -> str:  # pyright: ignore[reportAny]
+        MAX_WIDTH = 80
+        pad = '\t' * tabs
+
+        match value:
+            case BaseModel():
+                lines = [f'{pad}{value.__class__.__name__}']
+                for k, v in value.__dict__.items():  # pyright: ignore[reportAny]
+                    lines.append(f'{pad}\t{k}: {self._render(v, tabs + 1).lstrip()}')
+                return '\n'.join(lines)
+            case list():
+                if not value:
+                    return '[]'
+                inline = f'[{", ".join(self._short(v) for v in value)}]'
+
+                if len(inline) <= MAX_WIDTH:
+                    return inline
+
+                return '[\n' + '\n'.join(self._render(v, tabs + 1) for v in value) + f'\n{pad}]'
+            case datetime():
+                return value.strftime('%Y-%m-%d %H:%M:%S')
+            case date():
+                return value.strftime('%Y-%m-%d')
+            case str():
+                if len(pad) + len(value) > MAX_WIDTH:
+                    ...
+                return value
+
+        return repr(value)  # pyright: ignore[reportAny]
+
+    def _short(self, value: Any) -> str:  # pyright: ignore[reportAny]
+        match value:
+            case BaseModel():
+                return value.__class__.__name__
+            case datetime():
+                return value.strftime('%Y-%m-%d %H:%M:%S')
+            case date():
+                return value.strftime('%Y-%m-%d')
+            case str():
+                return value
+
+        return repr(value)  # pyright: ignore[reportAny]
+
+
+# WARN: Developmental placeholder
+class UnknownReqShape(SpaceTradersAPIReqShape):
+    """⚠  FOR DEVELOPMENT ONLY ⚠
+
+    An unknown shape to use as a placeholder for fields requiring a SpaceTradersAPIReqShape
+
+    data: any
+    """
+
+    data: Any = {}  # pyright: ignore[reportAny]
+
+
+# WARN: Developmental placeholder
+class UnknownResShape(SpaceTradersAPIResShape):
+    """⚠  FOR DEVELOPMENT ONLY ⚠
+
+    An unknown shape to use as a placeholder for fields requiring a SpaceTradersAPIResShape
+
+    data: any
+    """
+
+    data: Any = {}  # pyright: ignore[reportAny]
+
+
+class NoDataReqShape(SpaceTradersAPIReqShape):
+    pass
+
+
+class NoDataResShape(SpaceTradersAPIResShape):
+    pass
+
+
+class MarketSupplyChainAdditionalPropertiesShape(SpaceTradersAPIResShape):
+    ANY_ADDITIONAL_PROPERTY: list[str]
+
+
+class MarketSupplyChainShape(SpaceTradersAPIResShape):
+    export_to_import_map: Mapping[TradeSymbol, list[TradeSymbol]]  # TODO: Verify
+
+
+class EventSubscribeReqShape(SpaceTradersAPIReqShape):
+    action: str  # TODO: Make enum
+    system_symbol: str
 
 
 ####################

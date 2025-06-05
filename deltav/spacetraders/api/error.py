@@ -1,9 +1,11 @@
-from typing import Any, cast
+from http import HTTPStatus
+from typing import Any
 
+from pydantic import ValidationError
 from requests import Response
 
 from deltav.spacetraders.enums.error import SpaceTradersAPIErrorCodes
-from deltav.spacetraders.models.error import ErrorShape, HttpErrorShape
+from deltav.spacetraders.models.error import HttpErrorShape, SpaceTradersAPIErrorShape
 
 
 # TODO: Implement
@@ -11,14 +13,31 @@ from deltav.spacetraders.models.error import ErrorShape, HttpErrorShape
 #  - Handle HTTP 502 errors (recommended to wait a few minutes for retry)
 class SpaceTradersAPIError:
     def __init__(self, res: Response):
-        data = cast(ErrorShape, res.json()['error'])
-        if 'requestId' in data:
-            self.code: SpaceTradersAPIErrorCodes = SpaceTradersAPIErrorCodes(data['code'])
-            self.message: str = data['message']  # pyright: ignore[reportRedeclaration]
-            self.data: dict[Any, Any] = data['data']
-            self.request_id: str = data['requestId']
-        else:
-            data = cast(HttpErrorShape, res.json())
-            self.status_code: int = data['status_code']
-            self.message: str = data['message']
-            self.error: str = data['error']
+        self.__res: Response = res
+        self.__data: SpaceTradersAPIErrorShape | HttpErrorShape
+        self.code: SpaceTradersAPIErrorCodes | HTTPStatus
+        self.message: str
+        self.data: Any  # TODO: Type could be improved
+        self.request_id: str | None
+
+        try:
+            data = SpaceTradersAPIErrorShape.model_validate(res.json()['error'])
+            self.__init_spacetraders_error(data)
+        except ValidationError:
+            data = HttpErrorShape.model_validate(res.json())
+            self.__init_http_error(data)
+
+    def unwrap(self) -> 'SpaceTradersAPIError':
+        return self
+
+    def __init_spacetraders_error(self, err: SpaceTradersAPIErrorShape) -> None:
+        self.code = err.code
+        self.message = err.message
+        self.data = err.data
+        self.request_id = err.request_id
+
+    def __init_http_error(self, err: HttpErrorShape) -> None:
+        self.code = err.code
+        self.message = err.message
+        self.data = err.error  # Actually the 'error' field
+        self.request_id = None

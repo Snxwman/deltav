@@ -12,18 +12,16 @@ from deltav.spacetraders.enums.faction import FactionSymbol
 from deltav.spacetraders.game import SpaceTradersGame
 from deltav.spacetraders.models.agent import AgentShape
 from deltav.spacetraders.models.contract import ContractDeliverReqShape
-from deltav.spacetraders.models.event import EventShape
-from deltav.spacetraders.models.market import CargoItemShape
 from deltav.spacetraders.models.ship import (
     ShipCargoInventoryShape,
     ShipCooldownShape,
     ShipFuelShape,
     ShipNavShape,
-    ShipPurchaseShape,
-    ShipRefuelShape,
+    ShipPurchaseReqShape,
+    ShipRefuelReqShape,
 )
-from deltav.spacetraders.models.systems import MarketShape, ShipyardShape
-from deltav.spacetraders.models.waypoint import WaypointNavigateShape, WaypointShape
+from deltav.spacetraders.models.systems import ShipyardShape
+from deltav.spacetraders.models.waypoint import WaypointShape, WaypointSymbolResShape
 from deltav.spacetraders.ship import Ship
 from deltav.spacetraders.system import System
 
@@ -190,7 +188,7 @@ def ships(active_agent: AgentShape | None):
         print('No active agent set. Please set an active agent first.')
         return
     
-    def navigate(ship_symbol: str, waypoint: WaypointNavigateShape):
+    def navigate(ship_symbol: str, waypoint: WaypointSymbolResShape):
         waypoint_symbol = waypoint['waypoint_symbol']
         print(f'Navigating ship {ship_symbol} to waypoint {waypoint_symbol}...')
         res = Ship.navigate(ship_symbol, waypoint)
@@ -238,7 +236,7 @@ def ships(active_agent: AgentShape | None):
 
     def getNavStatus(ship_symbol: str):
         print(f'Getting navigation status for ship {ship_symbol}...')
-        status = Ship.get_nav_status(ship_symbol)
+        status = Ship.fetch_nav_status(ship_symbol)
         if isinstance(status, SpaceTradersAPIError):
             print(f'No navigation status found for ship {ship_symbol}. Error: {status.message}')
             return
@@ -310,7 +308,7 @@ def ships(active_agent: AgentShape | None):
 
     def viewCargo(ship_symbol: str):
         print(f'Viewing cargo for ship {ship_symbol}...')
-        cargo = Ship.get_cargo(ship_symbol)
+        cargo = Ship.fetch_cargo(ship_symbol)
         if isinstance(cargo, SpaceTradersAPIError):
             print(f'Error getting cargo for ship {ship_symbol}: {cargo}')
             return
@@ -362,7 +360,7 @@ def ships(active_agent: AgentShape | None):
 
     def getCooldown(ship_symbol: str):
         print(f'Getting cooldowns for ship {ship_symbol}...')
-        cooldown = Ship.get_cooldown(ship_symbol)
+        cooldown = Ship.fetch_cooldown(ship_symbol)
         if isinstance(cooldown, SpaceTradersAPIError):
             print(f'Error getting cooldown for ship {ship_symbol}: {cooldown}')
             print(f'Error code: {cooldown.code}')
@@ -426,7 +424,7 @@ def ships(active_agent: AgentShape | None):
 
         ship_type = input('Enter ship type to purchase (e.g. EXPLORER, FIGHTER, etc.): ').upper()
         print(f'Purchasing ship of type {ship_type} at waypoint {waypoint_symbol}...')
-        shape: ShipPurchaseShape = {
+        shape: ShipPurchaseReqShape = {
             'ship_type': ship_type,
             'waypoint_symbol': waypoint_symbol
         }
@@ -450,13 +448,13 @@ def ships(active_agent: AgentShape | None):
     def refuel_ship(ship_symbol: str):
         # one unit of fuel from marketplace/cargo = 100 fuel units TODO: verify?
         print(f'Refueling ship {ship_symbol}...')
-        refuel: ShipRefuelShape = {
+        refuel: ShipRefuelReqShape = {
             'units': 0,  
             'from_cargo': True 
         }
 
         # if not at marketplace with fuel, check if ship cargo has fuel, if so use it
-        req = Ship.get_ship(ship_symbol)
+        req = Ship.fetch_ship(ship_symbol)
         if isinstance(req, SpaceTradersAPIError):
             print(f'Error getting ship during refueling {ship_symbol}: {req.code.value} - {req.message}')
             return
@@ -520,7 +518,7 @@ def ships(active_agent: AgentShape | None):
     if active_agent is not None:
         agent_instance = Agent(CONFIG.agent_token, active_agent)
 
-    current_ships = Ship.get_ships()
+    current_ships = Ship.fetch_ships()
     if isinstance(current_ships, SpaceTradersAPIError):
         print(f'Error retrieving ships: {current_ships.message}')
         return
@@ -584,7 +582,7 @@ def ships(active_agent: AgentShape | None):
                 scanWaypoints(ship_symbol)
             case '5':
                 waypoint_symbol = input('Enter waypoint symbol to navigate to: ').upper()
-                waypoint: WaypointNavigateShape = {
+                waypoint: WaypointSymbolResShape = {
                     'waypoint_symbol': waypoint_symbol
                 }
                 navigate(ship_symbol, waypoint)
@@ -683,8 +681,8 @@ def run(client: SpaceTradersAPIClient):
             case 'h' | 'help':
                 usage()
             case 'game':
-                from pprint import pp
-                pp(SpaceTradersGame().fetch_server_status().__dict__)
+                game = SpaceTradersGame()
+                print(game.server_status)
             # case 'new' | 'new-agent':
             #     make_new_agent(args)
             # case 'current' | 'agent' | 'me':

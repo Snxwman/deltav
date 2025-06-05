@@ -16,7 +16,7 @@ class ActivityLevel(Enum):
     RESTRICTED = auto()
 
 
-class MarketTransactionType(Enum):
+class TransactionType(Enum):
     """
 
     PURCHASE

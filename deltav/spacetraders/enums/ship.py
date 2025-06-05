@@ -75,7 +75,7 @@ class ShipConditionEvent(Enum):
     VIBRATION_OVERLOAD = auto()
 
 
-class ShipCrewRotation(Enum):
+class ShipCrewRotationShape(Enum):
     """
 
     STRICT
