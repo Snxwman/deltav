@@ -1,6 +1,8 @@
 from enum import Enum, auto
 
+from deltav.spacetraders.enums import serialize_by_name
 
+@serialize_by_name
 class ShipComponent(Enum):
     """
 
@@ -14,6 +16,7 @@ class ShipComponent(Enum):
     ENGINE = auto()
 
 
+@serialize_by_name
 class ShipConditionEvent(Enum):
     """
 
@@ -75,6 +78,7 @@ class ShipConditionEvent(Enum):
     VIBRATION_OVERLOAD = auto()
 
 
+@serialize_by_name
 class ShipCrewRotationShape(Enum):
     """
 
@@ -86,6 +90,7 @@ class ShipCrewRotationShape(Enum):
     RELAXED = auto()
 
 
+@serialize_by_name
 class ShipEngines(Enum):
     """
 

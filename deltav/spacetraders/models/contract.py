@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from datetime import datetime
 
+from pydantic import Field
+
 from deltav.spacetraders.enums.contract import ContractType
 from deltav.spacetraders.enums.faction import FactionSymbol
 from deltav.spacetraders.models import SpaceTradersAPIReqShape, SpaceTradersAPIResShape
@@ -27,6 +29,15 @@ class ContractShape(SpaceTradersAPIResShape):
     accepted: bool
     fulfilled: bool
     deadline_to_accept: datetime
+
+
+class ContractsShape(SpaceTradersAPIResShape):
+    """
+
+    data: list[ContractShape]
+    """
+
+    contracts: list[ContractShape] = Field(alias='data')
 
 
 class ContractAcceptShape(SpaceTradersAPIResShape):

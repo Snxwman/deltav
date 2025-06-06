@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from datetime import datetime
 
+from pydantic import Field
+
 from deltav.spacetraders.enums.faction import FactionSymbol
 from deltav.spacetraders.enums.market import SurveySize, TradeSymbol
 from deltav.spacetraders.enums.ship import (
@@ -48,8 +50,14 @@ class CargoItemResShape(SpaceTradersAPIResShape):
 
 
 class ExtractionShape(SpaceTradersAPIResShape):
+    """
+
     ship_symbol: str
-    extration_yield: CargoItemResShape
+    extration_yield: CargoItemResShape = Field(alias='yield')
+    """
+
+    ship_symbol: str
+    extration_yield: CargoItemResShape = Field(alias='yield')
 
 
 class ShipShape(SpaceTradersAPIResShape):
@@ -81,6 +89,15 @@ class ShipShape(SpaceTradersAPIResShape):
     cargo: ShipCargoShape
     fuel: ShipFuelShape
     cooldown: ShipCooldownShape
+
+
+class ShipsShape(SpaceTradersAPIResShape):
+    """
+
+    ships: list[ShipShape]
+    """
+
+    ships: list[ShipShape] = Field(alias='data')
 
 
 class ShipCargoShape(SpaceTradersAPIResShape):
@@ -379,6 +396,15 @@ class ShipModuleShape(SpaceTradersAPIResShape):
     requirements: ShipRequirementsShape
 
 
+class ShipModulesShape(SpaceTradersAPIResShape):
+    """
+
+    modules: list[ShipModuleShape] = Field(alias='data')
+    """
+
+    modules: list[ShipModuleShape] = Field(alias='data')
+
+
 class ShipModuleSymbolShape(SpaceTradersAPIReqShape):
     """
 
@@ -405,6 +431,15 @@ class ShipMountShape(SpaceTradersAPIResShape):
     strength: int
     deposits: list[ShipMountDeposits]
     requirements: ShipRequirementsShape
+
+
+class ShipMountsShape(SpaceTradersAPIResShape):
+    """
+
+    modules: list[ShipMountShape] = Field(alias='data')
+    """
+
+    modules: list[ShipMountShape] = Field(alias='data')
 
 
 class ShipMountSymbolShape(SpaceTradersAPIReqShape):
@@ -763,7 +798,7 @@ class ScanSystemsShape(SpaceTradersAPIResShape):
     systems: list[ShipSystemShape]
 
 
-class ScanWaypointShape(SpaceTradersAPIResShape):
+class ScanWaypointsShape(SpaceTradersAPIResShape):
     """
 
     cooldown: ShipCooldownShape
@@ -778,11 +813,11 @@ class SiphonShape(SpaceTradersAPIResShape):
     """
 
     ship_symbol: str
-    siphon_yield: CargoItemResShape  # TODO: Add "yield" alias
+    siphon_yield: CargoItemResShape = Field(alias='yield')
     """
 
     ship_symbol: str
-    siphon_yield: CargoItemResShape  # TODO: Add "yield" alias
+    siphon_yield: CargoItemResShape = Field(alias='yield')
 
 
 class SiphonResShape(SpaceTradersAPIResShape):

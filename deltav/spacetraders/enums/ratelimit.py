@@ -1,6 +1,5 @@
 from enum import Enum
 
-
 class RateLimitType(Enum):
     """
 

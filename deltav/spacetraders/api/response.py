@@ -1,71 +1,47 @@
-from dataclasses import dataclass
 from http import HTTPStatus
 from typing import Any, Generic, TypeVar, cast
 
-from requests import Response
-from requests.structures import CaseInsensitiveDict
+from httpx import Headers, Response
 
 from deltav.spacetraders.api.ratelimit import Ratelimit
 from deltav.spacetraders.enums.endpoints import SpaceTradersAPIEndpoint
 from deltav.spacetraders.models import SpaceTradersAPIResShape
 from deltav.spacetraders.models.meta import MetaShape
 
-
-@dataclass
-class HttpResponse:
-    status_code: int
-    headers: CaseInsensitiveDict[str]
-
-
-@dataclass
-class SpaceTradersAPIResData:
-    data: SpaceTradersAPIResShape
-    meta: MetaShape | None
-    headers: CaseInsensitiveDict[str]
-
-
 T = TypeVar('T', bound=SpaceTradersAPIResShape)
 
 
 class SpaceTradersAPIResponse(Generic[T]):
     def __init__(self, endpoint: SpaceTradersAPIEndpoint, res: Response):
-        self.__res: Response = res
+        self.__endpoint: SpaceTradersAPIEndpoint = endpoint
+        self.__headers: Headers = res.headers.copy()
+        self.__shape: type[SpaceTradersAPIResShape]
+        self.__meta: MetaShape | None
+        self.data: T
+
+        self.__filter_headers()
 
         shape = endpoint.response_shapes.get(HTTPStatus(res.status_code))
         if shape is None:
             raise ValueError(f'Got unexpected http status code {res.status_code}')
-        self.__shape: type[SpaceTradersAPIResShape] = shape
+        self.__shape = shape
 
-        http_headers, spacetraders_headers = self.__extract_headers()
+        json_data: dict[str, Any] = {} if res.status_code == 204 else res.json()
+        if 'meta' in json_data:
+            self.__meta = MetaShape.model_validate(json_data['meta'])
+        else:
+            self.__meta = None
 
-        json_data: dict[Any, Any] = {} if res.status_code == 204 else res.json()
-
-        data = self.__shape.model_validate(json_data, by_alias=True)
-        meta = None if 'meta' not in json_data else cast(MetaShape, json_data['meta'])
-
-        self.__data: T = cast(T, data)
-
-        self.http: HttpResponse = HttpResponse(
-            status_code=res.status_code, 
-            headers=http_headers
-        )  # fmt: skip
-        self.spacetraders: SpaceTradersAPIResData = SpaceTradersAPIResData(
-            data=data,
-            meta=meta,
-            headers=spacetraders_headers,
-        )
+        self.data = cast(T, shape.model_validate(json_data, by_alias=True))
 
     def unwrap(self) -> T:
-        return self.__data
+        return self.data
 
-    def __extract_headers(self) -> tuple[CaseInsensitiveDict[str], CaseInsensitiveDict[str]]:
-        http_headers = self.__res.headers.copy()
-        spacetraders_headers = self.__res.headers.copy()
+    @property
+    def meta(self) -> MetaShape | None:
+        return self.__meta
 
-        for header in self.__res.headers.keys():
-            if header in Ratelimit.X_HEADERS:
-                _ = http_headers.pop(header)
-            else:
-                _ = spacetraders_headers.pop(header)
-
-        return (http_headers, spacetraders_headers)
+    def __filter_headers(self) -> None:
+        for header in self.__headers.keys():
+            if header not in Ratelimit.X_HEADERS:
+                _ = self.__headers.pop(header)

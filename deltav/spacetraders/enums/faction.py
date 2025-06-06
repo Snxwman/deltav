@@ -1,6 +1,9 @@
 from enum import Enum, auto
 
+from deltav.spacetraders.enums import serialize_by_name
 
+
+@serialize_by_name 
 class FactionSymbol(Enum):
     """
     AEGIS
@@ -38,6 +41,7 @@ class FactionSymbol(Enum):
     ETHEREAL = auto()
     GALACTIC = auto()
     LORDS = auto()
+    OBSIDIAN = auto()
     OMEGA = auto()
     QUANTUM = auto()
     SHADOW = auto()
@@ -50,6 +54,7 @@ class FactionSymbol(Enum):
         return FactionSymbol.COSMIC
 
 
+@serialize_by_name 
 class FactionTraitSymbol(Enum):
     """
     ADAPTABLE

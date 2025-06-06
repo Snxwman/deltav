@@ -2,7 +2,9 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from datetime import date, datetime
-from typing import Any, override
+from deepmerge import always_merger
+from enum import Enum
+from typing import Any, TypeVar, override
 
 from pydantic import AliasGenerator, BaseModel, ConfigDict
 from pydantic.alias_generators import to_camel
@@ -15,6 +17,27 @@ from deltav.spacetraders.enums.market import TradeSymbol
 #   - str_max_length
 #   - use_enum_values
 #   - validate_assignment
+
+
+T = TypeVar("T", bound='SpaceTradersAPIResShape')
+
+# https://github.com/pydantic/pydantic/discussions/3416
+def merge_models(base: T, next: T) -> T:
+    """Merge two Pydantic model instances.
+
+    The attributes of 'base' and 'nxt' that weren't explicitly set are dumped into dicts
+    using '.model_dump(exclude_unset=True)', which are then merged using 'deepmerge',
+    and the merged result is turned into a model instance using '.model_validate'.
+
+    For attributes set on both 'base' and 'nxt', the value from 'nxt' will be used in
+    the output result.
+    """
+
+    base_dict = base.model_dump(exclude_unset=True)
+    next_dict = next.model_dump(exclude_unset=True)
+    merged_dict = always_merger.merge(base_dict, next_dict)
+    print(base.model_validate(merged_dict, by_name=True))
+    return base.model_validate(merged_dict, by_name=True)
 
 
 # Inherited super type used for type annotations
@@ -119,6 +142,8 @@ class SpaceTradersAPIResShape(BaseModel):
                 return value.strftime('%Y-%m-%d %H:%M:%S')
             case date():
                 return value.strftime('%Y-%m-%d')
+            case Enum():
+                return value.name
             case str():
                 if len(pad) + len(value) > MAX_WIDTH:
                     ...

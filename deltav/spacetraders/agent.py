@@ -68,7 +68,7 @@ class Agent:
             AgentShape | SpaceTradersAPIError
         """
         return SpaceTradersAPIClient.call(
-            SpaceTradersAPIRequest()
+            SpaceTradersAPIRequest[AgentShape]()
             .builder()
             .endpoint(
                 SpaceTradersAPIEndpoint.GET_AGENT  # fmt: skip
@@ -78,7 +78,6 @@ class Agent:
             .path_params(symbol or '')
             .token()
             .build(),
-            AgentShape,
         ).unwrap()
 
     @staticmethod
@@ -94,10 +93,9 @@ class Agent:
             RegisterAgentReqData | SpaceTradersAPIError
         """
         return SpaceTradersAPIClient.call(
-            SpaceTradersAPIRequest()
+            SpaceTradersAPIRequest[AgentRegisterResData]()
             .builder()
             .endpoint(SpaceTradersAPIEndpoint.REGISTER_AGENT)
             .data(data)
             .build(),
-            AgentRegisterResData,
         ).unwrap()

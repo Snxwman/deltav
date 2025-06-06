@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from datetime import datetime
 
+from pydantic import Field
+
 from deltav.spacetraders.enums.faction import FactionSymbol
 from deltav.spacetraders.enums.ship import ShipType
 from deltav.spacetraders.enums.system import SystemType
@@ -43,6 +45,7 @@ class ShipyardTransactionShape(SpaceTradersAPIResShape):
     agent_symbol: str
     timestamp: datetime
     """
+
     waypoint_symbol: str
     ship_type: ShipType
     price: int
@@ -86,6 +89,15 @@ class SystemShape(SpaceTradersAPIResShape):
     name: str
 
 
+class SystemsShape(SpaceTradersAPIResShape):
+    """
+
+    systems: list[SystemShape] = Field(alias='data')
+    """
+
+    systems: list[SystemShape] = Field(alias='data')
+
+
 class SystemSymbolShape(SpaceTradersAPIResShape):
     """
 
@@ -124,3 +136,12 @@ class SystemWaypointShape(SpaceTradersAPIResShape):
     modifiers: list[WaypointModifierShape]
     chart: ChartShape
     is_under_construction: bool
+
+
+class SystemWaypointsShape(SpaceTradersAPIResShape):
+    """
+
+    waypoints: list[SystemWaypointShape] = Field(alias='data')
+    """
+
+    waypoints: list[SystemWaypointShape] = Field(alias='data')

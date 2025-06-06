@@ -1,12 +1,13 @@
 from datetime import datetime
 
 from deltav.spacetraders.agent import Agent
+from deltav.spacetraders.api import MAX_PAGE_LIMIT
 from deltav.spacetraders.api.client import SpaceTradersAPIClient
 from deltav.spacetraders.api.error import SpaceTradersAPIError
 from deltav.spacetraders.api.request import SpaceTradersAPIRequest
 from deltav.spacetraders.enums.endpoints import SpaceTradersAPIEndpoint
 from deltav.spacetraders.models import ServerStatusShape
-from deltav.spacetraders.models.agent import PublicAgentShape
+from deltav.spacetraders.models.agent import PublicAgentShape, PublicAgentsShape
 from deltav.spacetraders.ship import Ship
 from deltav.spacetraders.system import System
 from deltav.spacetraders.waypoint import Waypoint
@@ -23,7 +24,7 @@ class SpaceTradersGame:
     """
 
     def __init__(self) -> None:
-        self.agents: list[Agent]
+        self.agents: list[PublicAgentShape]
         self.ships: list[Ship]
         self.systems: list[System]
         self.waypoints: list[Waypoint]
@@ -42,26 +43,30 @@ class SpaceTradersGame:
             _status = SpaceTradersGame._fetch_server_status()
             print(_status)
 
-    def update_agents(self) -> None: ...
+    def update_agents(self) -> None:
+        match res := self._fetch_public_agents():
+            case PublicAgentsShape():
+                self.agents = res.agents
+            case SpaceTradersAPIError():
+                print(res)
 
     @staticmethod
-    def _fetch_public_agents() -> list[PublicAgentShape] | SpaceTradersAPIError:
+    def _fetch_public_agents() -> PublicAgentsShape | SpaceTradersAPIError:
         return SpaceTradersAPIClient.call(
-            SpaceTradersAPIRequest()
+            SpaceTradersAPIRequest[PublicAgentsShape]()
             .builder()
             .endpoint(SpaceTradersAPIEndpoint.GET_ALL_AGENTS)
             .token()
             .all_pages()
+            .page_limit(MAX_PAGE_LIMIT)
             .build(),
-            list[PublicAgentShape],
         ).unwrap()
 
     @staticmethod
     def _fetch_server_status() -> ServerStatusShape | SpaceTradersAPIError:
         return SpaceTradersAPIClient.call(
-            SpaceTradersAPIRequest()
+            SpaceTradersAPIRequest[ServerStatusShape]()
             .builder()
             .endpoint(SpaceTradersAPIEndpoint.GET_SERVER_STATUS)
             .build(),
-            ServerStatusShape
         ).unwrap()  # fmt: skip

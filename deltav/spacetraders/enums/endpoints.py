@@ -25,6 +25,7 @@ from deltav.spacetraders.models.agent import (
     AgentEventShape,
     AgentShape,
     PublicAgentShape,
+    PublicAgentsShape,
 )
 from deltav.spacetraders.models.construction import (
     ConstructionShape,
@@ -36,20 +37,21 @@ from deltav.spacetraders.models.contract import (
     ContractDeliverReqShape,
     ContractDeliverResShape,
     ContractShape,
+    ContractsShape,
 )
 from deltav.spacetraders.models.endpoint import (
     AgentRegisterReqData,
     AgentRegisterResData,
     ChartCreateShape,
 )
-from deltav.spacetraders.models.faction import FactionShape
+from deltav.spacetraders.models.faction import FactionShape, FactionsShape
 from deltav.spacetraders.models.market import MarketShape, TransactionShape
 from deltav.spacetraders.models.ship import (
     CargoItemReqShape,
     CargoItemResShape,
     ScanShipsShape,
     ScanSystemsShape,
-    ScanWaypointShape,
+    ScanWaypointsShape,
     ShipCargoShape,
     ShipCargoTransferReqShape,
     ShipCooldownShape,
@@ -74,6 +76,7 @@ from deltav.spacetraders.models.ship import (
     ShipScrapShape,
     ShipScrapTransactionShape,
     ShipShape,
+    ShipsShape,
     SiphonResShape,
     SurveyCreateShape,
     SurveyReqShape,
@@ -83,6 +86,8 @@ from deltav.spacetraders.models.systems import (
     ShipyardShape,
     SystemShape,
     SystemWaypointShape,
+    SystemWaypointsShape,
+    SystemsShape,
 )
 from deltav.spacetraders.models.waypoint import (
     WaypointSymbolReqShape,
@@ -194,9 +199,9 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     GET_ALL_AGENTS = (
         Template('/agents'),
         HTTPMethod.GET,
-        TokenType.NONE,
+        TokenType.AGENT,
         NoDataReqShape,
-        {HTTPStatus.OK: AgentShape},
+        {HTTPStatus.OK: PublicAgentsShape},
         False,
     )
     """List all public agent details.
@@ -206,14 +211,14 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     HTTPMethod.GET,
     TokenType.NONE,
     NoDataReqShape,
-    {HTTPStatus.OK: AgentShape},
+    {HTTPStatus.OK: list[PublicAgentShape]},
     False,
     ```
     """
     GET_PUBLIC_AGENT = (
         Template('/agents/$agent_symbol'),
         HTTPMethod.GET,
-        TokenType.NONE,
+        TokenType.AGENT,
         NoDataReqShape,
         {HTTPStatus.OK: PublicAgentShape},
         False,
@@ -272,7 +277,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
         HTTPMethod.GET,
         TokenType.AGENT,
         NoDataReqShape,
-        {HTTPStatus.OK: ContractShape},
+        {HTTPStatus.OK: ContractsShape},
         True,
     )
     """Return a paginated list of all your contracts.
@@ -282,7 +287,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     HTTPMethod.GET,
     TokenType.AGENT,
     NoDataReqShape,
-    {HTTPStatus.OK: ContractShape},
+    {HTTPStatus.OK: ContractsShape},
     True,
     ```
     """
@@ -386,7 +391,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
         HTTPMethod.GET,
         TokenType.NONE,
         NoDataReqShape,
-        {HTTPStatus.OK: FactionShape},
+        {HTTPStatus.OK: FactionsShape},
         True,
     )
     """Return a paginated list of all the factions in the game.
@@ -396,7 +401,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     HTTPMethod.GET,
     TokenType.NONE,
     NoDataReqShape,
-    {HTTPStatus.OK: FactionShape},
+    {HTTPStatus.OK: FactionsShape},
     True,
     ```
     """
@@ -443,7 +448,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
         HTTPMethod.GET,
         TokenType.AGENT,
         NoDataReqShape,
-        {HTTPStatus.OK: ShipShape},
+        {HTTPStatus.OK: ShipsShape},
         True,
     )
     """Return a paginated list of all of ships under your agent's ownership.
@@ -453,7 +458,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     HTTPMethod.GET,
     TokenType.AGENT,
     NoDataReqShape,
-    {HTTPStatus.OK: ShipShape},
+    {HTTPStatus.OK: ShipsShape},
     True,
     ```
     """
@@ -682,7 +687,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
         HTTPMethod.POST,
         TokenType.AGENT,
         NoDataReqShape,
-        {HTTPStatus.CREATED: ScanWaypointShape},
+        {HTTPStatus.CREATED: ScanWaypointsShape},
         False,
     )
     """Scan for nearby waypoints, retrieving detailed information on each
@@ -1159,7 +1164,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
         HTTPMethod.GET,
         TokenType.NONE,
         NoDataReqShape,
-        {HTTPStatus.OK: SystemShape},
+        {HTTPStatus.OK: SystemsShape},
         True,
     )
     """Return a paginated list of all systems.
@@ -1169,7 +1174,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     HTTPMethod.GET,
     TokenType.NONE,
     NoDataReqShape,
-    {HTTPStatus.OK: SystemShape},
+    {HTTPStatus.OK: SystemsShape},
     True,
     ```
     """
@@ -1198,7 +1203,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
         HTTPMethod.GET,
         TokenType.NONE,
         NoDataReqShape,
-        {HTTPStatus.OK: SystemWaypointShape},
+        {HTTPStatus.OK: SystemWaypointsShape},
         True,
     )
     """Return a paginated list of all of the waypoints for a given system.
@@ -1208,7 +1213,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     HTTPMethod.GET,
     TokenType.NONE,
     NoDataReqShape,
-    {HTTPStatus.OK: SystemWaypointShape},
+    {HTTPStatus.OK: SystemWaypointsShape},
     True,
     ```
     """
@@ -1407,14 +1412,11 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     ```
     """
 
-    def with_params(self, params: list[str]) -> str:
-        mapping = dict(zip(self.path.get_identifiers(), params))
-        return self.path.substitute(mapping)
-
     def with_paging(self, page: int, limit: int) -> str:
-        return self.path.substitute(page=page, limit=limit)
+        paging_query_fragment = f'?page={page}&limit={limit}'
+        return self.path.substitute()
 
     def with_query_params(self, **params: str) -> str: ...
 
-    def get_query_params(self) -> list[str]:
+    def get_path_params(self) -> list[str]:
         return self.path.get_identifiers()

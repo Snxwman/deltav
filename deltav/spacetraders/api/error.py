@@ -2,7 +2,7 @@ from http import HTTPStatus
 from typing import Any
 
 from pydantic import ValidationError
-from requests import Response
+from httpx import Response
 
 from deltav.spacetraders.enums.error import SpaceTradersAPIErrorCodes
 from deltav.spacetraders.models.error import HttpErrorShape, SpaceTradersAPIErrorShape

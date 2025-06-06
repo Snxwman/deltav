@@ -661,7 +661,7 @@ def ships(active_agent: AgentShape | None):
         functions_in_transit(chosen_ship['symbol'])
 
 
-def run(client: SpaceTradersAPIClient):
+def run():
     quit = False
     contract_id = 'cmb8cutehk6lxuo6x23gs1gu1'
     active_agent: AgentShape = {
@@ -672,6 +672,7 @@ def run(client: SpaceTradersAPIClient):
         'ship_count': 1,
         'account_id': None
     }
+    game = SpaceTradersGame()
     while not quit:
         args = list(filter(len, get_next_command()))
 
@@ -681,8 +682,12 @@ def run(client: SpaceTradersAPIClient):
             case 'h' | 'help':
                 usage()
             case 'game':
-                game = SpaceTradersGame()
                 print(game.server_status)
+            case 'agents':
+                game.update_agents()
+                for agent in game.agents:
+                    if agent.ship_count != 2:
+                        print(agent)
             # case 'new' | 'new-agent':
             #     make_new_agent(args)
             # case 'current' | 'agent' | 'me':
