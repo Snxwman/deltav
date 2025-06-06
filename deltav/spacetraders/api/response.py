@@ -32,7 +32,12 @@ class SpaceTradersAPIResponse(Generic[T]):
         else:
             self.__meta = None
 
-        self.data = cast(T, shape.model_validate(json_data, by_alias=True))
+        if isinstance(json_data['data'], dict):
+            model = shape.model_validate(json_data['data'], by_alias=True)
+        else:
+            model = shape.model_validate(json_data, by_alias=True)
+
+        self.data = cast(T, model)
 
     def unwrap(self) -> T:
         return self.data

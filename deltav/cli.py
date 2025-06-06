@@ -184,7 +184,7 @@ def transit_time(departure_time_str: datetime, arrival_time_str: datetime) -> li
     seconds = total_seconds % 60
     return [hours, minutes, seconds]
 
-def ships(active_agent: AgentShape | None):
+def cli_ships(active_agent: AgentShape | None):
     if active_agent is None:
         print('No active agent set. Please set an active agent first.')
         return
@@ -662,7 +662,10 @@ def run():
         'ship_count': 1,
         'account_id': None
     })
+
     game = SpaceTradersGame()
+    my_agent = Agent(CONFIG.agent_token)
+
     while not quit:
         args = list(filter(len, get_next_command()))
 
@@ -684,11 +687,13 @@ def run():
             #     get_current_agent()
             # TODO: negotate contract
             case 'contract' | 'contract' | 'c':
-                get_contract(contract_id)
+                pass
             case 'contracts':
-                get_contracts()
+                contracts = my_agent.past_contracts
+                print(contracts)
             case 'accept' | 'a' | 'accept-contract':
                 accept_contract()
             case 'ships' | 'ship' | 'my-ships' | 's':
-                ships(active_agent)
-
+                my_ships = my_agent.ships
+                for ship in my_ships:
+                    print(ship)

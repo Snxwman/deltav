@@ -1,3 +1,4 @@
+from datetime import datetime
 from deltav.spacetraders.account import Account
 from deltav.spacetraders.api.client import SpaceTradersAPIClient
 from deltav.spacetraders.api.error import SpaceTradersAPIError
@@ -6,32 +7,62 @@ from deltav.spacetraders.contract import Contract
 from deltav.spacetraders.enums.endpoints import SpaceTradersAPIEndpoint
 from deltav.spacetraders.faction import Faction
 from deltav.spacetraders.models.agent import AgentShape, PublicAgentShape
+from deltav.spacetraders.models.contract import ContractShape, ContractsShape
 from deltav.spacetraders.models.endpoint import AgentRegisterReqData, AgentRegisterResData
+from deltav.spacetraders.models.ship import ShipsShape
 from deltav.spacetraders.ship import Ship
 
 
 # TODO: Convert token to an actual JWT type
 class Agent:
-    def __init__(self, token: str, data: AgentShape | PublicAgentShape) -> None:
-        self._token: str
+    def __init__(self, token: str, data: AgentShape | PublicAgentShape | None = None) -> None:
+        self._token: str = ''
+        self._account_id: str = ''
         # TODO: Track sold and scrapped ships
-        self._ships: list[Ship]
-        self._ship_count: int
+        self._ships: list[Ship] = []
+        self._ship_count: int = 0
         self._active_contract: Contract
-        self._past_contracts: list[Contract]
+        self._past_contracts: list[Contract] = []
+        self.symbol: str = ''
+        self.credits: int = 0
+        # self.faction: Faction
+        self.headquarters: str = ''
 
-        self.account: Account | None
-        if isinstance(data, AgentShape):
-            self.account = Account(data.account_id)
-        else:
-            self.account = None
+        if data is None:
+            res = self._fetch_agent()
+            if isinstance(res, AgentShape):
+                data = res
+            else:
+                raise TypeError('Agent() failed to get proper shape')
 
-        self.symbol: str = data.symbol
-        self.credits: int = data.credits
-        self.faction: Faction = Faction.get_by_symbol(data.starting_faction)
-        self.headquarters: str = data.headquarters
+        self.symbol = data.symbol
+        self.credits = data.credits
+        # self.faction = Faction(data.starting_faction)
+        self.headquarters = data.headquarters
 
-        self.token = token
+        match data:
+            case AgentShape():
+                self._token = token
+                self._account_id = data.account_id
+                
+                res = Ship.fetch_ships()  # FIX:
+                if isinstance(res, ShipsShape):
+                    self._ships = [Ship(ship) for ship in res.ships]
+
+                res = self._fetch_contracts()
+                if isinstance(res, ContractsShape):
+                    for contract in res.contracts:
+                        self._past_contracts.append(Contract(contract))
+            case PublicAgentShape():
+                pass
+
+    @property
+    def active_contract(self) -> Contract:
+        return self._active_contract
+
+    @property
+    def past_contracts(self) -> list[Contract]:
+        return self._past_contracts
 
     @property
     def ships(self) -> list[Ship]:
@@ -56,7 +87,7 @@ class Agent:
         # TODO: Verify token is valid
         self._token = token
 
-    def fetch_agent(self, symbol: str | None = None) -> AgentShape | SpaceTradersAPIError:
+    def _fetch_agent(self, symbol: str | None = None) -> AgentShape | PublicAgentShape | SpaceTradersAPIError:
         """Fetch the details for an agent from the SpaceTrader API.
 
         If callsign is None, fetch_agent will fetch the details for this Agent instance.
@@ -79,6 +110,16 @@ class Agent:
             .token()
             .build(),
         ).unwrap()
+
+    def _fetch_contracts(self) -> ContractsShape | SpaceTradersAPIError:
+        return SpaceTradersAPIClient.call(
+            SpaceTradersAPIRequest[ContractsShape]()
+            .builder()
+            .endpoint(SpaceTradersAPIEndpoint.MY_CONTRACTS)
+            .all_pages()
+            .token()
+            .build(),
+        ).unwrap()  # fmt: skip
 
     @staticmethod
     def register(

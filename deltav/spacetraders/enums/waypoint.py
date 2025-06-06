@@ -1,6 +1,9 @@
 from enum import Enum, auto
 
+from deltav.spacetraders.enums import serialize_by_name
 
+
+@serialize_by_name 
 class WaypointModifierSymbol(Enum):
     """
 
@@ -18,6 +21,7 @@ class WaypointModifierSymbol(Enum):
     UNSTABLE = auto()
 
 
+@serialize_by_name 
 class WaypointTraitSymbol(Enum):
     """
 
@@ -163,6 +167,7 @@ class WaypointTraitSymbol(Enum):
     WEAK_GRAVITY = auto()
 
 
+@serialize_by_name 
 class WaypointType(Enum):
     """
 

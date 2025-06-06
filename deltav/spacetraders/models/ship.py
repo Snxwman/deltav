@@ -85,8 +85,8 @@ class ShipShape(SpaceTradersAPIResShape):
     frame: ShipFrameShape
     reactor: ShipReactorShape
     engine: ShipEngineShape
-    modules: list[ShipModuleShape]
-    mounts: list[ShipMountShape]
+    modules: list[ShipModuleShape] = []
+    mounts: list[ShipMountShape] = []
     cargo: ShipCargoShape
     fuel: ShipFuelShape
     cooldown: ShipCooldownShape
@@ -176,9 +176,9 @@ class ShipCooldownShape(SpaceTradersAPIResShape):
     """
 
     ship_symbol: str
-    total_seconds: int
-    remaining_seconds: int
-    expiration: datetime
+    total_seconds: int = 0
+    remaining_seconds: int = 0
+    expiration: datetime = datetime.now()
 
 
 class ShipCrewShape(SpaceTradersAPIResShape):
@@ -392,8 +392,8 @@ class ShipModuleShape(SpaceTradersAPIResShape):
     symbol: ShipModules
     name: str
     description: str
-    capacity: int
-    range: int
+    capacity: int = 0
+    range: int = 0
     requirements: ShipRequirementsShape
 
 
@@ -429,8 +429,8 @@ class ShipMountShape(SpaceTradersAPIResShape):
     symbol: ShipMounts
     name: str
     description: str
-    strength: int
-    deposits: list[ShipMountDeposits]
+    strength: int = 0
+    deposits: list[ShipMountDeposits] = []
     requirements: ShipRequirementsShape
 
 
@@ -622,17 +622,17 @@ class ShipRefuelTransactionShape(SpaceTradersAPIResShape):
 
     waypoint_symbol: str
     ship_symbol: str
+    trade_symbol: TradeSymbol
+    type: TransactionType
     total_price: int
-    timestamp: datetime
     units: int
-    from_cargo: bool
+    timestamp: datetime
     """
 
     waypoint_symbol: str
     ship_symbol: str
     trade_symbol: TradeSymbol
     type: TransactionType
-    units: int
     total_price: int
     units: int
     timestamp: datetime
@@ -674,9 +674,9 @@ class ShipRequirementsShape(SpaceTradersAPIResShape):
     slots: int
     """
 
-    power: int
-    crew: int
-    slots: int
+    power: int = 0
+    crew: int = 0
+    slots: int = 0
 
 
 class ShipRepairShape(SpaceTradersAPIResShape):

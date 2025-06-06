@@ -8,7 +8,7 @@ from deltav.spacetraders.api.client import SpaceTradersAPIClient
 
 def signal_handler(sig: int, frame: FrameType | None) -> None:
     match sig:
-        case signal.CTRL_C_EVENT | signal.SIGINT:
+        case signal.SIGINT:
             SpaceTradersAPIClient.http_client.close()
             sys.exit(0)
         case _:

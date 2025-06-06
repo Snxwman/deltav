@@ -39,18 +39,18 @@ from deltav.spacetraders.models.waypoint import WaypointSymbolReqShape
 
 
 class Ship:
-    def __init__(self):
-        self.registration: ShipRegistrationShape
-        self.nav: ShipNavShape
-        self.crew: ShipCrewShape
-        self.frame: ShipFrameShape
-        self.reactor: ShipReactorShape
-        self.engine: ShipEngineShape
-        self.modules: ShipModuleShape
-        self.mounts: ShipMountShape
-        self.cargo: ShipCargoShape
-        self.fuel: ShipFuelShape
-        self.cooldown: ShipCooldownShape
+    def __init__(self, data: ShipShape):
+        self.cargo: ShipCargoShape = data.cargo
+        self.cooldown: ShipCooldownShape = data.cooldown
+        self.crew: ShipCrewShape = data.crew
+        self.engine: ShipEngineShape = data.engine
+        self.frame: ShipFrameShape = data.frame
+        self.fuel: ShipFuelShape = data.fuel
+        self.modules: list[ShipModuleShape] = data.modules
+        self.mounts: list[ShipMountShape] = data.mounts
+        self.nav: ShipNavShape = data.nav
+        self.reactor: ShipReactorShape = data.reactor
+        self.registration: ShipRegistrationShape = data.registration
 
     @staticmethod
     def fetch_ships() -> ShipsShape | SpaceTradersAPIError:
@@ -58,6 +58,7 @@ class Ship:
             SpaceTradersAPIRequest[ShipsShape]()
             .builder()
             .endpoint(SpaceTradersAPIEndpoint.MY_SHIPS)
+            .all_pages()
             .token()
             .build(),
         ).unwrap()

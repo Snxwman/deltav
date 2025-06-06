@@ -105,16 +105,6 @@ class Contract:
             .build(),
         ).unwrap()
 
-    # QUESTION: Should this be in Agent?
-    def fetch_contracts(self) -> ContractsShape | SpaceTradersAPIError:
-        return SpaceTradersAPIClient.call(
-            SpaceTradersAPIRequest[ContractsShape]()
-            .builder()
-            .endpoint(SpaceTradersAPIEndpoint.MY_CONTRACTS)
-            .token()
-            .build(),
-        ).unwrap()  # fmt: skip
-
     @staticmethod
     def fetch_contract(contract_id: str) -> ContractShape | SpaceTradersAPIError:
         return SpaceTradersAPIClient.call(

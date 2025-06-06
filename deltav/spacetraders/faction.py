@@ -3,7 +3,7 @@ from deltav.spacetraders.api.error import SpaceTradersAPIError
 from deltav.spacetraders.api.request import SpaceTradersAPIRequest
 from deltav.spacetraders.enums.endpoints import SpaceTradersAPIEndpoint
 from deltav.spacetraders.enums.faction import FactionSymbol
-from deltav.spacetraders.models.faction import FactionShape, FactionTraitShape
+from deltav.spacetraders.models.faction import FactionShape, FactionTraitShape, FactionsShape
 
 
 class Faction:
@@ -69,22 +69,20 @@ class Faction:
     @staticmethod
     def _fetch_faction(name: FactionSymbol) -> FactionShape | SpaceTradersAPIError:
         return SpaceTradersAPIClient.call(
-            SpaceTradersAPIRequest()
+            SpaceTradersAPIRequest[FactionShape]()
             .builder()
             .endpoint(SpaceTradersAPIEndpoint.GET_FACTION)
             .path_params(name.name)
-            .build(),
-            FactionShape,
+            .build()
         ).unwrap()
 
     @staticmethod
-    def _fetch_factions() -> list[FactionShape] | SpaceTradersAPIError:
+    def _fetch_factions() -> FactionsShape | SpaceTradersAPIError:
         return SpaceTradersAPIClient.call(
-            SpaceTradersAPIRequest()
+            SpaceTradersAPIRequest[FactionsShape]()
             .builder()
             .endpoint(SpaceTradersAPIEndpoint.GET_ALL_FACTIONS)
             .token()
             .all_pages()
-            .build(),
-            list[FactionShape],
+            .build()
         ).unwrap()
