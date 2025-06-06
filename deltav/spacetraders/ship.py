@@ -76,7 +76,7 @@ class Ship:
     @staticmethod
     def scan_systems(ship_symbol: str) -> ScanSystemsShape | SpaceTradersAPIError:
         return SpaceTradersAPIClient.call(
-            SpaceTradersAPIRequest[ScanWaypointShape]()
+            SpaceTradersAPIRequest[ScanSystemsShape]()
             .builder()
             .endpoint(SpaceTradersAPIEndpoint.SCAN_SYSTEMS)
             .path_params(ship_symbol)

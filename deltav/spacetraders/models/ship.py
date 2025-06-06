@@ -5,7 +5,7 @@ from datetime import datetime
 from pydantic import Field
 
 from deltav.spacetraders.enums.faction import FactionSymbol
-from deltav.spacetraders.enums.market import SurveySize, TradeSymbol
+from deltav.spacetraders.enums.market import SurveySize, TradeSymbol, TransactionType
 from deltav.spacetraders.enums.ship import (
     ShipComponent,
     ShipConditionEvent,
@@ -18,6 +18,7 @@ from deltav.spacetraders.enums.ship import (
     ShipNavFlightMode,
     ShipReactors,
     ShipRole,
+    ShipType,
 )
 from deltav.spacetraders.enums.system import SystemType
 from deltav.spacetraders.enums.waypoint import WaypointModifierSymbol, WaypointType
@@ -537,6 +538,14 @@ class ShipPurchaseReqShape(SpaceTradersAPIReqShape):
     waypoint_symbol: str
 
 
+class ShipPurchaseTransactionShape(SpaceTradersAPIReqShape):
+    waypoint_symbol: str
+    ship_type: ShipType
+    price: int
+    agent_symbol: str
+    timestamp: datetime
+
+
 class ShipPurchaseResShape(SpaceTradersAPIResShape):
     """
 
@@ -547,7 +556,7 @@ class ShipPurchaseResShape(SpaceTradersAPIResShape):
 
     ship: ShipShape
     agent: AgentShape
-    transaction: ShipShape
+    transaction: ShipPurchaseTransactionShape
 
 
 class ShipReactorShape(SpaceTradersAPIResShape):
@@ -608,6 +617,27 @@ class ShipRefuelReqShape(SpaceTradersAPIReqShape):
     from_cargo: bool
 
 
+class ShipRefuelTransactionShape(SpaceTradersAPIResShape):
+    """
+
+    waypoint_symbol: str
+    ship_symbol: str
+    total_price: int
+    timestamp: datetime
+    units: int
+    from_cargo: bool
+    """
+
+    waypoint_symbol: str
+    ship_symbol: str
+    trade_symbol: TradeSymbol
+    type: TransactionType
+    units: int
+    total_price: int
+    units: int
+    timestamp: datetime
+
+
 class ShipRefuelResShape(SpaceTradersAPIResShape):
     """
 
@@ -620,7 +650,7 @@ class ShipRefuelResShape(SpaceTradersAPIResShape):
     agent: AgentShape
     fuel: ShipFuelShape
     cargo: ShipCargoShape
-    transaction: ShipShape
+    transaction: ShipRefuelTransactionShape
 
 
 class ShipRegistrationShape(SpaceTradersAPIResShape):

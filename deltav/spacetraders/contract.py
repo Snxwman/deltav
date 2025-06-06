@@ -13,6 +13,7 @@ from deltav.spacetraders.models.contract import (
     ContractDeliverResShape,
     ContractShape,
     ContractTermsShape,
+    ContractsShape,
 )
 
 
@@ -65,13 +66,12 @@ class Contract:
 
     def accept(self) -> ContractAcceptShape | SpaceTradersAPIError:
         return SpaceTradersAPIClient.call(
-            SpaceTradersAPIRequest()
+            SpaceTradersAPIRequest[ContractAcceptShape]()
             .builder()
             .endpoint(SpaceTradersAPIEndpoint.ACCEPT_CONTRACT)
             .path_params(self.id)
             .token()
             .build(),
-            ContractAcceptShape,
         ).unwrap()
 
     def deliver(
@@ -86,46 +86,42 @@ class Contract:
         )
 
         return SpaceTradersAPIClient.call(
-            SpaceTradersAPIRequest()
+            SpaceTradersAPIRequest[ContractDeliverResShape]()
             .builder()
             .endpoint(SpaceTradersAPIEndpoint.DELIVER_CONTRACT)
             .path_params(self.id)
             .token()
             .data(deliverable)
             .build(),
-            ContractDeliverResShape,
         ).unwrap()
 
     def fulfill(self) -> ContractShape | SpaceTradersAPIError:
         return SpaceTradersAPIClient.call(
-            SpaceTradersAPIRequest()
+            SpaceTradersAPIRequest[ContractShape]()
             .builder()
             .endpoint(SpaceTradersAPIEndpoint.FULFILL_CONTRACT)
             .path_params(self.id)
             .token()
             .build(),
-            ContractShape,
         ).unwrap()
 
     # QUESTION: Should this be in Agent?
-    def fetch_contracts(self) -> list[ContractShape] | SpaceTradersAPIError:
+    def fetch_contracts(self) -> ContractsShape | SpaceTradersAPIError:
         return SpaceTradersAPIClient.call(
-            SpaceTradersAPIRequest()
+            SpaceTradersAPIRequest[ContractsShape]()
             .builder()
             .endpoint(SpaceTradersAPIEndpoint.MY_CONTRACTS)
             .token()
             .build(),
-            list[ContractShape],
         ).unwrap()  # fmt: skip
 
     @staticmethod
     def fetch_contract(contract_id: str) -> ContractShape | SpaceTradersAPIError:
         return SpaceTradersAPIClient.call(
-            SpaceTradersAPIRequest()
+            SpaceTradersAPIRequest[ContractShape]()
             .builder()
             .endpoint(SpaceTradersAPIEndpoint.GET_CONTRACT)
             .path_params(contract_id)
             .token()
             .build(),
-            ContractShape,
         ).unwrap()

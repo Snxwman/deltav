@@ -1,6 +1,8 @@
 from deltav.spacetraders.api.request import SpaceTradersAPIRequest
 from deltav.spacetraders.enums.endpoints import SpaceTradersAPIEndpoint
 from deltav.spacetraders.models.construction import ConstructionSupplyReqShape
+from deltav.spacetraders.models.market import MarketShape
+from deltav.spacetraders.models.systems import JumpgateShape, ShipyardShape
 
 
 # TODO: Convert methods to right types
@@ -16,7 +18,7 @@ class System:
     def get_shipyard(waypoint_symbol: str) -> SpaceTradersAPIRequest:
         system_symbol: str = System.extract_system_symbol(waypoint_symbol)
         return (
-            SpaceTradersAPIRequest()
+            SpaceTradersAPIRequest[ShipyardShape]()
             .builder()
             .endpoint(SpaceTradersAPIEndpoint.GET_SHIPYARD)
             .path_params(system_symbol, waypoint_symbol)
@@ -28,7 +30,7 @@ class System:
     def get_market(waypoint_symbol: str) -> SpaceTradersAPIRequest:
         system_symbol: str = System.extract_system_symbol(waypoint_symbol)
         return (
-            SpaceTradersAPIRequest()
+            SpaceTradersAPIRequest[MarketShape]()
             .builder()
             .endpoint(SpaceTradersAPIEndpoint.GET_MARKET)
             .path_params(system_symbol, waypoint_symbol)
@@ -40,7 +42,7 @@ class System:
     def get_jumpgate(waypoint_symbol: str) -> SpaceTradersAPIRequest:
         system_symbol: str = System.extract_system_symbol(waypoint_symbol)
         return (
-            SpaceTradersAPIRequest()
+            SpaceTradersAPIRequest[JumpgateShape]()
             .builder()
             .endpoint(SpaceTradersAPIEndpoint.GET_JUMPGATE)
             .path_params(system_symbol, waypoint_symbol)
