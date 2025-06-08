@@ -32,7 +32,7 @@ class SpaceTradersAPIResponse(Generic[T]):
         else:
             self.__meta = None
 
-        if isinstance(json_data['data'], dict):
+        if 'data' in json_data and isinstance(json_data['data'], dict):
             model = shape.model_validate(json_data['data'], by_alias=True)
         else:
             model = shape.model_validate(json_data, by_alias=True)

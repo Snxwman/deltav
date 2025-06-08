@@ -1,5 +1,7 @@
 from datetime import datetime
 
+from loguru import logger
+
 from deltav.spacetraders.agent import Agent
 from deltav.spacetraders.api import MAX_PAGE_LIMIT
 from deltav.spacetraders.api.client import SpaceTradersAPIClient
@@ -70,3 +72,7 @@ class SpaceTradersGame:
             .endpoint(SpaceTradersAPIEndpoint.GET_SERVER_STATUS)
             .build(),
         ).unwrap()  # fmt: skip
+
+
+GAME = SpaceTradersGame()
+logger.info(f'SpaceTraders server status: {GAME.server_status}')

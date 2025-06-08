@@ -1,23 +1,68 @@
-# Accounts
+# deltav
 # ---
-# Table is in the format ["account".nickname]
+# Subtables: log, db, vantage
+[deltav]
+
+# deltav.Log
+# ---
+# Keys:
+#   - level (str): What level of logs will be emitted.
+#         Options: none, warn, info, debug, trace.
+#   - directory (str): Path to the directory where logs will be stored.
+[deltav.log]
+level = "trace"
+directory = "~/.local/share/deltav/log/"
+
+# deltav.db
+# ---
+# Keys:
+#   - directory (str): Path to the directory where databases will be stored.
+[deltav.db]
+directory = "~/.local/state/deltav/db/"
+
+# vantage
+# ---
+# Keys:
+#   - theme (str): What theme to use for the user interface
+[vantage]
+theme = "dark"
+
+# spacetraders.defaults
+# ---
+# Specify default values for keys in [[spacetraders.accounts]] and [[spacetraders.agents]]
+# Subtables: accounts, agents
+# Keys:
+#     - email (str)
+#     - autocreate (boolean)
+[spacetraders.defaults]
+email = "email@example.com"
+autocreate.accounts = false
+autocreate.agents = false
+
+# spacetraders.accounts (array of tables, double square brackets)
+# ---
 # The account nickname is not part of the SpaceTraders platform.
 # It is only used internally by the client to identify accounts 
 # when running agents on multiple accounts.
-[account.snxwman]
-email = ""
+# Keys:
+#     - nickname (string): The nickname to use for the account.
+#     - token (string): The spacetraders account token.
+#     - proxy (string): The proxy url to use for api requests.
+[[spacetraders.accounts]]
+nickname = "example"
 token = ""
-proxy = ""
 
-# Agents
+# spacetraders.agents (array of tables, double square brackets)
 # ---
-# Table name format: ["agent".account_nickname.agent_nickname]
 # The agent nickname is not the agent's callsign (in case it is not available).
 # It is only used internally by the client to identify agents consistently.
-[agent.snxwman.test1]
-callsign = "SNXW1"
+# Keys:
+#     - account (string): An account's nickname.
+#     - autocreate (boolean): If the agent should automatically be registred.
+#     - callsign (string): The callsign to use for the agent's symbol.
+#     - token (string): The agent's token, if already registered.
+[[spacetraders.agents]]
+account = "example"
+callsign = "5P4C3"
 token = ""
-
-[agent.snxwman.test1]
-callsign = "SNXW1"
-token = ""
+autocreate = true

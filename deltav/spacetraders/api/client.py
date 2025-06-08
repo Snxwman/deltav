@@ -3,6 +3,7 @@ from time import sleep
 from typing import TypeVar
 
 import httpx
+from loguru import logger
 
 from deltav.spacetraders.api.error import SpaceTradersAPIError
 from deltav.spacetraders.api.ratelimit import Ratelimit
@@ -30,14 +31,14 @@ class SpaceTradersAPIClient:
         # QUESTION: How to handle partial success for paged requests
         # TODO: Log the request and response properly
 
-        print(_req.url)
-        print(req)
+        logger.info(f'Requesting {_req.url}')
         res = cls.http_client.send(_req)
-        print(res)
 
         if res.status_code < 300:
+            logger.success(res.status_code)
             return SpaceTradersAPIResponse[T](req.endpoint, res)
         else:
+            logger.error(res.status_code)
             return SpaceTradersAPIError(res)
 
     # FIX: REALLY BAD, probably need to refactor SpaceTradersAPIResponse

@@ -1,6 +1,7 @@
 from http import HTTPStatus
 from typing import Any
 
+from loguru import logger
 from pydantic import ValidationError
 from httpx import Response
 
@@ -13,6 +14,7 @@ from deltav.spacetraders.models.error import HttpErrorShape, SpaceTradersAPIErro
 #  - Handle HTTP 502 errors (recommended to wait a few minutes for retry)
 class SpaceTradersAPIError:
     def __init__(self, res: Response):
+        logger.error(res.json())
         self.__res: Response = res
         self.__data: SpaceTradersAPIErrorShape | HttpErrorShape
         self.code: SpaceTradersAPIErrorCodes | HTTPStatus

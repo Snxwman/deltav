@@ -1,3 +1,4 @@
+from deltav.config.config import Config
 from deltav.spacetraders.api.client import SpaceTradersAPIClient
 from deltav.spacetraders.api.error import SpaceTradersAPIError
 from deltav.spacetraders.api.request import SpaceTradersAPIRequest
@@ -51,17 +52,6 @@ class Ship:
         self.nav: ShipNavShape = data.nav
         self.reactor: ShipReactorShape = data.reactor
         self.registration: ShipRegistrationShape = data.registration
-
-    @staticmethod
-    def fetch_ships() -> ShipsShape | SpaceTradersAPIError:
-        return SpaceTradersAPIClient.call(
-            SpaceTradersAPIRequest[ShipsShape]()
-            .builder()
-            .endpoint(SpaceTradersAPIEndpoint.MY_SHIPS)
-            .all_pages()
-            .token()
-            .build(),
-        ).unwrap()
 
     @staticmethod
     def fetch_ship(ship_symbol: str) -> ShipShape | SpaceTradersAPIError:

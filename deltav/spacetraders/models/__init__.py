@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from datetime import date, datetime
+from textwrap import wrap
 from deepmerge import always_merger
 from enum import Enum
 from typing import Any, TypeVar, override
@@ -10,6 +11,8 @@ from pydantic import AliasGenerator, BaseModel, ConfigDict
 from pydantic.alias_generators import to_camel
 
 from deltav.spacetraders.enums.market import TradeSymbol
+from deltav.util import generic__repr__
+from deltav.util.strings import indent
 
 # TODO: Look into the following model config fields for ConfigDict
 #   - str_to_upper
@@ -54,7 +57,7 @@ class SpaceTradersAPIReqShape(BaseModel):
         ),
         revalidate_instances='always',
     )
-
+    
     @override
     def __str__(self) -> str:
         return self._render(self, 0).expandtabs(4)
@@ -125,14 +128,17 @@ class SpaceTradersAPIResShape(BaseModel):
 
         match value:
             case BaseModel():
-                lines = [f'{pad}{value.__class__.__name__}']
-                for k, v in value.__dict__.items():  # pyright: ignore[reportAny]
-                    lines.append(f'{pad}\t{k}: {self._render(v, tabs + 1).lstrip()}')
-                return '\n'.join(lines)
+                if type(value).__str__ is not SpaceTradersAPIResShape.__str__:
+                    return str(value)
+                else:
+                    lines = [f'{pad}{value.__class__.__name__}']
+                    for k, v in value.__dict__.items():  # pyright: ignore[reportAny]
+                        lines.append(f'{pad}\t{k}: {self._render(v, tabs + 1).lstrip()}')
+                    return '\n'.join(lines)
             case list():
                 if not value:
                     return '[]'
-                inline = f'[{", ".join(self._short(v) for v in value)}]'
+                inline = f'[{", ".join(self._render(v, tabs) for v in value)}]'
 
                 if len(inline) <= MAX_WIDTH:
                     return inline
@@ -145,8 +151,9 @@ class SpaceTradersAPIResShape(BaseModel):
             case Enum():
                 return value.name
             case str():
-                if len(pad) + len(value) > MAX_WIDTH:
-                    ...
+                if len(value) > MAX_WIDTH:
+                    return '...' + ''.join(f'\n{pad}\t{line}' for line in wrap(value, width=MAX_WIDTH))
+
                 return value
 
         return repr(value)  # pyright: ignore[reportAny]
@@ -251,6 +258,10 @@ class CreditsLeaderboardAgentShape(SpaceTradersAPIResShape):
     agent_symbol: str
     credits: int
 
+    @override
+    def __str__(self) -> str:
+        return f'{self.agent_symbol.ljust(14)} ${self.credits:,}'
+
 
 class ChartsLeaderboardAgentShape(SpaceTradersAPIResShape):
     """
@@ -262,6 +273,10 @@ class ChartsLeaderboardAgentShape(SpaceTradersAPIResShape):
     agent_symbol: str
     chart_count: int
 
+    @override
+    def __str__(self) -> str:
+        return f'{self.agent_symbol.ljust(14)} {self.chart_count:,}'
+
 
 class LeaderboardsShape(SpaceTradersAPIResShape):
     """
@@ -272,6 +287,15 @@ class LeaderboardsShape(SpaceTradersAPIResShape):
 
     most_credits: list[CreditsLeaderboardAgentShape]
     most_submitted_charts: list[ChartsLeaderboardAgentShape]
+
+    @override
+    def __str__(self) -> str:
+        most_credits = ''.join(f'\n\t\t{agent}' for agent in self.most_credits)
+        most_charts = ''.join(f'\n\t\t{agent}' for agent in self.most_submitted_charts)
+        return ''.join([
+            f'\n\tMost credits: {most_credits}',
+            f'\n\tMost submitted charts: {most_charts}',
+        ])
 
 
 class ServerRestartsShape(SpaceTradersAPIResShape):
@@ -295,6 +319,11 @@ class AnnouncementShape(SpaceTradersAPIResShape):
     title: str
     body: str
 
+    @override
+    def __str__(self) -> str:
+        body = ''.join(f'\n\t{line}' for line in wrap(self.body, width=80))
+        return f'{self.title}{body}'
+
 
 class LinkShape(SpaceTradersAPIResShape):
     """
@@ -305,6 +334,10 @@ class LinkShape(SpaceTradersAPIResShape):
 
     name: str
     url: str
+
+    @override
+    def __str__(self) -> str:
+        return f'\t\t{self.name}: {self.url}'
 
 
 # NOTE: Top level return shape
@@ -333,6 +366,21 @@ class ServerStatusShape(SpaceTradersAPIResShape):
     server_resets: ServerRestartsShape
     announcements: list[AnnouncementShape]
     links: list[LinkShape]
+
+    @override
+    def __str__(self) -> str:
+        announcements = '\n'.join(str(ann) for ann in self.announcements)
+        next_reset = self.server_resets.next.strftime('%Y-%m-%d %H:%M:%S')
+        return '\n\t'.join([
+            f'\n\tStatus: {self.status}',
+            f'Reset: {self.reset_date} -> {next_reset} ({self.server_resets.frequency})',
+            'Stats:',
+            f'\t{self.stats.accounts} accounts, {self.stats.agents} agents, {self.stats.ships} ships',
+            f'\t{self.stats.systems} systems, {self.stats.waypoints} waypoints',
+            f'\tlast market update: {self.health.last_market_update}',
+            f'Announcements:\n{indent(announcements, 2)}',
+            f'Leaderboards: {indent(str(self.leaderboards), 1)}',
+        ]).expandtabs(4)
 
 
 class ErrorCodeShape(SpaceTradersAPIResShape):

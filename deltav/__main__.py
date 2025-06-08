@@ -2,6 +2,8 @@ import signal
 import sys
 from types import FrameType
 
+from loguru import logger
+
 from deltav import cli
 from deltav.spacetraders.api.client import SpaceTradersAPIClient
 
@@ -16,9 +18,13 @@ def signal_handler(sig: int, frame: FrameType | None) -> None:
 
 
 def main():
+    logger.trace('Registering signal handlers')
     _ = signal.signal(signal.SIGINT, signal_handler)
 
+    logger.trace('Initializing SpaceTradersAPIClient')
     _ = SpaceTradersAPIClient()
+
+    logger.trace('Running CLI')
     cli.run()
 
 

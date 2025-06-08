@@ -1,13 +1,12 @@
 from datetime import datetime, timedelta
 from typing import cast
 
-from deltav.config import CONFIG
+from deltav.config.config import Config
 from deltav.spacetraders.agent import Agent
 from deltav.spacetraders.api.error import SpaceTradersAPIError
 from deltav.spacetraders.contract import Contract
 from deltav.spacetraders.enums.error import SpaceTradersAPIErrorCodes
-from deltav.spacetraders.enums.faction import FactionSymbol
-from deltav.spacetraders.game import SpaceTradersGame
+from deltav.spacetraders.game import GAME
 from deltav.spacetraders.models import NoDataResShape
 from deltav.spacetraders.models.agent import AgentShape
 from deltav.spacetraders.models.contract import ContractDeliverReqShape
@@ -146,7 +145,7 @@ def accept_contract():
     print(f'Available contract ID: {temp_contract_id}')
     contract_id = input('Enter contract ID to accept: ')
 
-    contract = Contract.accept(contract_id)
+    contract = Contract._accept(contract_id)
 
     if isinstance(contract, SpaceTradersAPIError):
         print('You have already accepted the contract.')
@@ -334,7 +333,7 @@ def cli_ships(active_agent: AgentShape | None):
                 'trade_symbol': trade_symbol,
                 'units': units
             })
-            delivery = Contract.fulfill(contract_id, deliver)
+            delivery = Contract._fulfill(contract_id, deliver)
             print(f'Cargo delivered for ship {ship_symbol}:')
             print(delivery)
         except ValueError as e:
@@ -653,18 +652,19 @@ def cli_ships(active_agent: AgentShape | None):
 
 def run():
     quit = False
-    contract_id = 'cmb8cutehk6lxuo6x23gs1gu1'
-    active_agent = cast(AgentShape, {
-        'symbol': 'AGENT_MOJO',
-        'starting_faction': FactionSymbol.COSMIC,
-        'headquarters': 'HQ',
-        'credits': 1000,
-        'ship_count': 1,
-        'account_id': None
-    })
+    # contract_id = 'cmb8cutehk6lxuo6x23gs1gu1'
+    # active_agent = cast(AgentShape, {
+    #     'symbol': 'AGENT_MOJO',
+    #     'starting_faction': FactionSymbol.COSMIC,
+    #     'headquarters': 'HQ',
+    #     'credits': 1000,
+    #     'ship_count': 1,
+    #     'account_id': None
+    # })
 
-    game = SpaceTradersGame()
-    my_agent = Agent(CONFIG.agent_token)
+    config = Config()
+    agent_config = config.get_agent('snxwman', 'snxw')
+    my_agent = Agent(agent_config.token)
 
     while not quit:
         args = list(filter(len, get_next_command()))
@@ -675,10 +675,10 @@ def run():
             case 'h' | 'help':
                 usage()
             case 'game':
-                print(game.server_status)
+                print(GAME.server_status)
             case 'agents':
-                game.update_agents()
-                for agent in game.agents:
+                GAME.update_agents()
+                for agent in GAME.agents:
                     if agent.ship_count != 2:
                         print(agent)
             # case 'new' | 'new-agent':
@@ -697,3 +697,5 @@ def run():
                 my_ships = my_agent.ships
                 for ship in my_ships:
                     print(ship)
+            case 'config':
+                print(config)

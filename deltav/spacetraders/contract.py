@@ -57,14 +57,12 @@ class Contract:
     def deliverables(self) -> list[ContractDeliverResShape]:
         return [deliverable for deliverable in self.terms.deliver]
 
-    def get_deliverable_by_trade_symbol(
-        self, symbol: TradeSymbol
-    ) -> ContractDeliverResShape | None:
+    def get_deliverable_by_trade_symbol(self, symbol: TradeSymbol) -> ContractDeliverResShape | None:
         for deliverable in self.deliverables:
             if deliverable.trade_symbol == symbol:
                 return deliverable
 
-    def accept(self) -> ContractAcceptShape | SpaceTradersAPIError:
+    def _accept(self) -> ContractAcceptShape | SpaceTradersAPIError:
         return SpaceTradersAPIClient.call(
             SpaceTradersAPIRequest[ContractAcceptShape]()
             .builder()
@@ -74,9 +72,7 @@ class Contract:
             .build(),
         ).unwrap()
 
-    def deliver(
-        self, symbol: TradeSymbol, units: int = 0
-    ) -> ContractDeliverResShape | SpaceTradersAPIError:
+    def _deliver(self, symbol: TradeSymbol, units: int = 0) -> ContractDeliverResShape | SpaceTradersAPIError:
         # FIX: Move out of this method
         # FIX: Data should be acquired from ship instances
         deliverable = ContractDeliverReqShape(
@@ -95,7 +91,7 @@ class Contract:
             .build(),
         ).unwrap()
 
-    def fulfill(self) -> ContractShape | SpaceTradersAPIError:
+    def _fulfill(self) -> ContractShape | SpaceTradersAPIError:
         return SpaceTradersAPIClient.call(
             SpaceTradersAPIRequest[ContractShape]()
             .builder()

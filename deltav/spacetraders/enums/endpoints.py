@@ -9,7 +9,6 @@ from typing import override
 
 from pydantic import BaseModel
 
-from deltav.spacetraders.enums.token import TokenType
 from deltav.spacetraders.models import (
     ErrorCodesShape,
     EventSubscribeReqShape,
@@ -92,6 +91,7 @@ from deltav.spacetraders.models.systems import (
 from deltav.spacetraders.models.waypoint import (
     WaypointSymbolReqShape,
 )
+from deltav.spacetraders.token import AccountToken, AgentToken, Token
 from deltav.util import generic__repr__
 
 
@@ -99,7 +99,7 @@ from deltav.util import generic__repr__
 class EndpointDataMixin:
     path: Template
     method: HTTPMethod
-    token_type: TokenType
+    token_type: type[AccountToken] | type[AgentToken] | None
     request_shape: type[SpaceTradersAPIReqShape]
     response_shapes: Mapping[HTTPStatus, type[SpaceTradersAPIResShape]]
     paginated: bool
@@ -147,7 +147,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     ```
     path: Template
     method: HTTPMethod
-    token_type: TokenType
+    token_type: type[AccountToken] | type[AgentToken] | None
     request_shape: type[SpaceTradersAPIReqShape]
     response_shapes: Mapping[HTTPStatus, type[SpaceTradersAPIResShape]]
     paginated: bool
@@ -161,7 +161,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     MY_ACCOUNT = (
         Template('/my/account'),
         HTTPMethod.GET,
-        TokenType.ACCOUNT,
+        AccountToken,
         NoDataReqShape,
         {HTTPStatus.OK: AccountShape},
         False,
@@ -171,7 +171,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     ```
     Template('/my/account'),
     HTTPMethod.GET,
-    TokenType.ACCOUNT,
+    AccountToken,
     NoDataReqShape,
     {HTTPStatus.OK: AccountShape},
     False,
@@ -180,7 +180,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     REGISTER_AGENT = (
         Template('/register'),
         HTTPMethod.POST,
-        TokenType.ACCOUNT,
+        AccountToken,
         AgentRegisterReqData,
         {HTTPStatus.CREATED: AgentRegisterResData},
         False,
@@ -190,7 +190,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     ```
     Template('/register'),
     HTTPMethod.POST,
-    TokenType.ACCOUNT,
+    AccountToken,
     RegisterAgentReqData,
     {HTTPStatus.CREATED: RegisterAgentResData},
     False,
@@ -199,7 +199,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     GET_ALL_AGENTS = (
         Template('/agents'),
         HTTPMethod.GET,
-        TokenType.AGENT,
+        AgentToken,
         NoDataReqShape,
         {HTTPStatus.OK: PublicAgentsShape},
         False,
@@ -209,7 +209,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     ```
     Template('/agents'),
     HTTPMethod.GET,
-    TokenType.NONE,
+    None,
     NoDataReqShape,
     {HTTPStatus.OK: list[PublicAgentShape]},
     False,
@@ -218,7 +218,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     GET_PUBLIC_AGENT = (
         Template('/agents/$agent_symbol'),
         HTTPMethod.GET,
-        TokenType.AGENT,
+        AgentToken,
         NoDataReqShape,
         {HTTPStatus.OK: PublicAgentShape},
         False,
@@ -228,7 +228,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     ```
     Template('/agents/$agent_symbol'),
     HTTPMethod.GET,
-    TokenType.NONE,
+    None,
     NoDataReqShape,
     {HTTPStatus.OK: PublicAgentShape},
     False,
@@ -237,7 +237,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     GET_AGENT = (
         Template('/my/agent'),
         HTTPMethod.GET,
-        TokenType.AGENT,
+        AgentToken,
         NoDataReqShape,
         {HTTPStatus.OK: AgentShape},
         False,
@@ -247,7 +247,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     ```
     Template('/my/agent'),
     HTTPMethod.GET,
-    TokenType.AGENT,
+    AgentToken,
     NoDataReqShape,
     {HTTPStatus.OK: UnknownResShape},
     False,
@@ -256,7 +256,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     MY_AGENT_EVENTS = (
         Template('/my/agent/events'),
         HTTPMethod.GET,
-        TokenType.AGENT,
+        AgentToken,
         NoDataReqShape,
         {HTTPStatus.OK: AgentEventShape},
         False,
@@ -266,7 +266,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     ```
     Template('/my/agent/events'),
     HTTPMethod.GET,
-    TokenType.AGENT,
+    AgentToken,
     NoDataReqShape,
     {HTTPStatus.OK: AgentEventShape},
     False,
@@ -275,7 +275,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     MY_CONTRACTS = (
         Template('/my/contracts'),
         HTTPMethod.GET,
-        TokenType.AGENT,
+        AgentToken,
         NoDataReqShape,
         {HTTPStatus.OK: ContractsShape},
         True,
@@ -285,7 +285,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     ```
     Template('/my/contracts'),
     HTTPMethod.GET,
-    TokenType.AGENT,
+    AgentToken,
     NoDataReqShape,
     {HTTPStatus.OK: ContractsShape},
     True,
@@ -294,7 +294,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     GET_CONTRACT = (
         Template('/my/contracts/$contract_id'),
         HTTPMethod.GET,
-        TokenType.AGENT,
+        AgentToken,
         NoDataReqShape,
         {HTTPStatus.OK: ContractShape},
         False,
@@ -304,7 +304,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     ```
     Template('/my/contracts/$contract_id'),
     HTTPMethod.GET,
-    TokenType.AGENT,
+    AgentToken,
     NoDataReqShape,
     {HTTPStatus.OK: ContractShape},
     False,
@@ -313,7 +313,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     ACCEPT_CONTRACT = (
         Template('/my/contracts/$contract_id/accept'),
         HTTPMethod.POST,
-        TokenType.AGENT,
+        AgentToken,
         NoDataReqShape,
         {HTTPStatus.OK: ContractAcceptShape},
         False,
@@ -323,7 +323,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     ```
     Template('/my/contracts/$contract_id/accept'),
     HTTPMethod.POST,
-    TokenType.AGENT,
+    AgentToken,
     NoDataReqShape,
     {HTTPStatus.OK: AcceptContractShape},
     False,
@@ -332,7 +332,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     FULFILL_CONTRACT = (
         Template('/my/contracts/$contract_id/fulfill'),
         HTTPMethod.POST,
-        TokenType.AGENT,
+        AgentToken,
         NoDataReqShape,
         {HTTPStatus.OK: ContractShape},  # FIX: shape
         False,
@@ -342,7 +342,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     ```
     Template('/my/contracts/$contract_id/fulfill'),
     HTTPMethod.POST,
-    TokenType.AGENT,
+    AgentToken,
     NoDataReqShape,
     {HTTPStatus.OK: UnknownResShape},  # FIX: shape
     False,
@@ -351,7 +351,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     DELIVER_CONTRACT = (
         Template('/my/contracts/$contract_id/deliver'),
         HTTPMethod.POST,
-        TokenType.AGENT,
+        AgentToken,
         ContractDeliverReqShape,
         {HTTPStatus.OK: ContractDeliverResShape},
         False,
@@ -361,7 +361,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     ```
     Template('/my/contracts/$contract_id/deliver'),
     HTTPMethod.POST,
-    TokenType.AGENT,
+    AgentToken,
     ContractDeliverReqShape,
     {HTTPStatus.OK: ContractDeliverResShape},
     False,
@@ -370,7 +370,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     NEGOTIATE_CONTRACT = (
         Template('/my/ships/$ship_symbol/negotiate/contract'),
         HTTPMethod.POST,
-        TokenType.AGENT,
+        AgentToken,
         NoDataReqShape,
         {HTTPStatus.CREATED: ContractShape},
         False,
@@ -380,7 +380,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     ```
     Template('/my/ships/$ship_symbol/negotiate/contract'),
     HTTPMethod.POST,
-    TokenType.AGENT,
+    AgentToken,
     NoDataReqShape,
     {HTTPStatus.CREATED: ContractShape},
     False,
@@ -389,7 +389,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     GET_ALL_FACTIONS = (
         Template('/factions'),
         HTTPMethod.GET,
-        TokenType.NONE,
+        None,
         NoDataReqShape,
         {HTTPStatus.OK: FactionsShape},
         True,
@@ -399,7 +399,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     ```
     Template('/factions'),
     HTTPMethod.GET,
-    TokenType.NONE,
+    None,
     NoDataReqShape,
     {HTTPStatus.OK: FactionsShape},
     True,
@@ -408,7 +408,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     GET_FACTION = (
         Template('/factions/$faction_symbol'),
         HTTPMethod.GET,
-        TokenType.NONE,
+        None,
         NoDataReqShape,
         {HTTPStatus.OK: FactionShape},
         False,
@@ -418,7 +418,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     ```
     Template('/factions/$faction_symbol'),
     HTTPMethod.GET,
-    TokenType.NONE,
+    None,
     NoDataReqShape,
     {HTTPStatus.OK: FactionShape},
     False,
@@ -427,7 +427,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     MY_FACTION = (
         Template('/my/faction'),
         HTTPMethod.GET,
-        TokenType.AGENT,
+        AgentToken,
         NoDataReqShape,
         {HTTPStatus.OK: FactionShape},
         False,
@@ -437,7 +437,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     ```
     Template('/my/faction'),
     HTTPMethod.GET,
-    TokenType.AGENT,
+    AgentToken,
     NoDataReqShape,
     {HTTPStatus.OK: FactionShape},
     False,
@@ -446,7 +446,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     MY_SHIPS = (
         Template('/my/ships'),
         HTTPMethod.GET,
-        TokenType.AGENT,
+        AgentToken,
         NoDataReqShape,
         {HTTPStatus.OK: ShipsShape},
         True,
@@ -456,7 +456,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     ```
     Template('/my/ships'),
     HTTPMethod.GET,
-    TokenType.AGENT,
+    AgentToken,
     NoDataReqShape,
     {HTTPStatus.OK: ShipsShape},
     True,
@@ -465,7 +465,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     PURCHASE_SHIP = (
         Template('/my/ships'),
         HTTPMethod.POST,
-        TokenType.AGENT,
+        AgentToken,
         ShipPurchaseReqShape,
         {HTTPStatus.CREATED: ShipPurchaseResShape},
         False,
@@ -475,7 +475,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     ```
     Template('/my/ships'),
     HTTPMethod.POST,
-    TokenType.AGENT,
+    AgentToken,
     ShipPurchaseReqShape,
     {HTTPStatus.CREATED: ShipPurchaseResShape},
     False,
@@ -484,7 +484,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     MY_SHIP = (
         Template('/my/ships/$ship_symbol'),
         HTTPMethod.GET,
-        TokenType.AGENT,
+        AgentToken,
         NoDataReqShape,
         {HTTPStatus.OK: ShipShape},
         False,
@@ -494,7 +494,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     ```
     Template('/my/ships/$ship_symbol'),
     HTTPMethod.GET,
-    TokenType.AGENT,
+    AgentToken,
     NoDataReqShape,
     {HTTPStatus.OK: ShipShape},
     False,
@@ -503,7 +503,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     CREATE_CHART = (
         Template('/my/ships/$ship_symbol/chart'),
         HTTPMethod.POST,
-        TokenType.AGENT,
+        AgentToken,
         NoDataReqShape,
         {HTTPStatus.CREATED: ChartCreateShape},
         False,
@@ -513,7 +513,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     ```
     Template('/my/ships/$ship_symbol/chart'),
     HTTPMethod.POST,
-    TokenType.AGENT,
+    AgentToken,
     NoDataReqShape,
     {HTTPStatus.CREATED: ShipCreateChartShape},
     False,
@@ -523,7 +523,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     #
     # NEGOTIATE_CONTRACT = (
     #     Template('/my/ships/$ship_symbol/negotiate/contract'),
-    #     TokenType.AGENT,
+    #     AgentToken,
     #     {HTTPMethod.POST: NoDataReqShape},
     #     {HTTPStatus.CREATED: ContractShape},
     #     False,
@@ -532,7 +532,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     #
     # ```
     # Template('/my/ships/$ship_symbol/negotiate/contract'),
-    # TokenType.AGENT,
+    # AgentToken,
     # {HTTPMethod.POST: NoDataReqShape},
     # {HTTPStatus.CREATED: ContractShape},
     # False,
@@ -541,7 +541,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     GET_SHIP_COOLDOWN = (
         Template('/my/ships/$ship_symbol/cooldown'),
         HTTPMethod.GET,
-        TokenType.AGENT,
+        AgentToken,
         NoDataReqShape,
         {
             HTTPStatus.OK: ShipCooldownShape,
@@ -557,7 +557,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     ```
     Template('/my/ships/$ship_symbol/cooldown'),
     HTTPMethod.GET,
-    TokenType.AGENT,
+    AgentToken,
     NoDataReqShape,
     {
         HTTPStatus.OK: ShipCooldownShape,
@@ -569,7 +569,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     DOCK_SHIP = (
         Template('/my/ships/$ship_symbol/dock'),
         HTTPMethod.POST,
-        TokenType.AGENT,
+        AgentToken,
         NoDataReqShape,
         {HTTPStatus.OK: ShipNavShape},
         False,
@@ -579,7 +579,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     ```
     Template('/my/ships/$ship_symbol/dock'),
     HTTPMethod.POST,
-    TokenType.AGENT,
+    AgentToken,
     NoDataReqShape,
     {HTTPStatus.OK: ShipNavShape},
     False,
@@ -588,7 +588,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     EXTRACT_RESOURCES = (
         Template('/my/ships/$ship_symbol/extract'),
         HTTPMethod.POST,
-        TokenType.AGENT,
+        AgentToken,
         NoDataReqShape,
         {HTTPStatus.CREATED: ShipExtractionShape},
         False,
@@ -599,7 +599,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     ```
     Template('/my/ships/$ship_symbol/extract'),
     HTTPMethod.POST,
-    TokenType.AGENT,
+    AgentToken,
     NoDataReqShape,
     {HTTPStatus.CREATED: ShipExtractionShape},
     False,
@@ -608,7 +608,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     EXTRACT_RESOURCES_WITH_SURVEY = (
         Template('/my/ships/$ship_symbol/extract/survey'),
         HTTPMethod.POST,
-        TokenType.AGENT,
+        AgentToken,
         SurveyReqShape,
         {HTTPStatus.CREATED: ShipExtractionShape},
         False,
@@ -618,7 +618,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     ```
     Template('/my/ships/$ship_symbol/extract/survey'),
     HTTPMethod.POST,
-    TokenType.AGENT,
+    AgentToken,
     SurveyReqShape,
     {HTTPStatus.CREATED: ExtractionShape},
     False,
@@ -627,7 +627,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     JETTISON_CARGO = (
         Template('/my/ships/$ship_symbol/jettison'),
         HTTPMethod.POST,
-        TokenType.AGENT,
+        AgentToken,
         CargoItemReqShape,
         {HTTPStatus.OK: ShipCargoShape},
         False,
@@ -637,7 +637,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     ```
     Template('/my/ships/$ship_symbol/jettison'),
     HTTPMethod.POST,
-    TokenType.AGENT,
+    AgentToken,
     CargoItemReqShape,
     {HTTPStatus.OK: ShipCargoShape},
     False,
@@ -646,7 +646,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     JUMP_SHIP = (
         Template('/my/ships/$ship_symbol/jump'),
         HTTPMethod.POST,
-        TokenType.AGENT,
+        AgentToken,
         WaypointSymbolReqShape,
         {HTTPStatus.OK: TransactionShape},
         False,
@@ -656,7 +656,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     ```
     Template('/my/ships/$ship_symbol/jump'),
     HTTPMethod.POST,
-    TokenType.AGENT,
+    AgentToken,
     WaypointNavigateReqShape,
     {HTTPStatus.OK: TransactionShape},
     False,
@@ -665,7 +665,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     SCAN_SYSTEMS = (
         Template('/my/ships/$ship_symbol/scan/systems'),
         HTTPMethod.POST,
-        TokenType.AGENT,
+        AgentToken,
         NoDataReqShape,
         {HTTPStatus.CREATED: ScanSystemsShape},
         False,
@@ -676,7 +676,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     ```
     Template('/my/ships/$ship_symbol/scan/systems'),
     HTTPMethod.POST,
-    TokenType.AGENT,
+    AgentToken,
     NoDataReqShape,
     {HTTPStatus.CREATED: ScanSystemsShape},
     False,
@@ -685,7 +685,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     SCAN_WAYPOINTS = (
         Template('/my/ships/$ship_symbol/scan/waypoints'),
         HTTPMethod.POST,
-        TokenType.AGENT,
+        AgentToken,
         NoDataReqShape,
         {HTTPStatus.CREATED: ScanWaypointsShape},
         False,
@@ -696,7 +696,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     ```
     Template('/my/ships/$ship_symbol/scan/waypoints'),
     HTTPMethod.POST,
-    TokenType.AGENT,
+    AgentToken,
     NoDataReqShape,
     {HTTPStatus.CREATED: WaypointScanShape},
     False,
@@ -705,7 +705,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     SCAN_SHIPS = (
         Template('/my/ships/$ship_symbol/scan/ships'),
         HTTPMethod.POST,
-        TokenType.AGENT,
+        AgentToken,
         NoDataReqShape,
         {HTTPStatus.CREATED: ScanShipsShape},
         False,
@@ -715,7 +715,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     ```
     Template('/my/ships/$ship_symbol/scan/ships'),
     HTTPMethod.POST,
-    TokenType.AGENT,
+    AgentToken,
     NoDataReqShape,
     {HTTPStatus.CREATED: ScanShipsShape},
     False,
@@ -724,7 +724,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     SCRAP_SHIP = (
         Template('/my/ships/$ship_symbol/scrap'),
         HTTPMethod.POST,
-        TokenType.AGENT,
+        AgentToken,
         NoDataReqShape,
         {HTTPStatus.OK: ShipScrapShape},
         False,
@@ -735,7 +735,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     ```
     Template('/my/ships/$ship_symbol/scrap'),
     HTTPMethod.POST,
-    TokenType.AGENT,
+    AgentToken,
     NoDataReqShape,
     {HTTPStatus.OK: ShipScrapedShape},
     False,
@@ -744,7 +744,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     GET_SHIP_SCRAP_VALUE = (
         Template('/my/ships/$ship_symbol/scrap'),
         HTTPMethod.GET,
-        TokenType.AGENT,
+        AgentToken,
         NoDataReqShape,
         {HTTPStatus.OK: ShipScrapTransactionShape},
         False,
@@ -754,7 +754,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     ```
     Template('/my/ships/$ship_symbol/scrap'),
     HTTPMethod.GET,
-    TokenType.AGENT,
+    AgentToken,
     NoDataReqShape,
     {HTTPStatus.OK: ShipTransactionShape},
     False,
@@ -763,7 +763,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     NAVIGATE_SHIP = (
         Template('/my/ships/$ship_symbol/navigate'),
         HTTPMethod.POST,
-        TokenType.AGENT,
+        AgentToken,
         WaypointSymbolReqShape,
         {HTTPStatus.OK: ShipNavigationShape},
         False,
@@ -773,7 +773,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     ```
     Template('/my/ships/$ship_symbol/navigate'),
     HTTPMethod.POST,
-    TokenType.AGENT,
+    AgentToken,
     WaypointSymbolReqShape,
     {HTTPStatus.OK: ShipNavigationShape},
     False,
@@ -782,7 +782,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     WARP_SHIP = (
         Template('/my/ships/$ship_symbol/warp'),
         HTTPMethod.POST,
-        TokenType.AGENT,
+        AgentToken,
         WaypointSymbolReqShape,
         {HTTPStatus.OK: ShipNavigationShape},
         False,
@@ -792,7 +792,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     ```
     Template('/my/ships/$ship_symbol/warp'),
     HTTPMethod.POST,
-    TokenType.AGENT,
+    AgentToken,
     WaypointSymbolReqShape,
     {HTTPStatus.OK: ShipNavigationShape},
     False,
@@ -801,7 +801,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     ORBIT_SHIP = (
         Template('/my/ships/$ship_symbol/orbit'),
         HTTPMethod.POST,
-        TokenType.AGENT,
+        AgentToken,
         NoDataReqShape,
         {HTTPStatus.OK: ShipNavShape},
         False,
@@ -811,7 +811,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     ```
     Template('/my/ships/$ship_symbol/orbit'),
     HTTPMethod.POST,
-    TokenType.AGENT,
+    AgentToken,
     NoDataReqShape,
     {HTTPStatus.OK: ShipNavShape},
     False,
@@ -820,7 +820,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     PURCHASE_CARGO = (
         Template('/my/ships/$ship_symbol/purchase'),
         HTTPMethod.POST,
-        TokenType.AGENT,
+        AgentToken,
         CargoItemReqShape,
         {HTTPStatus.CREATED: TransactionShape},
         False,
@@ -830,7 +830,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     ```
     Template('/my/ships/$ship_symbol/purchase'),
     HTTPMethod.POST,
-    TokenType.AGENT,
+    AgentToken,
     CargoItemReqShape,
     {HTTPStatus.CREATED: MarketTransactionShape},
     False,
@@ -839,7 +839,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     REFINE_MATERIALS = (
         Template('/my/ships/$ship_symbol/refine'),
         HTTPMethod.POST,
-        TokenType.AGENT,
+        AgentToken,
         ShipRefineReqShape,
         {HTTPStatus.CREATED: ShipRefineResShape},
         False,
@@ -849,7 +849,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     ```
     Template('/my/ships/$ship_symbol/refine'),
     HTTPMethod.POST,
-    TokenType.AGENT,
+    AgentToken,
     ShipRefineReqShape,
     {HTTPStatus.CREATED: ShipRefineResShape},
     False,
@@ -858,7 +858,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     REFUEL_SHIP = (
         Template('/my/ships/$ship_symbol/refuel'),
         HTTPMethod.POST,
-        TokenType.AGENT,
+        AgentToken,
         ShipRefuelReqShape,
         {HTTPStatus.OK: ShipRefuelResShape},
         False,
@@ -868,7 +868,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     ```
     Template('/my/ships/$ship_symbol/refuel'),
     HTTPMethod.POST,
-    TokenType.AGENT,
+    AgentToken,
     ShipRefuelReqShape,
     {HTTPStatus.OK: ShipRefuelResShape},
     False,
@@ -877,7 +877,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     REPAIR_SHIP = (
         Template('/my/ships/$ship_symbol/repair'),
         HTTPMethod.POST,
-        TokenType.AGENT,
+        AgentToken,
         NoDataReqShape,
         {HTTPStatus.OK: ShipRepairShape},
         False,
@@ -887,7 +887,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     ```
     Template('/my/ships/$ship_symbol/repair'),
     HTTPMethod.POST,
-    TokenType.AGENT,
+    AgentToken,
     NoDataReqShape,
     {HTTPStatus.OK: ShipRepairShape},
     False,
@@ -896,7 +896,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     GET_SHIP_REPAIR_COST = (
         Template('/my/ships/$ship_symbol/repair'),
         HTTPMethod.GET,
-        TokenType.AGENT,
+        AgentToken,
         NoDataReqShape,
         {HTTPStatus.OK: ShipScrapTransactionShape},
         False,
@@ -906,7 +906,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     ```
     Template('/my/ships/$ship_symbol/repair'),
     HTTPMethod.GET,
-    TokenType.AGENT,
+    AgentToken,
     NoDataReqShape,
     {HTTPStatus.OK: ShipTransactionShape},
     False,
@@ -915,7 +915,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     SELL_CARGO = (
         Template('/my/ships/$ship_symbol/sell'),
         HTTPMethod.POST,
-        TokenType.AGENT,
+        AgentToken,
         CargoItemReqShape,
         {HTTPStatus.CREATED: TransactionShape},
         False,
@@ -925,7 +925,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     ```
     Template('/my/ships/$ship_symbol/sell'),
     HTTPMethod.POST,
-    TokenType.AGENT,
+    AgentToken,
     CargoItemReqShape,
     {HTTPStatus.CREATED: MarketTransactionShape},
     False,
@@ -934,7 +934,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     SIPHON_RESOURCES = (
         Template('/my/ships/$ship_symbol/siphon'),
         HTTPMethod.POST,
-        TokenType.AGENT,
+        AgentToken,
         NoDataReqShape,
         {HTTPStatus.CREATED: SiphonResShape},
         False,
@@ -944,7 +944,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     ```
     Template('/my/ships/$ship_symbol/siphon'),
     HTTPMethod.POST,
-    TokenType.AGENT,
+    AgentToken,
     NoDataReqShape,
     {HTTPStatus.CREATED: SiphonResShape},
     False,
@@ -953,7 +953,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     CREATE_SURVEY = (
         Template('/my/ships/$ship_symbol/survey'),
         HTTPMethod.POST,
-        TokenType.AGENT,
+        AgentToken,
         NoDataReqShape,
         {HTTPStatus.CREATED: SurveyCreateShape},
         False,
@@ -964,7 +964,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     ```
     Template('/my/ships/$ship_symbol/survey'),
     HTTPMethod.POST,
-    TokenType.AGENT,
+    AgentToken,
     NoDataReqShape,
     {HTTPStatus.CREATED: CreateSurveyShape},
     False,
@@ -973,7 +973,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     TRANSFER_CARGO = (
         Template('/my/ships/$ship_symbol/transfer'),
         HTTPMethod.POST,
-        TokenType.AGENT,
+        AgentToken,
         ShipCargoTransferReqShape,
         {HTTPStatus.OK: CargoItemResShape},
         False,
@@ -983,7 +983,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     ```
     Template('/my/ships/$ship_symbol/transfer'),
     HTTPMethod.POST,
-    TokenType.AGENT,
+    AgentToken,
     CargoTransferReqShape,
     {HTTPStatus.OK: CargoItemResShape},
     False,
@@ -993,7 +993,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     GET_SHIP_CARGO = (
         Template('/my/ships/$ship_symbol/cargo'),
         HTTPMethod.GET,
-        TokenType.AGENT,
+        AgentToken,
         NoDataReqShape,
         {HTTPStatus.OK: ShipCargoShape},
         False,
@@ -1003,7 +1003,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     ```
     Template('/my/ships/$ship_symbol/cargo'),
     HTTPMethod.GET,
-    TokenType.AGENT,
+    AgentToken,
     NoDataReqShape,
     {HTTPStatus.OK: ShipCargoShape},
     False,
@@ -1012,7 +1012,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     GET_SHIP_MODULES = (
         Template('/my/ships/$ship_symbol/modules'),
         HTTPMethod.GET,
-        TokenType.AGENT,
+        AgentToken,
         NoDataReqShape,
         {HTTPStatus.OK: ShipModuleShape},
         False,
@@ -1021,7 +1021,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     ```
     Template('/my/ships/$ship_symbol/modules'),
     HTTPMethod.GET,
-    TokenType.AGENT,
+    AgentToken,
     NoDataReqShape,
     {HTTPStatus.OK: ShipModuleShape},
     False,
@@ -1029,7 +1029,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     INSTALL_MODULE = (
         Template('/my/ships/$ship_symbol/modules/install'),
         HTTPMethod.POST,
-        TokenType.AGENT,
+        AgentToken,
         ShipModuleSymbolShape,
         {HTTPStatus.CREATED: ShipModifyModuleShape},
         False,
@@ -1039,7 +1039,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     ```
     Template('/my/ships/$ship_symbol/modules/install'),
     HTTPMethod.POST,
-    TokenType.AGENT,
+    AgentToken,
     ModuleSymbolShape,
     {HTTPStatus.CREATED: ShipModifyModuleShape},
     False,
@@ -1048,7 +1048,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     REMOVE_MODULE = (
         Template('/my/ships/$ship_symbol/modules/remove'),
         HTTPMethod.POST,
-        TokenType.AGENT,
+        AgentToken,
         ShipModuleSymbolShape,
         {HTTPStatus.CREATED: ShipModifyModuleShape},
         False,
@@ -1058,7 +1058,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     ```
     Template('/my/ships/$ship_symbol/modules/remove'),
     HTTPMethod.POST,
-    TokenType.AGENT,
+    AgentToken,
     ModuleSymbolShape,
     {HTTPStatus.CREATED: ShipModifyModuleShape},
     False,
@@ -1067,7 +1067,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     GET_MOUNTS = (
         Template('/my/ships/$ship_symbol/mounts'),
         HTTPMethod.POST,
-        TokenType.AGENT,
+        AgentToken,
         NoDataReqShape,
         {HTTPStatus.OK: ShipMountShape},
         False,
@@ -1077,7 +1077,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     ```
     Template('/my/ships/$ship_symbol/mounts'),
     HTTPMethod.POST,
-    TokenType.AGENT,
+    AgentToken,
     NoDataReqShape,
     {HTTPStatus.OK: ShipMountsShape},
     False,
@@ -1086,7 +1086,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     INSTALL_MOUNT = (
         Template('/my/ships/$ship_symbol/mounts/install'),
         HTTPMethod.POST,
-        TokenType.AGENT,
+        AgentToken,
         ShipMountSymbolShape,
         {HTTPStatus.CREATED: ShipModifyMountShape},
         False,
@@ -1096,7 +1096,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     ```
     Template('/my/ships/$ship_symbol/mounts/install'),
     HTTPMethod.POST,
-    TokenType.AGENT,
+    AgentToken,
     ShipMountSymbolShape,
     {HTTPStatus.OK: ShipModifyMountShape},
     False,
@@ -1105,7 +1105,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     REMOVE_MOUNT = (
         Template('/my/ships/$ship_symbol/mounts/remove'),
         HTTPMethod.POST,
-        TokenType.AGENT,
+        AgentToken,
         ShipMountSymbolShape,
         {HTTPStatus.CREATED: ShipModifyMountShape},
         False,
@@ -1115,7 +1115,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     ```
     Template('/my/ships/$ship_symbol/mounts/install'),
     HTTPMethod.POST,
-    TokenType.AGENT,
+    AgentToken,
     ShipMountSymbolShape,
     {HTTPStatus.OK: ShipModifyMountShape},
     False,
@@ -1124,7 +1124,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     GET_NAV_STATUS = (
         Template('/my/ships/$ship_symbol/nav'),
         HTTPMethod.GET,
-        TokenType.AGENT,
+        AgentToken,
         NoDataReqShape,
         {HTTPStatus.OK: ShipNavShape},
         False,
@@ -1134,7 +1134,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     ```
     Template('/my/ships/$ship_symbol/nav'),
     HTTPMethod.GET,
-    TokenType.AGENT,
+    AgentToken,
     NoDataReqShape,
     {HTTPStatus.OK: ShipNavShape},
     False,
@@ -1143,7 +1143,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     UPDATE_NAV_STATUS = (
         Template('/my/ships/$ship_symbol/nav'),
         HTTPMethod.PATCH,
-        TokenType.AGENT,
+        AgentToken,
         ShipFlightModeShape,
         {HTTPStatus.OK: ShipNavUpdateShape},
         False,
@@ -1153,7 +1153,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     ```
     Template('/my/ships/$ship_symbol/nav'),
     HTTPMethod.PATCH,
-    TokenType.AGENT,
+    AgentToken,
     ShipFlightModeShape,
     {HTTPStatus.OK: ShipNavUpdateShape},
     False,
@@ -1162,7 +1162,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     GET_ALL_SYSTEMS = (
         Template('/systems'),
         HTTPMethod.GET,
-        TokenType.NONE,
+        None,
         NoDataReqShape,
         {HTTPStatus.OK: SystemsShape},
         True,
@@ -1172,7 +1172,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     ```
     Template('/systems'),
     HTTPMethod.GET,
-    TokenType.NONE,
+    None,
     NoDataReqShape,
     {HTTPStatus.OK: SystemsShape},
     True,
@@ -1181,7 +1181,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     GET_SYSTEM = (
         Template('/systems/$system_symbol'),
         HTTPMethod.GET,
-        TokenType.NONE,
+        None,
         NoDataReqShape,
         {HTTPStatus.OK: SystemShape},
         False,
@@ -1192,7 +1192,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     ```
     Template('/systems/$system_symbol'),
     HTTPMethod.GET,
-    TokenType.NONE,
+    None,
     NoDataReqShape,
     {HTTPStatus.OK: SystemShape},
     False,
@@ -1201,7 +1201,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     GET_ALL_SYSTEM_WAYPOINTS = (  # TODO: More query parameters than page and limit
         Template('/systems/$system_symbol/waypoints'),
         HTTPMethod.GET,
-        TokenType.NONE,
+        None,
         NoDataReqShape,
         {HTTPStatus.OK: SystemWaypointsShape},
         True,
@@ -1211,7 +1211,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     ```
     Template('/systems/$system_symbol/waypoints'),
     HTTPMethod.GET,
-    TokenType.NONE,
+    None,
     NoDataReqShape,
     {HTTPStatus.OK: SystemWaypointsShape},
     True,
@@ -1220,7 +1220,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     GET_WAYPOINT = (
         Template('/systems/$system_symbol/waypoints/$waypoint_symbol'),
         HTTPMethod.GET,
-        TokenType.NONE,
+        None,
         NoDataReqShape,
         {HTTPStatus.OK: SystemWaypointShape},
         False,
@@ -1230,7 +1230,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     ```
     Template('/systems/$system_symbol/waypoints/$waypoint_symbol'),
     HTTPMethod.GET,
-    TokenType.NONE,
+    None,
     NoDataReqShape,
     {HTTPStatus.OK: SystemWaypointShape},
     False,
@@ -1239,7 +1239,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     GET_CONSTRUCTION_SITE = (
         Template('/systems/$system_symbol/waypoints/$waypoint_symbol/construction'),
         HTTPMethod.GET,
-        TokenType.NONE,
+        None,
         NoDataReqShape,
         {HTTPStatus.OK: ConstructionShape},
         False,
@@ -1249,7 +1249,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     ```
     Template('/systems/$system_symbol/waypoints/$waypoint_symbol/construction'),
     HTTPMethod.GET,
-    TokenType.NONE,
+    None,
     NoDataReqShape,
     {HTTPStatus.OK: ConstructionSiteShape},
     False,
@@ -1258,7 +1258,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     SUPPLY_CONSTRUCTION_SITE = (
         Template('/systems/$system_symbol/waypoints/$waypoint_symbol/construction/supply'),
         HTTPMethod.POST,
-        TokenType.AGENT,
+        AgentToken,
         ConstructionSupplyReqShape,
         {HTTPStatus.CREATED: ConstructionSupplyResShape},
         False,
@@ -1268,7 +1268,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     ```
     Template('/systems/$system_symbol/waypoints/$waypoint_symbol/construction/supply'),
     HTTPMethod.POST,
-    TokenType.AGENT,
+    AgentToken,
     SupplyConstructionSiteReqShape,
     {HTTPStatus.CREATED: SupplyConstructionSiteResShape},
     False,
@@ -1277,7 +1277,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     GET_MARKET = (
         Template('/systems/$system_symbol/waypoints/$waypoint_symbol/market'),
         HTTPMethod.GET,
-        TokenType.NONE,
+        None,
         NoDataReqShape,
         {HTTPStatus.OK: MarketShape},
         False,
@@ -1287,7 +1287,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     ```
     Template('/systems/$system_symbol/waypoints/$waypoint_symbol/market'),
     HTTPMethod.GET,
-    TokenType.NONE,
+    None,
     NoDataReqShape,
     {HTTPStatus.OK: MarketShape},
     False,
@@ -1296,7 +1296,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     GET_JUMPGATE = (
         Template('/systems/$system_symbol/waypoints/$waypoint_symbol/jumpgate'),
         HTTPMethod.GET,
-        TokenType.NONE,
+        None,
         NoDataReqShape,
         {HTTPStatus.OK: JumpgateShape},
         False,
@@ -1306,7 +1306,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     ```
     Template('/systems/$system_symbol/waypoints/$waypoint_symbol/jumpgate'),
     HTTPMethod.GET,
-    TokenType.NONE,
+    None,
     NoDataReqShape,
     {HTTPStatus.OK: JumpgateShape},
     False,
@@ -1315,7 +1315,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     GET_SHIPYARD = (
         Template('/systems/$system_symbol/waypoints/$waypoint_symbol/shipyard'),
         HTTPMethod.GET,
-        TokenType.NONE,
+        None,
         NoDataReqShape,
         {HTTPStatus.OK: ShipyardShape},
         False,
@@ -1325,7 +1325,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     ```
     Template('/systems/$system_symbol/waypoints/$waypoint_symbol/shipyard'),
     HTTPMethod.GET,
-    TokenType.NONE,
+    None,
     NoDataReqShape,
     {HTTPStatus.OK: ShipyardShape},
     False,
@@ -1334,7 +1334,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     GET_TRADE_RELATIONSHIPS = (
         Template('/market/supply-chain'),
         HTTPMethod.GET,
-        TokenType.NONE,  # TODO: Verify
+        None,  # TODO: Verify
         NoDataReqShape,
         {HTTPStatus.OK: MarketSupplyChainShape},
         True,
@@ -1344,7 +1344,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     ```
     Template('/market/supply-chain'),
     HTTPMethod.GET,
-    TokenType.NONE,  # TODO: Verify
+    None,  # TODO: Verify
     NoDataReqShape,
     {HTTPStatus.OK: MarketSupplyChainShape},
     True,
@@ -1353,7 +1353,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     SUBSCRIBE_TO_EVENTS = (
         Template('/my/socket.io'),
         HTTPMethod.GET,
-        TokenType.NONE,  # TODO: Verify
+        None,  # TODO: Verify
         EventSubscribeReqShape,
         {HTTPStatus.OK: NoDataResShape},
         True,
@@ -1366,7 +1366,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     ```
     Template('/my/socket.io'),
     HTTPMethod.GET,
-    TokenType.NONE,  # TODO: Verify
+    None,  # TODO: Verify
     EventSubscribeReqShape,
     {HTTPStatus.OK: NoDataResShape},
     True,
@@ -1375,7 +1375,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     GET_SERVER_STATUS = (
         Template('/'),
         HTTPMethod.GET,
-        TokenType.NONE,
+        None,
         NoDataReqShape,
         {HTTPStatus.OK: ServerStatusShape},
         False,
@@ -1386,7 +1386,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     ```
     Template('/'),
     HTTPMethod.GET,
-    TokenType.NONE,
+    None,
     NoDataReqShape,
     {HTTPStatus.OK: ServerStatusShape},
     False,
@@ -1395,7 +1395,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     GET_ERROR_CODES = (
         Template('/error-codes'),
         HTTPMethod.GET,
-        TokenType.NONE,
+        None,
         NoDataReqShape,
         {HTTPStatus.OK: ErrorCodesShape},
         True,
@@ -1405,7 +1405,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     ```
     Template('/error-codes'),
     HTTPMethod.GET,
-    TokenType.NONE,
+    None,
     NoDataReqShape,
     {HTTPStatus.OK: ErrorCodesShape},
     True,

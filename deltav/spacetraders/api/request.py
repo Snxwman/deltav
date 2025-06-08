@@ -5,13 +5,15 @@ from http import HTTPStatus
 from math import ceil
 from typing import Any, Generic, TypeVar, override
 
-from deltav.config import CONFIG
+from loguru import logger
+
+from deltav.config.config import Config
 from deltav.spacetraders.api import DEFAULT_PAGE_LIMIT, MAX_PAGE_LIMIT, SPACETRADERS_API_URL
 from deltav.spacetraders.enums.endpoints import SpaceTradersAPIEndpoint
 from deltav.spacetraders.enums.error import SpaceTradersAPIErrorCodes
-from deltav.spacetraders.enums.token import TokenType
 from deltav.spacetraders.errors.request import InvalidRequestError
 from deltav.spacetraders.models import NoDataReqShape, SpaceTradersAPIReqShape, SpaceTradersAPIResShape, UnknownReqShape
+from deltav.spacetraders.token import AccountToken, AgentToken
 from deltav.util import generic__repr__
 
 
@@ -49,7 +51,7 @@ class SpaceTradersAPIRequest(Generic[T]):
         self._timeout_response: int = 60
 
         # The token to use for the request, could be account or agent
-        self._token: str | None = None
+        self._token: AccountToken | AgentToken | None = None
 
     @property
     def endpoint(self) -> SpaceTradersAPIEndpoint:
@@ -297,16 +299,20 @@ class SpaceTradersAPIRequestBuilder(Generic[T]):
         self.req._should_retry = True
         return self
 
-    def token(self) -> 'SpaceTradersAPIRequestBuilder[T]':
+    # TODO: Find a better way to get account and agent
+    def token(self, token: AccountToken | AgentToken | None = None) -> 'SpaceTradersAPIRequestBuilder[T]':
         self.__check_must_call_endpoint_before('.token()')
         self.__called_token = True
 
-        required_token = self.req.endpoint.token_type
-        if required_token == TokenType.NONE:
-            raise InvalidRequestError('No token type needed for this endpoint')
-        else:
-            self.req._token = CONFIG.token if required_token == TokenType.ACCOUNT else CONFIG.agent_token
-            self.req._headers['Authorization'] = f'Bearer {self.req._token}'
+        if self.req.endpoint.token_type is None:
+            logger.warning('No token type needed for this endpoint')
+            return self
+
+        if not isinstance(token, self.req.endpoint.token_type):
+            raise TypeError(f'Endpoint {self.req.endpoint.name} requires {self.req.endpoint.token_type}')
+
+        self.req._token = token
+        self.req._headers['Authorization'] = f'Bearer {self.req._token}'
         return self
 
     def cancel_on_ratelimit(self) -> 'SpaceTradersAPIRequestBuilder[T]':
@@ -338,7 +344,7 @@ class SpaceTradersAPIRequestBuilder(Generic[T]):
         if self.req.endpoint.paginated and not self.__called_page_method:
             raise InvalidRequestError('')
 
-        if self.req.endpoint.token_type is not TokenType.NONE and not self.__called_token:
+        if self.req.endpoint.token_type is not None and not self.__called_token:
             raise InvalidRequestError('')
 
         # Default headers
