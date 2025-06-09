@@ -37,7 +37,7 @@ class AgentRegisterReqData(SpaceTradersAPIReqShape):
 class AgentRegisterResData(SpaceTradersAPIResShape):
     """Represents the response data returned when registering an agent.
 
-    token: str
+    token: AgentToken
     agent: AgentShape
     faction: FactionShape
     contract: ContractShape

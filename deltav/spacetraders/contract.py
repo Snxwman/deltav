@@ -13,23 +13,22 @@ from deltav.spacetraders.models.contract import (
     ContractDeliverResShape,
     ContractShape,
     ContractTermsShape,
-    ContractsShape,
 )
 
 
 class Contract:
     def __init__(self, data: ContractShape) -> None:
         self.id: str = data.id
-        self.faction: Faction = Faction.get_by_symbol(data.faction_symbol)
+        self.faction: Faction = Faction.get_faction(data.faction_symbol)
         self.type: ContractType = data.type
         self.terms: ContractTermsShape = data.terms
         self.accepted: bool = data.accepted
         self.fulfilled: bool = data.fulfilled
         self.deadline_to_accept: datetime = data.deadline_to_accept
 
-        self._negotiated_at: datetime
-        self._accepted_at: datetime
-        self._closed_at: datetime
+        self._negotiated_at: datetime | None = None
+        self._accepted_at: datetime | None = None
+        self._closed_at: datetime | None = None
         # self._closed_reason:  # fulfilled, abandonded, expired, ...
 
     def update(self, data: ContractShape) -> None:
@@ -40,6 +39,22 @@ class Contract:
     @property
     def deadline(self) -> datetime:
         return self.terms.deadline
+
+    @property
+    def is_expired(self) -> bool:
+        now = datetime.now()
+        if self.accepted and self.deadline <= now:
+            self._closed_at = self.deadline
+            return True
+        elif not self.accepted and self.deadline_to_accept <= now:
+            self._closed_at = self.deadline_to_accept
+            return True
+        else:
+            return False
+
+    @property
+    def is_closed(self) -> bool:
+        return True if self._closed_at is not None else False
 
     @property
     def time_to_deadline(self) -> timedelta:
@@ -57,7 +72,7 @@ class Contract:
     def deliverables(self) -> list[ContractDeliverResShape]:
         return [deliverable for deliverable in self.terms.deliver]
 
-    def get_deliverable_by_trade_symbol(self, symbol: TradeSymbol) -> ContractDeliverResShape | None:
+    def get_deliverable_by_symbol(self, symbol: TradeSymbol) -> ContractDeliverResShape | None:
         for deliverable in self.deliverables:
             if deliverable.trade_symbol == symbol:
                 return deliverable

@@ -31,7 +31,7 @@ class FactionsShape(SpaceTradersAPIResShape):
     factions: list[FactionsShape] = Field(alias='data')
     """
 
-    factions: list[FactionsShape] = Field(alias='data')
+    factions: list[FactionShape] = Field(alias='data')
 
 
 class FactionReputationShape(SpaceTradersAPIResShape):

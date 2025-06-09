@@ -65,7 +65,7 @@ class SpaceTradersAPIClient:
                 method=req.endpoint.method,
                 headers=req.headers,
                 url=req.url,
-                data=req.json_data,
+                json=req.json_data,
                 params=req.params,
             )
 

@@ -58,7 +58,7 @@ class Ship:
         return SpaceTradersAPIClient.call(
             SpaceTradersAPIRequest[ShipShape]()
             .builder()
-            .endpoint(SpaceTradersAPIEndpoint.MY_SHIP)
+            .endpoint(SpaceTradersAPIEndpoint.GET_SHIP)
             .path_params(ship_symbol)
             .token()
             .build(),

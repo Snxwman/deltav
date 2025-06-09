@@ -19,9 +19,10 @@ from deltav.spacetraders.models import (
     SpaceTradersAPIReqShape,
     SpaceTradersAPIResShape,
 )
-from deltav.spacetraders.models.account import AccountShape
+from deltav.spacetraders.models.account import AccountShape, MyAccountShape
 from deltav.spacetraders.models.agent import (
     AgentEventShape,
+    AgentEventsShape,
     AgentShape,
     PublicAgentShape,
     PublicAgentsShape,
@@ -43,7 +44,7 @@ from deltav.spacetraders.models.endpoint import (
     AgentRegisterResData,
     ChartCreateShape,
 )
-from deltav.spacetraders.models.faction import FactionShape, FactionsShape
+from deltav.spacetraders.models.faction import FactionReputationsShape, FactionShape, FactionsShape
 from deltav.spacetraders.models.market import MarketShape, TransactionShape
 from deltav.spacetraders.models.ship import (
     CargoItemReqShape,
@@ -84,14 +85,14 @@ from deltav.spacetraders.models.systems import (
     JumpgateShape,
     ShipyardShape,
     SystemShape,
+    SystemsShape,
     SystemWaypointShape,
     SystemWaypointsShape,
-    SystemsShape,
 )
 from deltav.spacetraders.models.waypoint import (
     WaypointSymbolReqShape,
 )
-from deltav.spacetraders.token import AccountToken, AgentToken, Token
+from deltav.spacetraders.token import AccountToken, AgentToken
 from deltav.util import generic__repr__
 
 
@@ -124,9 +125,7 @@ class EndpointDataMixin:
             )
             return f'{s.__name__}{fields_str}'
 
-        request_shape = (
-            '\n\t\tnone' if self.request_shape is NoDataReqShape else shape_str(self.request_shape)
-        )
+        request_shape = '\n\t\tnone' if self.request_shape is NoDataReqShape else shape_str(self.request_shape)
         response_shape = '\n'.join(shape_str(shape) for shape in self.response_shapes.values())
 
         return '\n\t'.join([
@@ -158,12 +157,12 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     ```
     """
 
-    MY_ACCOUNT = (
+    GET_ACCOUNT = (
         Template('/my/account'),
         HTTPMethod.GET,
-        AccountToken,
+        AgentToken,
         NoDataReqShape,
-        {HTTPStatus.OK: AccountShape},
+        {HTTPStatus.OK: MyAccountShape},
         False,
     )
     """Fetch your account details.
@@ -253,12 +252,12 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     False,
     ```
     """
-    MY_AGENT_EVENTS = (
+    GET_AGENT_EVENTS = (
         Template('/my/agent/events'),
         HTTPMethod.GET,
         AgentToken,
         NoDataReqShape,
-        {HTTPStatus.OK: AgentEventShape},
+        {HTTPStatus.OK: AgentEventsShape},
         False,
     )
     """Get recent events for your agent.
@@ -272,7 +271,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     False,
     ```
     """
-    MY_CONTRACTS = (
+    GET_CONTRACTS = (
         Template('/my/contracts'),
         HTTPMethod.GET,
         AgentToken,
@@ -424,12 +423,12 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     False,
     ```
     """
-    MY_FACTION = (
-        Template('/my/faction'),
+    GET_FACTION_REPUTATIONS = (
+        Template('/my/factions'),
         HTTPMethod.GET,
         AgentToken,
         NoDataReqShape,
-        {HTTPStatus.OK: FactionShape},
+        {HTTPStatus.OK: FactionReputationsShape},
         False,
     )
     """Retrieve factions with which the agent has reputation.
@@ -443,7 +442,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     False,
     ```
     """
-    MY_SHIPS = (
+    GET_SHIPS = (
         Template('/my/ships'),
         HTTPMethod.GET,
         AgentToken,
@@ -481,7 +480,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     False,
     ```
     """
-    MY_SHIP = (
+    GET_SHIP = (
         Template('/my/ships/$ship_symbol'),
         HTTPMethod.GET,
         AgentToken,

@@ -62,7 +62,7 @@ class SpaceTradersAPIRequest(Generic[T]):
         if self.endpoint.request_shape is NoDataReqShape:
             return {}
         else:
-            return self._data.model_dump(by_alias=True)
+            return self._data.model_dump(mode='json', by_alias=True)
 
     @property
     def headers(self) -> dict[str, str]:

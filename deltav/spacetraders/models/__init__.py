@@ -2,16 +2,15 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from datetime import date, datetime
-from textwrap import wrap
-from deepmerge import always_merger
 from enum import Enum
+from textwrap import wrap
 from typing import Any, TypeVar, override
 
+from deepmerge import always_merger
 from pydantic import AliasGenerator, BaseModel, ConfigDict
 from pydantic.alias_generators import to_camel
 
 from deltav.spacetraders.enums.market import TradeSymbol
-from deltav.util import generic__repr__
 from deltav.util.strings import indent
 
 # TODO: Look into the following model config fields for ConfigDict
@@ -22,7 +21,8 @@ from deltav.util.strings import indent
 #   - validate_assignment
 
 
-T = TypeVar("T", bound='SpaceTradersAPIResShape')
+T = TypeVar('T', bound='SpaceTradersAPIResShape')
+
 
 # https://github.com/pydantic/pydantic/discussions/3416
 def merge_models(base: T, next: T) -> T:

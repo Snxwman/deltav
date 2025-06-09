@@ -1,3 +1,5 @@
+from datetime import datetime
+from loguru import logger
 from deltav.spacetraders.api.client import SpaceTradersAPIClient
 from deltav.spacetraders.api.error import SpaceTradersAPIError
 from deltav.spacetraders.api.request import SpaceTradersAPIRequest
@@ -8,73 +10,83 @@ from deltav.spacetraders.models.faction import FactionShape, FactionTraitShape, 
 
 class Faction:
     DEFAULT: str = 'COSMIC'
-    # TODO: Track when we last updated a faction
     _FACTIONS: dict[FactionSymbol, 'Faction'] = {}
+    __FACTIONS_TIMESTAMPS: dict[FactionSymbol, datetime] = {}
 
-    def __init__(self, data: FactionShape):
-        self.symbol: FactionSymbol = data.symbol
-        self.name: str = data.name
-        self.description: str = data.description
-        self.headquarters: str = data.headquarters
-        self.traits: list[FactionTraitShape] = data.traits
-        self.is_recruiting: bool = data.is_recruiting
+    def __init__(self, data: FactionShape) -> None:
+        self._symbol: FactionSymbol = data.symbol
+        self._name: str = data.name
+        self._description: str = data.description
+        self._headquarters: str = data.headquarters
+        self._traits: list[FactionTraitShape] = data.traits
+        self._is_recruiting: bool = data.is_recruiting
+
+        Faction.__update_cache(self)
+
+    @property
+    def symbol(self) -> FactionSymbol:
+        return self._symbol
+
+    @property
+    def name(self) -> str:
+        return self._name
+
+    @property
+    def description(self) -> str:
+        return self._description
+
+    @property
+    def headquarters(self) -> str:
+        return self._headquarters
+
+    @property
+    def traits(self) -> list[FactionTraitShape]:
+        return self._traits
+
+    @property
+    def is_recruiting(self) -> bool:
+        return self._is_recruiting
 
     @classmethod
-    def hydrate_factions(cls) -> None | SpaceTradersAPIError:
-        # WARN: This might clog the ratelimits as is
-        factions = Faction._fetch_factions()
-
-        match factions:
-            case list():
-                for faction in factions:
-                    Faction._add_faction_to_cache(faction)
-            case SpaceTradersAPIError() as err:
-                return err
-
-    @classmethod
-    def get_by_symbol(cls, symbol: FactionSymbol) -> 'Faction':
-        """Get the Faction instance for the given symbol from the class' cache
-
-        Args:
-            symbol (FactionSymbol): The faction's symbol
-
-        Retuns:
-            Faction
-
-        Raises:
-            ValueError: If the faction is not in the cache and cannot be fetched
-                from the SpaceTraders API. Factions are predefined by the game,
-                so not being able to fetch the faction is irrecoverable.
-        """
-        faction: Faction | None = cls._FACTIONS.get(symbol, None)
-
-        if faction is not None:
+    def get_faction(cls, symbol: FactionSymbol) -> 'Faction':
+        if (faction := Faction.__from_cache(symbol)) is not None:
             return faction
-        else:  # This faction hasn't been added to _FACTIONS yet
-            _faction = Faction._fetch_faction(symbol)
 
-            match _faction:
-                case SpaceTradersAPIError() as err:
-                    # CRIT: Irrecoverable (not apparant from signature)
-                    raise ValueError(err)
-                case _:  # Default case because python doesn't allow TypeDicts in match arms
-                    Faction._add_faction_to_cache(_faction)
-                    return cls._FACTIONS[symbol]
-
-    @classmethod
-    def _add_faction_to_cache(cls, data: FactionShape) -> None:
-        symbol, faction = data.symbol, Faction(data)
-        cls._FACTIONS[symbol] = faction
+        match Faction._fetch_faction(symbol):
+            case FactionShape() as res:
+                faction = Faction(res)
+                Faction.__update_cache(faction)
+                return faction
+            case SpaceTradersAPIError() as err:
+                # CRIT: Irrecoverable (not apparant from signature)
+                raise Faction.__handle_fetch_faction_err(err)
 
     @staticmethod
-    def _fetch_faction(name: FactionSymbol) -> FactionShape | SpaceTradersAPIError:
+    def _fetch_faction(symbol: FactionSymbol) -> FactionShape | SpaceTradersAPIError:
         return SpaceTradersAPIClient.call(
             SpaceTradersAPIRequest[FactionShape]()
             .builder()
             .endpoint(SpaceTradersAPIEndpoint.GET_FACTION)
-            .path_params(name.name)
+            .path_params(symbol.name)
             .build()
         ).unwrap()
+
+    @staticmethod
+    def __handle_fetch_faction_err(err: SpaceTradersAPIError) -> ValueError:
+        log_str = f'Got an error while fetching faction. {err}'
+        logger.error(log_str)
+        return ValueError(log_str)
+
+    @classmethod
+    def get_factions(cls) -> None | SpaceTradersAPIError:
+        # WARN: This might clog the ratelimits as is
+        match Faction._fetch_factions():
+            case FactionsShape() as res:
+                for _faction in res.factions:
+                    faction = Faction(_faction)
+                    Faction.__update_cache(faction)
+            case SpaceTradersAPIError() as err:
+                raise Faction.__handle_fetch_factions_err(err)
 
     @staticmethod
     def _fetch_factions() -> FactionsShape | SpaceTradersAPIError:
@@ -86,3 +98,26 @@ class Faction:
             .all_pages()
             .build()
         ).unwrap()
+
+    @staticmethod
+    def __handle_fetch_factions_err(err: SpaceTradersAPIError) -> ValueError:
+        log_str = f'Got an error while fetching factions. {err}'
+        logger.error(log_str)
+        return ValueError(log_str)
+
+    @classmethod
+    def __update_cache(cls, faction: 'Faction') -> None:
+        """Adds or updates the factions cache"""
+        cls._FACTIONS[faction.symbol] = faction
+        cls.__FACTIONS_TIMESTAMPS[faction.symbol] = datetime.now()
+
+    @classmethod
+    def __from_cache(cls, symbol: FactionSymbol) -> 'Faction | None':
+        """Get the Faction instance, for the given symbol, from the class' cache
+
+        Args:
+        ```
+        symbol (FactionSymbol)
+        ```
+        """
+        return cls._FACTIONS.get(symbol, None)

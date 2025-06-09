@@ -1,10 +1,14 @@
 # pyright: reportAny=false
-# pyright: reportUnknownMemberType=false
 # pyright: reportAssignmentType=false
+# pyright: reportAttributeAccessIssue=false
+# pyright: reportOptionalMemberAccess=false
 # pyright: reportUnknownArgumentType=false
+# pyright: reportUnknownMemberType=false
+# pyright: reportUnknownVariableType=false
 
 from __future__ import annotations
 
+import os
 import sys
 from dataclasses import dataclass
 from enum import Enum
@@ -18,6 +22,7 @@ from tomlkit.items import AoT, Table
 
 from deltav.config import get_default_config_paths, get_default_db_path, get_default_log_path
 from deltav.config.errors import ConfigNotFoundError
+from deltav.spacetraders.enums.faction import FactionSymbol
 from deltav.spacetraders.token import AccountToken, AgentToken
 from deltav.util import generic__repr__
 from deltav.util.strings import indent
@@ -99,6 +104,7 @@ class StAccountConfig:
 class StAgentConfig:
     nickname: str
     symbol: str
+    faction: FactionSymbol
     token: AgentToken
     account: str
     autocreate: bool = False
@@ -202,11 +208,13 @@ class Config:
         for agent in toml_st_agents:
             account: StAccountConfig = self.get_account(agent.get('account'))
             nick: str = agent.get('nickname', agent.get('callsign')).lower()
+            faction = agent.get('faction', 'cosmic').upper()
             agent = StAgentConfig(
                 nickname=nick,
-                symbol=agent.get('callsign').lower(),
-                token=AgentToken(agent.get('token')),
                 account=agent.get('account').lower(),
+                symbol=agent.get('callsign').lower(),
+                faction=FactionSymbol(faction),
+                token=AgentToken(agent.get('token')),
                 autocreate=agent.get('autocreate', False),
             )
             account.agents[nick] = agent
@@ -214,6 +222,9 @@ class Config:
         logger.trace('Loaded tables: [[spacetraders.agents]]')
         logger.success('Loaded config')
         logger.trace(f'Config values: {self}')
+
+    def update_agent_token(self, token: AgentToken) -> None:
+        ...
 
     @classmethod
     def get_account(cls, account: str) -> StAccountConfig:
@@ -259,8 +270,18 @@ class Config:
         if not self.__config_file_path:
             raise ValueError('self.__config_file_path must be set before calling self.__get_toml_from_file()')
 
-        with open(self.__config_file_path) as config_file:
+        with open(self.__config_file_path, 'r') as config_file:
             return tomlkit.load(config_file)
+
+    def __write_toml_file(self) -> None:
+        backup_path = Path(f'{self.__config_file_path}.bak')
+
+        with open(backup_path, 'w') as backup_file:
+            tomlkit.dump(self.__original_toml, backup_file)
+
+        with open(self.__config_file_path, 'w') as config_file:
+            tomlkit.dump(self.__original_toml, config_file)
+
 
     @staticmethod
     def __locate_config_file(path: Path | str | None) -> Path:

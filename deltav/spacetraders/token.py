@@ -1,4 +1,4 @@
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from hashlib import sha256, shake_128
 from typing import Any, final, override
 
@@ -65,12 +65,16 @@ class AccountToken(Token):
 class AgentToken(Token):
     def __init__(self, token: str) -> None:
         super().__init__(token)
-        self._reset_date: str
+        self._reset_date: str = self.decoded['reset_date']
 
     @property
     def agent_symbol(self) -> str:
         return self._identifier
 
     @property
-    def expires(self) -> date:
-        return date.fromisoformat(self._reset_date)
+    def expiration(self) -> date:
+        return date.fromisoformat(self._reset_date) + timedelta(days=7)  # TODO: Make this dynamic somehow
+
+    @property
+    def is_expired(self) -> bool:
+        return date.today() >= self.expiration
