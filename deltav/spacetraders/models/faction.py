@@ -1,20 +1,9 @@
 from __future__ import annotations
 
-from deltav.spacetraders.models import SpaceTradersAPIResShape
+from pydantic import Field
+
 from deltav.spacetraders.enums.faction import FactionSymbol, FactionTraitSymbol
-
-
-class FactionTrait(SpaceTradersAPIResShape):
-    """
-
-    symbol: FactionTraitSymbol
-    name: str
-    description: str
-    """
-
-    symbol: FactionTraitSymbol
-    name: str
-    description: str
+from deltav.spacetraders.models import SpaceTradersAPIResShape
 
 
 class FactionShape(SpaceTradersAPIResShape):
@@ -24,7 +13,7 @@ class FactionShape(SpaceTradersAPIResShape):
     name: str
     description: str
     headquarters: str
-    traits: list[FactionTrait]
+    traits: list[FactionTraitShape]
     is_recruiting: bool
     """
 
@@ -32,5 +21,56 @@ class FactionShape(SpaceTradersAPIResShape):
     name: str
     description: str
     headquarters: str
-    traits: list[FactionTrait]
+    traits: list[FactionTraitShape]
     is_recruiting: bool
+
+
+class FactionsShape(SpaceTradersAPIResShape):
+    """
+
+    factions: list[FactionsShape] = Field(alias='data')
+    """
+
+    factions: list[FactionShape] = Field(alias='data')
+
+
+class FactionReputationShape(SpaceTradersAPIResShape):
+    """
+
+    symbol: FactionSymbol
+    reputation: int
+    """
+
+    symbol: FactionSymbol
+    reputation: int
+
+
+class FactionReputationsShape(SpaceTradersAPIResShape):
+    """
+
+    factions: list[FactionReputationShape] = Field(alias='data')
+    """
+
+    factions: list[FactionReputationShape] = Field(alias='data')
+
+
+class FactionSymbolShape(SpaceTradersAPIResShape):
+    """
+
+    symbol: FactionSymbol
+    """
+
+    symbol: FactionSymbol
+
+
+class FactionTraitShape(SpaceTradersAPIResShape):
+    """
+
+    symbol: FactionTraitSymbol
+    name: str
+    description: str
+    """
+
+    symbol: FactionTraitSymbol
+    name: str
+    description: str

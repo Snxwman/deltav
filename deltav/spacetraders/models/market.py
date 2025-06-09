@@ -2,62 +2,47 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from deltav.spacetraders.enums.market import ActivityLevel, MarketTradeGoodType, SupplyLevel
-from deltav.spacetraders.enums.ship import ShipType
+from deltav.spacetraders.enums.market import (
+    ActivityLevel,
+    MarketTradeGoodType,
+    SupplyLevel,
+    TradeSymbol,
+    TransactionType,
+)
 from deltav.spacetraders.models import SpaceTradersAPIResShape
 
 
-class CargoItemShape(SpaceTradersAPIResShape):
+# FIX: CargoItemShape
+class MarketShape(SpaceTradersAPIResShape):
     """
 
     symbol: str
-    units: int
-    description: str | None
+    exports: list[MarketItemShape]
+    imports: list[MarketItemShape]
+    exchange: list[MarketItemShape]
+    transactions: list[MarketTransactionShape]
+    trade_goods: list[TradeGoodShape]
     """
 
     symbol: str
-    units: int
-    description: str | None
+    exports: list[MarketItemShape]
+    imports: list[MarketItemShape]
+    exchange: list[MarketItemShape]
+    transactions: list[TransactionShape]
+    trade_goods: list[TradeGoodShape]
 
 
-class TransactionShape(SpaceTradersAPIResShape):
+class MarketItemShape(SpaceTradersAPIResShape):
     """
 
-    waypoint_symbol: str
-    ship_symbol: str
-    trade_symbol: str
-    type: str
-    units: int
-    price_per_unit: int
-    total_price: int
-    timestamp: datetime
+    symbol: TradeSymbol
+    name: str
+    description: str
     """
 
-    waypoint_symbol: str
-    ship_symbol: str
-    trade_symbol: str
-    type: str
-    units: int
-    price_per_unit: int
-    total_price: int
-    timestamp: datetime
-
-
-class ShipTransactionShape(SpaceTradersAPIResShape):
-    """
-
-    waypoint_symbol: str
-    ship_type: ShipType
-    price: int
-    agent_symbol: str
-    timestamp: datetime
-    """
-
-    waypoint_symbol: str
-    ship_type: ShipType
-    price: int
-    agent_symbol: str
-    timestamp: datetime
+    symbol: TradeSymbol
+    name: str
+    description: str
 
 
 class TradeGoodShape(SpaceTradersAPIResShape):
@@ -79,3 +64,26 @@ class TradeGoodShape(SpaceTradersAPIResShape):
     activity: ActivityLevel
     purchase_price: int
     sell_price: int
+
+
+class TransactionShape(SpaceTradersAPIResShape):
+    """
+
+    waypoint_symbol: str
+    ship_symbol: str
+    trade_symbol: TradeSymbol
+    type: TransactionType
+    units: int
+    price_per_unit: int
+    total_price: int
+    timestamp: datetime
+    """
+
+    waypoint_symbol: str
+    ship_symbol: str
+    trade_symbol: TradeSymbol
+    type: TransactionType
+    units: int
+    price_per_unit: int
+    total_price: int
+    timestamp: datetime

@@ -15,6 +15,15 @@ class AccountShape(SpaceTradersAPIResShape):
     """
 
     id: str
-    email: str
-    token: str  # TODO: Should be a JWT
+    email: str = ''
+    token: str = ''
     created_at: datetime
+
+
+class MyAccountShape(SpaceTradersAPIResShape):
+    """
+
+    account: AccountShape
+    """
+
+    account: AccountShape

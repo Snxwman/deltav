@@ -6,8 +6,11 @@ description = "A typed python client for the SpaceTraders.io game API"
 readme = "readme.md"
 requires-python = ">=3.13"
 dependencies = [
+    "deepmerge>=2.0",
+    "httpx>=0.28.1",
+    "loguru>=0.7.3",
     "pydantic>=2.11.5",
-    "requests>=2.32.3",
+    "pyjwt[crypto]>=2.10.1",
     "textual[syntax]>=3.2.0",
     "tomlkit>=0.13.2",
 ]

@@ -1,6 +1,9 @@
 from enum import Enum, auto
 
+from deltav.spacetraders.enums import serialize_by_name
 
+
+@serialize_by_name
 class FactionSymbol(Enum):
     """
     AEGIS
@@ -22,34 +25,36 @@ class FactionSymbol(Enum):
     UNITED
     VOID
 
-    Methods:
-    default() -> 'FactionSymbol'
+    Properties:
+    default
     """
 
-    AEGIS = auto()
-    ANCIENTS = auto()
-    ASTRO = auto()
-    COBALT = auto()
-    CORSAIRS = auto()
-    COSMIC = auto()
-    CULT = auto()
-    DOMINION = auto()
-    ECHO = auto()
-    ETHEREAL = auto()
-    GALACTIC = auto()
-    LORDS = auto()
-    OMEGA = auto()
-    QUANTUM = auto()
-    SHADOW = auto()
-    SOLITARY = auto()
-    UNITED = auto()
-    VOID = auto()
+    AEGIS = 'AEGIS'
+    ANCIENTS = 'ANCIENTS'
+    ASTRO = 'ASTRO'
+    COBALT = 'COBALT'
+    CORSAIRS = 'CORSAIRS'
+    COSMIC = 'COSMIC'
+    CULT = 'CULT'
+    DOMINION = 'DOMINION'
+    ECHO = 'ECHO'
+    ETHEREAL = 'ETHEREAL'
+    GALACTIC = 'GALACTIC'
+    LORDS = 'LORDS'
+    OBSIDIAN = 'OBSIDIAN'
+    OMEGA = 'OMEGA'
+    QUANTUM = 'QUANTUM'
+    SHADOW = 'SHADOW'
+    SOLITARY = 'SOLITARY'
+    UNITED = 'UNITED'
+    VOID = 'VOID'
 
-    @property
-    def default(self) -> 'FactionSymbol':
-        return FactionSymbol.COSMIC
+    # @property
+    # def default(self) -> 'FactionSymbol':
+    #     return FactionSymbol.COSMIC
 
 
+@serialize_by_name
 class FactionTraitSymbol(Enum):
     """
     ADAPTABLE

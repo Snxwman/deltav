@@ -1,6 +1,8 @@
 from deltav.spacetraders.api.request import SpaceTradersAPIRequest
 from deltav.spacetraders.enums.endpoints import SpaceTradersAPIEndpoint
-from deltav.spacetraders.models.systems import SupplyConstructionSiteShape
+from deltav.spacetraders.models.construction import ConstructionSupplyReqShape
+from deltav.spacetraders.models.market import MarketShape
+from deltav.spacetraders.models.systems import JumpgateShape, ShipyardShape
 
 
 # TODO: Convert methods to right types
@@ -16,11 +18,11 @@ class System:
     def get_shipyard(waypoint_symbol: str) -> SpaceTradersAPIRequest:
         system_symbol: str = System.extract_system_symbol(waypoint_symbol)
         return (
-            SpaceTradersAPIRequest()
+            SpaceTradersAPIRequest[ShipyardShape]()
             .builder()
             .endpoint(SpaceTradersAPIEndpoint.GET_SHIPYARD)
             .path_params(system_symbol, waypoint_symbol)
-            .with_token()
+            .token()
             .build()
         )
 
@@ -28,11 +30,11 @@ class System:
     def get_market(waypoint_symbol: str) -> SpaceTradersAPIRequest:
         system_symbol: str = System.extract_system_symbol(waypoint_symbol)
         return (
-            SpaceTradersAPIRequest()
+            SpaceTradersAPIRequest[MarketShape]()
             .builder()
             .endpoint(SpaceTradersAPIEndpoint.GET_MARKET)
             .path_params(system_symbol, waypoint_symbol)
-            .with_token()
+            .token()
             .build()
         )
 
@@ -40,11 +42,11 @@ class System:
     def get_jumpgate(waypoint_symbol: str) -> SpaceTradersAPIRequest:
         system_symbol: str = System.extract_system_symbol(waypoint_symbol)
         return (
-            SpaceTradersAPIRequest()
+            SpaceTradersAPIRequest[JumpgateShape]()
             .builder()
             .endpoint(SpaceTradersAPIEndpoint.GET_JUMPGATE)
             .path_params(system_symbol, waypoint_symbol)
-            .with_token()
+            .token()
             .build()
         )
 
@@ -53,8 +55,8 @@ class System:
         return (
             SpaceTradersAPIRequest()
             .builder()
-            .endpoint(SpaceTradersAPIEndpoint.SYSTEM_GET_SYSTEMS)
-            .with_token()
+            .endpoint(SpaceTradersAPIEndpoint.GET_ALL_SYSTEMS)
+            .token()
             .build()
         )
 
@@ -64,9 +66,9 @@ class System:
         return (
             SpaceTradersAPIRequest()
             .builder()
-            .endpoint(SpaceTradersAPIEndpoint.SYSTEM_GET_SYSTEMS)
+            .endpoint(SpaceTradersAPIEndpoint.GET_ALL_SYSTEMS)
             .path_params(system_symbol)
-            .with_token()
+            .token()
             .build()
         )
 
@@ -75,9 +77,9 @@ class System:
         return (
             SpaceTradersAPIRequest()
             .builder()
-            .endpoint(SpaceTradersAPIEndpoint.SYSTEM_GET_WAYPOINTS)
+            .endpoint(SpaceTradersAPIEndpoint.GET_ALL_SYSTEM_WAYPOINTS)
             .path_params(system_symbol)
-            .with_token()
+            .token()
             .build()
         )
 
@@ -87,9 +89,9 @@ class System:
         return (
             SpaceTradersAPIRequest()
             .builder()
-            .endpoint(SpaceTradersAPIEndpoint.SYSTEM_GET_WAYPOINT)
+            .endpoint(SpaceTradersAPIEndpoint.GET_WAYPOINT)
             .path_params(system_symbol, waypoint_symbol)
-            .with_token()
+            .token()
             .build()
         )
 
@@ -99,21 +101,21 @@ class System:
         return (
             SpaceTradersAPIRequest()
             .builder()
-            .endpoint(SpaceTradersAPIEndpoint.SYSTEM_GET_CONSTRUCTION_SITE)
+            .endpoint(SpaceTradersAPIEndpoint.GET_CONSTRUCTION_SITE)
             .path_params(system_symbol, waypoint_symbol)
-            .with_token()
+            .token()
             .build()
         )
 
     @staticmethod
-    def supply_construction_site(waypoint_symbol: str, supply: SupplyConstructionSiteShape) -> SpaceTradersAPIRequest:
+    def supply_construction_site(waypoint_symbol: str, supply: ConstructionSupplyReqShape) -> SpaceTradersAPIRequest:
         system_symbol: str = System.extract_system_symbol(waypoint_symbol)
         return (
             SpaceTradersAPIRequest()
             .builder()
-            .endpoint(SpaceTradersAPIEndpoint.SYSTEM_SUPPLY_CONSTRUCTION_SITE)
+            .endpoint(SpaceTradersAPIEndpoint.SUPPLY_CONSTRUCTION_SITE)
             .path_params(system_symbol, waypoint_symbol)
-            .with_token()
+            .token()
             .data(supply)
             .build()
         )

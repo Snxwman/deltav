@@ -1,36 +1,34 @@
 from datetime import datetime, timedelta
-from typing import cast
 
 from deltav.spacetraders.api.client import SpaceTradersAPIClient
 from deltav.spacetraders.api.error import SpaceTradersAPIError
 from deltav.spacetraders.api.request import SpaceTradersAPIRequest
-from deltav.spacetraders.api.response import SpaceTradersAPIResponse
 from deltav.spacetraders.enums.contract import ContractType
 from deltav.spacetraders.enums.endpoints import SpaceTradersAPIEndpoint
 from deltav.spacetraders.enums.market import TradeSymbol
 from deltav.spacetraders.faction import Faction
 from deltav.spacetraders.models.contract import (
+    ContractAcceptShape,
     ContractDeliverReqShape,
     ContractDeliverResShape,
     ContractShape,
     ContractTermsShape,
 )
-from deltav.spacetraders.models.endpoint import AcceptContractShape
 
 
 class Contract:
     def __init__(self, data: ContractShape) -> None:
         self.id: str = data.id
-        self.faction: Faction = Faction.get_by_symbol(data.faction_symbol)
+        self.faction: Faction = Faction.get_faction(data.faction_symbol)
         self.type: ContractType = data.type
         self.terms: ContractTermsShape = data.terms
         self.accepted: bool = data.accepted
         self.fulfilled: bool = data.fulfilled
         self.deadline_to_accept: datetime = data.deadline_to_accept
 
-        self._negotiated_at: datetime
-        self._accepted_at: datetime
-        self._closed_at: datetime
+        self._negotiated_at: datetime | None = None
+        self._accepted_at: datetime | None = None
+        self._closed_at: datetime | None = None
         # self._closed_reason:  # fulfilled, abandonded, expired, ...
 
     def update(self, data: ContractShape) -> None:
@@ -41,6 +39,22 @@ class Contract:
     @property
     def deadline(self) -> datetime:
         return self.terms.deadline
+
+    @property
+    def is_expired(self) -> bool:
+        now = datetime.now()
+        if self.accepted and self.deadline <= now:
+            self._closed_at = self.deadline
+            return True
+        elif not self.accepted and self.deadline_to_accept <= now:
+            self._closed_at = self.deadline_to_accept
+            return True
+        else:
+            return False
+
+    @property
+    def is_closed(self) -> bool:
+        return True if self._closed_at is not None else False
 
     @property
     def time_to_deadline(self) -> timedelta:
@@ -58,29 +72,22 @@ class Contract:
     def deliverables(self) -> list[ContractDeliverResShape]:
         return [deliverable for deliverable in self.terms.deliver]
 
-    def get_deliverable_by_trade_symbol(self, symbol: TradeSymbol) -> ContractDeliverResShape | None:
+    def get_deliverable_by_symbol(self, symbol: TradeSymbol) -> ContractDeliverResShape | None:
         for deliverable in self.deliverables:
             if deliverable.trade_symbol == symbol:
                 return deliverable
 
-    # QUESTION: Should this be in Agent?
-    def accept(self) -> AcceptContractShape | SpaceTradersAPIError:
-        res = SpaceTradersAPIClient.call(
-            SpaceTradersAPIRequest()
+    def _accept(self) -> ContractAcceptShape | SpaceTradersAPIError:
+        return SpaceTradersAPIClient.call(
+            SpaceTradersAPIRequest[ContractAcceptShape]()
             .builder()
             .endpoint(SpaceTradersAPIEndpoint.ACCEPT_CONTRACT)
             .path_params(self.id)
-            .with_token()
-            .build()
-        )
+            .token()
+            .build(),
+        ).unwrap()
 
-        match res:
-            case SpaceTradersAPIResponse():
-                return cast(AcceptContractShape, res.spacetraders.data)
-            case SpaceTradersAPIError() as err:
-                return err
-
-    def deliver(self, symbol: TradeSymbol, units: int = 0) -> ContractDeliverResShape | SpaceTradersAPIError:
+    def _deliver(self, symbol: TradeSymbol, units: int = 0) -> ContractDeliverResShape | SpaceTradersAPIError:
         # FIX: Move out of this method
         # FIX: Data should be acquired from ship instances
         deliverable = ContractDeliverReqShape(
@@ -89,67 +96,33 @@ class Contract:
             units=units,
         )
 
-        res = SpaceTradersAPIClient.call(
-            SpaceTradersAPIRequest()
+        return SpaceTradersAPIClient.call(
+            SpaceTradersAPIRequest[ContractDeliverResShape]()
             .builder()
             .endpoint(SpaceTradersAPIEndpoint.DELIVER_CONTRACT)
             .path_params(self.id)
-            .with_token()
+            .token()
             .data(deliverable)
-            .build()
-        )
+            .build(),
+        ).unwrap()
 
-        match res:
-            case SpaceTradersAPIResponse():
-                return cast(ContractDeliverResShape, res.spacetraders.data)
-            case SpaceTradersAPIError() as err:
-                return err
-
-    def fulfill(self) -> ContractShape | SpaceTradersAPIError:
-        res = SpaceTradersAPIClient.call(
-            SpaceTradersAPIRequest()
+    def _fulfill(self) -> ContractShape | SpaceTradersAPIError:
+        return SpaceTradersAPIClient.call(
+            SpaceTradersAPIRequest[ContractShape]()
             .builder()
             .endpoint(SpaceTradersAPIEndpoint.FULFILL_CONTRACT)
             .path_params(self.id)
-            .with_token()
-            .build()
-        )
-
-        match res:
-            case SpaceTradersAPIResponse():
-                return cast(ContractShape, res.spacetraders.data)
-            case SpaceTradersAPIError() as err:
-                return err
-
-    # QUESTION: Should this be in Agent?
-    def fetch_contracts(self) -> list[ContractShape] | SpaceTradersAPIError:
-        res = SpaceTradersAPIClient.call(
-            SpaceTradersAPIRequest()
-            .builder()
-            .endpoint(SpaceTradersAPIEndpoint.MY_CONTRACTS)
-            .with_token()
-            .build()
-        )  # fmt: skip
-
-        match res:
-            case SpaceTradersAPIResponse():
-                return cast(list[ContractShape], res.spacetraders.data)
-            case SpaceTradersAPIError() as err:
-                return err
+            .token()
+            .build(),
+        ).unwrap()
 
     @staticmethod
     def fetch_contract(contract_id: str) -> ContractShape | SpaceTradersAPIError:
-        res = SpaceTradersAPIClient.call(
-            SpaceTradersAPIRequest()
+        return SpaceTradersAPIClient.call(
+            SpaceTradersAPIRequest[ContractShape]()
             .builder()
-            .endpoint(SpaceTradersAPIEndpoint.MY_CONTRACT)
+            .endpoint(SpaceTradersAPIEndpoint.GET_CONTRACT)
             .path_params(contract_id)
-            .with_token()
-            .build()
-        )
-
-        match res:
-            case SpaceTradersAPIResponse():
-                return cast(ContractShape, res.spacetraders.data)
-            case SpaceTradersAPIError() as err:
-                return err
+            .token()
+            .build(),
+        ).unwrap()

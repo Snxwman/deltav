@@ -1,6 +1,8 @@
 from enum import Enum, auto
 
+from deltav.spacetraders.enums import serialize_by_name
 
+@serialize_by_name
 class ShipComponent(Enum):
     """
 
@@ -14,6 +16,7 @@ class ShipComponent(Enum):
     ENGINE = auto()
 
 
+@serialize_by_name
 class ShipConditionEvent(Enum):
     """
 
@@ -75,7 +78,8 @@ class ShipConditionEvent(Enum):
     VIBRATION_OVERLOAD = auto()
 
 
-class ShipCrewRotation(Enum):
+@serialize_by_name
+class ShipCrewRotationShape(Enum):
     """
 
     STRICT
@@ -86,6 +90,7 @@ class ShipCrewRotation(Enum):
     RELAXED = auto()
 
 
+@serialize_by_name
 class ShipEngines(Enum):
     """
 
@@ -101,6 +106,7 @@ class ShipEngines(Enum):
     ENGINE_ION_DRIVE_II = auto()
 
 
+@serialize_by_name 
 class ShipFrames(Enum):
     """
 
@@ -140,6 +146,7 @@ class ShipFrames(Enum):
     FRAME_TRANSPORT = auto()
 
 
+@serialize_by_name 
 class ShipModules(Enum):
     """
 
@@ -187,6 +194,7 @@ class ShipModules(Enum):
     MODULE_WARP_DRIVE_III = auto()
 
 
+@serialize_by_name 
 class ShipMounts(Enum):
     """
 
@@ -224,6 +232,7 @@ class ShipMounts(Enum):
     MOUNT_TURRET_I = auto()
 
 
+@serialize_by_name 
 class ShipMountDeposits(Enum):
     """
 
@@ -259,6 +268,7 @@ class ShipMountDeposits(Enum):
     URANITE_ORE = auto()
 
 
+@serialize_by_name 
 class ShipNavFlightMode(Enum):
     """
 
@@ -274,6 +284,7 @@ class ShipNavFlightMode(Enum):
     STEALTH = auto()
 
 
+@serialize_by_name 
 class ShipNavStatus(Enum):
     """
 
@@ -287,6 +298,7 @@ class ShipNavStatus(Enum):
     IN_TRANSIT = auto()
 
 
+@serialize_by_name 
 class ShipReactors(Enum):
     """
 
@@ -304,6 +316,7 @@ class ShipReactors(Enum):
     REACTOR_SOLAR_I = auto()
 
 
+@serialize_by_name 
 class ShipRole(Enum):
     """
 
@@ -339,6 +352,7 @@ class ShipRole(Enum):
     TRANSPORT = auto()
 
 
+@serialize_by_name 
 class ShipType(Enum):
     """
 
