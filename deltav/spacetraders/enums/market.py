@@ -1,9 +1,8 @@
+from __future__ import annotations
+
 from enum import Enum, auto
 
-from deltav.spacetraders.enums import serialize_by_name
 
-
-@serialize_by_name 
 class ActivityLevel(Enum):
     """
 
@@ -19,7 +18,6 @@ class ActivityLevel(Enum):
     RESTRICTED = auto()
 
 
-@serialize_by_name 
 class TransactionType(Enum):
     """
 
@@ -31,7 +29,6 @@ class TransactionType(Enum):
     SELL = auto()
 
 
-@serialize_by_name 
 class MarketTradeGoodType(Enum):
     """
 
@@ -45,7 +42,6 @@ class MarketTradeGoodType(Enum):
     EXCHANGE = auto()
 
 
-@serialize_by_name 
 class SupplyLevel(Enum):
     """
     SCARCE
@@ -62,7 +58,6 @@ class SupplyLevel(Enum):
     ABUNDANT = auto()
 
 
-@serialize_by_name 
 class SurveySize(Enum):
     """
     SMALL
@@ -75,7 +70,6 @@ class SurveySize(Enum):
     LARGE = auto()
 
 
-@serialize_by_name 
 class TradeSymbol(Enum):
     """
 

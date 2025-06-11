@@ -534,7 +534,7 @@ class ShipPurchaseReqShape(SpaceTradersAPIReqShape):
     waypoint_symbol: str
     """
 
-    ship_type: str
+    ship_type: ShipType
     waypoint_symbol: str
 
 
@@ -551,7 +551,7 @@ class ShipPurchaseResShape(SpaceTradersAPIResShape):
 
     ship: ShipShape
     agent: AgentShape
-    transaction: ShipShape
+    transaction: ShipPurchaseTransactionShape
     """
 
     ship: ShipShape

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from datetime import datetime, timedelta
 from typing import cast
 
@@ -699,3 +701,5 @@ def run():
                     print(ship)
             case 'config':
                 print(config)
+            case 'faction':
+                print(my_agent.faction.symbol)

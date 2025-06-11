@@ -8,7 +8,6 @@
 
 from __future__ import annotations
 
-import os
 import sys
 from dataclasses import dataclass
 from enum import Enum
@@ -213,7 +212,7 @@ class Config:
                 nickname=nick,
                 account=agent.get('account').lower(),
                 symbol=agent.get('callsign').lower(),
-                faction=FactionSymbol(faction),
+                faction=FactionSymbol[faction],
                 token=AgentToken(agent.get('token')),
                 autocreate=agent.get('autocreate', False),
             )

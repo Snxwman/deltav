@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from deltav.spacetraders.enums.faction import FactionSymbol
 from deltav.spacetraders.models import SpaceTradersAPIReqShape, SpaceTradersAPIResShape
 from deltav.spacetraders.models.agent import AgentShape
@@ -82,3 +84,8 @@ class MarketTransactionResShape(SpaceTradersAPIResShape):
     cargo: ShipCargoShape
     transaction: TransactionShape
     agent: AgentShape
+
+
+class EventSubscribeReqShape(SpaceTradersAPIReqShape):
+    action: str  # TODO: Make enum
+    system_symbol: str

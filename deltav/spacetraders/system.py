@@ -1,122 +1,115 @@
+from __future__ import annotations
+
+from datetime import datetime
+
+from deltav.spacetraders import Coordinate
+from deltav.spacetraders.api import DEFAULT_PAGE_LIMIT
+from deltav.spacetraders.api.client import SpaceTradersAPIClient
+from deltav.spacetraders.api.error import SpaceTradersAPIError
 from deltav.spacetraders.api.request import SpaceTradersAPIRequest
 from deltav.spacetraders.enums.endpoints import SpaceTradersAPIEndpoint
-from deltav.spacetraders.models.construction import ConstructionSupplyReqShape
-from deltav.spacetraders.models.market import MarketShape
-from deltav.spacetraders.models.systems import JumpgateShape, ShipyardShape
+from deltav.spacetraders.enums.system import SystemType
+from deltav.spacetraders.enums.waypoint import WaypointTraitSymbol, WaypointType
+from deltav.spacetraders.faction import Faction
+from deltav.spacetraders.models.systems import SystemShape, SystemWaypointsShape
+from deltav.spacetraders.waypoint import Waypoint
 
 
 # TODO: Convert methods to right types
 class System:
-    @staticmethod
-    def extract_system_symbol(waypoint_symbol: str) -> str:
-        parts = waypoint_symbol.split('-')
-        if len(parts) >= 2:
-            return f'{parts[0]}-{parts[1]}'
-        return waypoint_symbol
+    def __init__(self, symbol: str | None = None, data: SystemShape | None = None) -> None:
+        self.__synced_api: bool = False
+        self.__synced_db: bool = False
 
-    @staticmethod
-    def get_shipyard(waypoint_symbol: str) -> SpaceTradersAPIRequest:
-        system_symbol: str = System.extract_system_symbol(waypoint_symbol)
-        return (
-            SpaceTradersAPIRequest[ShipyardShape]()
+        self.__data: SystemShape
+        self.__data_timestamp: datetime
+
+        self._coordinate: Coordinate
+        self._factions: list[Faction]
+        self._waypoints: list[Waypoint]
+
+    @property
+    def constellation(self) -> str:
+        """The constellation that the system is part of."""
+        return self.__data.constellation
+
+    @property
+    def factions(self) -> list[Faction]:
+        """Factions that control this system."""
+        return self._factions
+
+    @property
+    def coordinate(self) -> Coordinate:
+        """The relative position of the system in the sector.
+        ```py
+        Coordinate(NamedTuple)
+            x: int
+            y: int
+        ```
+        """
+        return self._coordinate
+
+    @property
+    def sector_symbol(self) -> str:
+        """The symbol of the sector."""
+        return self.__data.sector_symbol
+
+    @property
+    def symbol(self) -> str:
+        """The symbol of the system."""
+        return self.__data.symbol
+
+    @property
+    def type(self) -> SystemType:
+        """The type of system."""
+        return self.__data.type
+
+    @property
+    def waypoints(self) -> list[Waypoint]:
+        """Waypoints in this system."""
+        return self._waypoints
+
+    def _fetch_system(self) -> SystemShape | SpaceTradersAPIError:
+        return SpaceTradersAPIClient.call(
+            SpaceTradersAPIRequest[SystemShape]()
             .builder()
-            .endpoint(SpaceTradersAPIEndpoint.GET_SHIPYARD)
-            .path_params(system_symbol, waypoint_symbol)
+            .endpoint(SpaceTradersAPIEndpoint.GET_ALL_SYSTEMS)
+            .path_params(self.symbol)
             .token()
             .build()
-        )
+        ).unwrap()
 
-    @staticmethod
-    def get_market(waypoint_symbol: str) -> SpaceTradersAPIRequest:
-        system_symbol: str = System.extract_system_symbol(waypoint_symbol)
-        return (
-            SpaceTradersAPIRequest[MarketShape]()
-            .builder()
-            .endpoint(SpaceTradersAPIEndpoint.GET_MARKET)
-            .path_params(system_symbol, waypoint_symbol)
-            .token()
-            .build()
-        )
-
-    @staticmethod
-    def get_jumpgate(waypoint_symbol: str) -> SpaceTradersAPIRequest:
-        system_symbol: str = System.extract_system_symbol(waypoint_symbol)
-        return (
-            SpaceTradersAPIRequest[JumpgateShape]()
-            .builder()
-            .endpoint(SpaceTradersAPIEndpoint.GET_JUMPGATE)
-            .path_params(system_symbol, waypoint_symbol)
-            .token()
-            .build()
-        )
-
-    @staticmethod
-    def get_systems() -> SpaceTradersAPIRequest:
-        return (
-            SpaceTradersAPIRequest()
+    def _fetch_systems(self) -> SystemShape | SpaceTradersAPIError:
+        return SpaceTradersAPIClient.call(
+            SpaceTradersAPIRequest[SystemShape]()
             .builder()
             .endpoint(SpaceTradersAPIEndpoint.GET_ALL_SYSTEMS)
             .token()
             .build()
-        )
+        ).unwrap()
 
-    @staticmethod
-    def get_system(waypoint_symbol: str) -> SpaceTradersAPIRequest:
-        system_symbol: str = System.extract_system_symbol(waypoint_symbol)
-        return (
-            SpaceTradersAPIRequest()
-            .builder()
-            .endpoint(SpaceTradersAPIEndpoint.GET_ALL_SYSTEMS)
-            .path_params(system_symbol)
-            .token()
-            .build()
-        )
-
-    @staticmethod
-    def get_waypoints(system_symbol: str) -> SpaceTradersAPIRequest:
-        return (
-            SpaceTradersAPIRequest()
+    def _fetch_waypoints(
+        self,
+        waypoint_type: WaypointType | None = None,
+        waypoint_traits: list[WaypointTraitSymbol] | None = None,
+        start_page: int = 1,
+        end_page: int | None = None,
+        limit: int = DEFAULT_PAGE_LIMIT,
+    ) -> SystemWaypointsShape | SpaceTradersAPIError:
+        return SpaceTradersAPIClient.call(
+            SpaceTradersAPIRequest[SystemWaypointsShape]()
             .builder()
             .endpoint(SpaceTradersAPIEndpoint.GET_ALL_SYSTEM_WAYPOINTS)
-            .path_params(system_symbol)
+            .path_params(self.symbol)
+            .query_params(type=waypoint_type, traits=waypoint_traits)
+            .pages(start_page, end_page)
+            .page_limit(limit)
             .token()
             .build()
-        )
+        ).unwrap()
 
-    @staticmethod
-    def get_waypoint(waypoint_symbol: str) -> SpaceTradersAPIRequest:
-        system_symbol: str = System.extract_system_symbol(waypoint_symbol)
-        return (
-            SpaceTradersAPIRequest()
-            .builder()
-            .endpoint(SpaceTradersAPIEndpoint.GET_WAYPOINT)
-            .path_params(system_symbol, waypoint_symbol)
-            .token()
-            .build()
-        )
+    def __handle_fetch_system_err(self, err: SpaceTradersAPIError) -> ValueError: ...
 
-    @staticmethod
-    def get_construction_site(waypoint_symbol: str) -> SpaceTradersAPIRequest:
-        system_symbol: str = System.extract_system_symbol(waypoint_symbol)
-        return (
-            SpaceTradersAPIRequest()
-            .builder()
-            .endpoint(SpaceTradersAPIEndpoint.GET_CONSTRUCTION_SITE)
-            .path_params(system_symbol, waypoint_symbol)
-            .token()
-            .build()
-        )
+    def __handle_fetch_systems_err(self, err: SpaceTradersAPIError) -> ValueError: ...
 
-    @staticmethod
-    def supply_construction_site(waypoint_symbol: str, supply: ConstructionSupplyReqShape) -> SpaceTradersAPIRequest:
-        system_symbol: str = System.extract_system_symbol(waypoint_symbol)
-        return (
-            SpaceTradersAPIRequest()
-            .builder()
-            .endpoint(SpaceTradersAPIEndpoint.SUPPLY_CONSTRUCTION_SITE)
-            .path_params(system_symbol, waypoint_symbol)
-            .token()
-            .data(supply)
-            .build()
-        )
-
+    def __handle_fetch_waypoints_err(self, err: SpaceTradersAPIError) -> ValueError: ...

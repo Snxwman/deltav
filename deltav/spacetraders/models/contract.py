@@ -6,6 +6,7 @@ from pydantic import Field
 
 from deltav.spacetraders.enums.contract import ContractType
 from deltav.spacetraders.enums.faction import FactionSymbol
+from deltav.spacetraders.enums.market import TradeSymbol
 from deltav.spacetraders.models import SpaceTradersAPIReqShape, SpaceTradersAPIResShape
 from deltav.spacetraders.models.agent import AgentShape
 
@@ -67,13 +68,13 @@ class ContractDeliverReqShape(SpaceTradersAPIReqShape):
 class ContractDeliverResShape(SpaceTradersAPIResShape):
     """
 
-    trade_symbol: str
+    trade_symbol: TradeSymbol
     destination_symbol: str
     units_required: int
     units_fulfilled: int
     """
 
-    trade_symbol: str
+    trade_symbol: TradeSymbol
     destination_symbol: str
     units_required: int
     units_fulfilled: int

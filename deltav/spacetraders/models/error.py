@@ -33,3 +33,24 @@ class HttpErrorShape(SpaceTradersAPIResShape):
     code: HTTPStatus
     error: str
     message: str
+
+
+class ErrorCodeShape(SpaceTradersAPIResShape):
+    """
+
+    code: int
+    name: str
+    """
+
+    code: int
+    name: str
+
+
+# NOTE: Top level return shape
+class ErrorCodesShape(SpaceTradersAPIResShape):
+    """
+
+    error_codes: list[ErrorCodeShape]
+    """
+
+    error_codes: list[ErrorCodeShape]

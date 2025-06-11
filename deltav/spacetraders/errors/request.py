@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+
 class InvalidRequestError(Exception):
     def __init__(self, message: str) -> None:
         self.message: str = message

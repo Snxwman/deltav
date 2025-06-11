@@ -1,10 +1,12 @@
+from __future__ import annotations
+
 from datetime import date, datetime, timedelta
-from hashlib import sha256, shake_128
+from hashlib import sha256
 from typing import Any, final, override
 
 import jwt
 
-from deltav.spacetraders.enums.token import TokenType 
+from deltav.spacetraders.enums.token import TokenType
 
 
 class Token:

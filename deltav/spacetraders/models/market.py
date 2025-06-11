@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Mapping
 from datetime import datetime
 
 from deltav.spacetraders.enums.market import (
@@ -12,7 +13,7 @@ from deltav.spacetraders.enums.market import (
 from deltav.spacetraders.models import SpaceTradersAPIResShape
 
 
-# FIX: CargoItemShape
+# FIX: Cargo Item Shape
 class MarketShape(SpaceTradersAPIResShape):
     """
 
@@ -87,3 +88,11 @@ class TransactionShape(SpaceTradersAPIResShape):
     price_per_unit: int
     total_price: int
     timestamp: datetime
+
+
+class MarketSupplyChainAdditionalPropertiesShape(SpaceTradersAPIResShape):
+    ANY_ADDITIONAL_PROPERTY: list[str]
+
+
+class MarketSupplyChainShape(SpaceTradersAPIResShape):
+    export_to_import_map: Mapping[TradeSymbol, list[TradeSymbol]]  # TODO: Verify

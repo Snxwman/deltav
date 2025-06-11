@@ -1,6 +1,7 @@
+from __future__ import annotations
+
 from enum import Enum
 
-from deltav.spacetraders.enums import serialize_by_name
 
 class SpaceTradersAPIErrorCodes(Enum):
     RESPONSE_SERIALIZATION_ERROR = 3000

@@ -1,9 +1,11 @@
+from __future__ import annotations
+
 from http import HTTPStatus
 from typing import Any
 
+from httpx import Response
 from loguru import logger
 from pydantic import ValidationError
-from httpx import Response
 
 from deltav.spacetraders.enums.error import SpaceTradersAPIErrorCodes
 from deltav.spacetraders.models.error import HttpErrorShape, SpaceTradersAPIErrorShape

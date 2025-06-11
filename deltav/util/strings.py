@@ -1,4 +1,7 @@
-def indent(string: str, level: int, start_even: bool = False) -> str:
+from __future__ import annotations
+
+
+def indent(string: str, level: int, *, start_even: bool = False) -> str:
     level = level - 1 if start_even else level
 
     _string = '\n'.join(

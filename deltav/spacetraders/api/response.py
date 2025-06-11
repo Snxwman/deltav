@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from http import HTTPStatus
 from typing import Any, Generic, TypeVar, cast
 
@@ -23,7 +25,8 @@ class SpaceTradersAPIResponse(Generic[T]):
 
         shape = endpoint.response_shapes.get(HTTPStatus(res.status_code))
         if shape is None:
-            raise ValueError(f'Got unexpected http status code {res.status_code}')
+            msg = f'Got unexpected http status code {res.status_code}'
+            raise ValueError(msg)
         self.__shape = shape
 
         json_data: dict[str, Any] = {} if res.status_code == 204 else res.json()

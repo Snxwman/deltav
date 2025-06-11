@@ -1,4 +1,6 @@
-from datetime import datetime
+from __future__ import annotations
+
+from datetime import UTC, datetime
 from typing import TypedDict
 
 from deltav.spacetraders.enums.ratelimit import RateLimitType
@@ -33,7 +35,7 @@ class Ratelimit:
         self.limit_burst: int = 30
         self.limit_per_second: int = 2
         self.remaining: int = 2
-        self.reset: datetime = datetime.now()
+        self.reset: datetime = datetime.now(tz=UTC)
         self.type: RateLimitType = RateLimitType.IP_ADDRESS
 
     def update(self, x_headers: RatelimitHeaders) -> None:

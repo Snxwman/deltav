@@ -1,11 +1,15 @@
-from datetime import datetime
+from __future__ import annotations
+
+from datetime import UTC, datetime
+
 from loguru import logger
+
 from deltav.spacetraders.api.client import SpaceTradersAPIClient
 from deltav.spacetraders.api.error import SpaceTradersAPIError
 from deltav.spacetraders.api.request import SpaceTradersAPIRequest
 from deltav.spacetraders.enums.endpoints import SpaceTradersAPIEndpoint
 from deltav.spacetraders.enums.faction import FactionSymbol
-from deltav.spacetraders.models.faction import FactionShape, FactionTraitShape, FactionsShape
+from deltav.spacetraders.models.faction import FactionShape, FactionsShape, FactionTraitShape
 
 
 class Faction:
@@ -109,7 +113,7 @@ class Faction:
     def __update_cache(cls, faction: 'Faction') -> None:
         """Adds or updates the factions cache"""
         cls._FACTIONS[faction.symbol] = faction
-        cls.__FACTIONS_TIMESTAMPS[faction.symbol] = datetime.now()
+        cls.__FACTIONS_TIMESTAMPS[faction.symbol] = datetime.now(tz=UTC)
 
     @classmethod
     def __from_cache(cls, symbol: FactionSymbol) -> 'Faction | None':

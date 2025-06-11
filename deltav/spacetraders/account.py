@@ -1,4 +1,6 @@
-from datetime import datetime
+from __future__ import annotations
+
+from datetime import UTC, datetime
 
 from loguru import logger
 
@@ -25,6 +27,7 @@ class Account:
             created_at (datetime)
             email (str)
         """
+
         logger.debug('Initializing new Account')
         logger.trace(f'{token=}')
 
@@ -50,20 +53,22 @@ class Account:
             case MyAccountShape() as res:
                 self.__synced_api = True
                 self.__data = res.account
-                self.__data_timestamp = datetime.now()
+                self.__data_timestamp = datetime.now(tz=UTC)
                 if self.email is None or self.email != res.account.email:
                     self.email = res.account.email
             case SpaceTradersAPIError() as err:
                 raise self.__handle_fetch_account_err(err)
 
     def _fetch_account(self, agent_token: AgentToken) -> MyAccountShape | SpaceTradersAPIError:
-        logger.debug(f'Attempting to fetch account details for token \'{self.token.hash}\'')
+        msg = f"Attempting to fetch account details for token '{self.token.hash}'"
+        logger.debug(msg)
+
         return SpaceTradersAPIClient.call(
             SpaceTradersAPIRequest[MyAccountShape]()
             .builder()
             .endpoint(SpaceTradersAPIEndpoint.GET_ACCOUNT)
             .token(agent_token)
-            .build(),
+            .build()
         ).unwrap()
 
     def __handle_fetch_account_err(self, err: SpaceTradersAPIError) -> ValueError:
@@ -83,5 +88,5 @@ class Account:
         cls._ACCOUNTS[account.id] = account
 
     @classmethod
-    def __from_cache(cls, id: str) -> 'Account | None':
-        return cls._ACCOUNTS.get(id, None)
+    def __from_cache(cls, account_id: str) -> 'Account | None':
+        return cls._ACCOUNTS.get(account_id, None)
