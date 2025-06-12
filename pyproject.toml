@@ -11,6 +11,7 @@ dependencies = [
     "loguru>=0.7.3",
     "pydantic>=2.11.5",
     "pyjwt[crypto]>=2.10.1",
+    "sqlalchemy>=2.0.41",
     "textual[syntax]>=3.2.0",
     "tomlkit>=0.13.2",
 ]
@@ -70,6 +71,7 @@ extend-select = [
     "RET",  # flake8 return
     "SLF",  # flake8 self
     "T20",  # flake8 print
+    "TC",   # flake8 type checking
 ]
 ignore = [
     "COM812",  # Missing trailing comma

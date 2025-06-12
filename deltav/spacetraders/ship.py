@@ -7,7 +7,7 @@ from deltav.spacetraders.api.error import SpaceTradersAPIError
 from deltav.spacetraders.api.request import SpaceTradersAPIRequest
 from deltav.spacetraders.enums.endpoints import SpaceTradersAPIEndpoint
 from deltav.spacetraders.enums.faction import FactionSymbol
-from deltav.spacetraders.enums.ship import ShipRole
+from deltav.spacetraders.enums.ship import ShipCrewRotationShape, ShipRole
 from deltav.spacetraders.models import NoDataResShape
 from deltav.spacetraders.models.contract import ContractShape
 from deltav.spacetraders.models.endpoint import ChartCreateShape
@@ -17,6 +17,7 @@ from deltav.spacetraders.models.ship import (
     ScanShipsShape,
     ScanSystemsShape,
     ScanWaypointsShape,
+    ShipCargoInventoryShape,
     ShipCargoShape,
     ShipCooldownShape,
     ShipCrewShape,
@@ -66,8 +67,20 @@ class Ship:
         self._symbol: str = data.symbol
 
     @property
-    def cargo(self) -> ShipCargoShape:
-        return self._cargo
+    def cargo(self) -> list[ShipCargoInventoryShape]:
+        return self._cargo.inventory
+
+    @property
+    def cargo_capacity(self) -> int:
+        return self._cargo.capacity
+
+    @property
+    def cargo_units(self) -> int:
+        return self._cargo.units
+
+    @property
+    def cargo_units_remaining(self) -> int:
+        return self.cargo_capacity - self.cargo_units
 
     @property
     def has_cargo(self) -> bool:
@@ -82,8 +95,20 @@ class Ship:
         return False if self._cooldown.remaining_seconds == 0 else True
 
     @property
-    def crew(self) -> ShipCrewShape:
+    def crew(self) -> int:
+        return self._crew.current
+
+    @property
+    def crew_details(self) -> ShipCrewShape:
         return self._crew
+
+    @property
+    def crew_required(self) -> int:
+        return self._crew.required
+
+    @property
+    def crew_rotation(self) -> ShipCrewRotationShape:
+        return self._crew.rotation
 
     @property
     def engine(self) -> ShipEngineShape:

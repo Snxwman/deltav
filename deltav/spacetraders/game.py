@@ -75,4 +75,4 @@ class SpaceTradersGame:
 
 
 GAME = SpaceTradersGame()
-logger.info(f'SpaceTraders server status: {GAME.server_status}')
+# logger.info(f'SpaceTraders server status: {GAME.server_status}')

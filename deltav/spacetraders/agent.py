@@ -62,6 +62,7 @@ class AgentABC(ABC):  # noqa: B024
         return self._ship_count
 
 
+
 @final
 class Agent(AgentABC):
     # TODO: Better error handling (try not to raise and make custom error types)
