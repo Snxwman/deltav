@@ -9,7 +9,7 @@ from sqlalchemy import Engine, create_engine, select
 
 from deltav import cli
 from deltav.spacetraders.api.client import SpaceTradersAPIClient
-from deltav.store.db import Base, Session
+from deltav.store.db import Base, Session, engine
 from deltav.store.db.ship import ShipRecord
 
 
@@ -26,7 +26,6 @@ def main():
     logger.trace('Registering signal handlers')
     _ = signal.signal(signal.SIGINT, signal_handler)
 
-    engine: Engine = create_engine('sqlite:///deltav.db', echo=True)
     Base.metadata.create_all(engine)
 
     sys.exit()

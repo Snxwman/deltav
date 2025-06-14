@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from typing import TYPE_CHECKING
 
 from loguru import logger
+from sqlalchemy import select
 
 from deltav.config.config import Config, StAccountConfig
 from deltav.spacetraders.api.client import SpaceTradersAPIClient
@@ -10,7 +12,11 @@ from deltav.spacetraders.api.error import SpaceTradersAPIError
 from deltav.spacetraders.api.request import SpaceTradersAPIRequest
 from deltav.spacetraders.enums.endpoints import SpaceTradersAPIEndpoint
 from deltav.spacetraders.models.account import AccountShape, MyAccountShape
-from deltav.spacetraders.token import AccountToken, AgentToken
+from deltav.store.db import Session
+from deltav.store.db.account import AccountRecord
+
+if TYPE_CHECKING:
+    from deltav.spacetraders.token import AccountToken, AgentToken
 
 
 class Account:
@@ -18,7 +24,12 @@ class Account:
     _ACCOUNTS: dict[str, 'Account'] = {}
 
     # SpaceTraders API requires an agent token (?) to fetch the account details...
-    def __init__(self, token: AccountToken, agent_token: AgentToken) -> None:
+    def __init__(
+        self,
+        token: AccountToken,
+        agent_token: AgentToken,
+        data: AccountShape | AccountRecord | None = None,
+    ) -> None:
         """A SpaceTraders Account
 
         Fields:
@@ -36,17 +47,40 @@ class Account:
         self.__data: AccountShape
         self.__data_timestamp: datetime
         self.__config: StAccountConfig
-        self.id: str = token.account_id
-        self.token: AccountToken = token
-        self.created_at: datetime = token.issued_at
-        self.email: str | None = None
+        self._account_id: str = token.account_id
+        self._token: AccountToken = token
+        self._created_at: datetime = token.issued_at
+        self._email: str | None = None
 
         if config := Config.get_account_from_token(token):
             self.__config = config
-            self.email = config.email
+            self._email = config.email
 
         self.update_account(agent_token)
         Account.__update_cache(self)
+
+    @property
+    def id(self) -> str:
+        return self._account_id
+
+    @property
+    def token(self) -> AccountToken:
+        return self._token
+
+    @property
+    def created_at(self) -> datetime:
+        return self._created_at
+
+    @property
+    def email(self) -> str | None:
+        return self._email
+
+    @staticmethod
+    def get_account(token: AccountToken, agent_token: AgentToken) -> 'Account':
+        if (account := Account.__from_cache(token.account_id)) is not None:
+            return account
+
+        return Account(token, agent_token)
 
     def update_account(self, token: AgentToken) -> None:
         match self._fetch_account(token):
@@ -55,7 +89,7 @@ class Account:
                 self.__data = res.account
                 self.__data_timestamp = datetime.now(tz=UTC)
                 if self.email is None or self.email != res.account.email:
-                    self.email = res.account.email
+                    self._email = res.account.email
             case SpaceTradersAPIError() as err:
                 raise self.__handle_fetch_account_err(err)
 
@@ -76,13 +110,6 @@ class Account:
         logger.error(log_str)
         return ValueError(log_str)
 
-    @staticmethod
-    def get_account(token: AccountToken, agent_token: AgentToken) -> 'Account':
-        if (account := Account.__from_cache(token.account_id)) is not None:
-            return account
-
-        return Account(token, agent_token)
-
     @classmethod
     def __update_cache(cls, account: 'Account') -> None:
         cls._ACCOUNTS[account.id] = account
@@ -90,3 +117,16 @@ class Account:
     @classmethod
     def __from_cache(cls, account_id: str) -> 'Account | None':
         return cls._ACCOUNTS.get(account_id, None)
+
+    def __update_db(self) -> None:
+        account = AccountRecord(
+            account_id=self.id, created_at=self.created_at, email=self.email, token=self.token
+        )
+
+        with Session() as session:
+            session.add(account)
+
+    def __from_db(self) -> None:
+        query = select(AccountRecord).where(AccountRecord.account_id == self.id)
+        with Session() as session:
+            data = session.scalar(query)
