@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from enum import Enum, auto
+from enum import Enum
 
 
 class SystemType(Enum):
@@ -18,13 +18,13 @@ class SystemType(Enum):
     YOUNG_STAR
     """
 
-    BLACK_HOLE = auto()
-    BLUE_STAR = auto()
-    HYPERGIANT = auto()
-    NEBULA = auto()
-    NEUTRON_STAR = auto()
-    ORANGE_STAR = auto()
-    RED_STAR = auto()
-    UNSTABLE = auto()
-    WHITE_DWARF = auto()
-    YOUNG_STAR = auto()
+    BLACK_HOLE = 'BLACK_HOLE'
+    BLUE_STAR = 'BLUE_STAR'
+    HYPERGIANT = 'HYPERGIANT'
+    NEBULA = 'NEBULA'
+    NEUTRON_STAR = 'NEUTRON_STAR'
+    ORANGE_STAR = 'ORANGE_STAR'
+    RED_STAR = 'RED_STAR'
+    UNSTABLE = 'UNSTABLE'
+    WHITE_DWARF = 'WHITE_DWARF'
+    YOUNG_STAR = 'YOUNG_STAR'

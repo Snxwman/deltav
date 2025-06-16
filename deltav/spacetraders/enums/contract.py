@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-from enum import Enum, auto
-
+from enum import Enum
 
 
 class ContractType(Enum):
@@ -12,6 +11,6 @@ class ContractType(Enum):
     TRANSPORT
     """
 
-    PROCUREMENT = auto()
-    SHUTTLE = auto()
-    TRANSPORT = auto()
+    PROCUREMENT = 'PROCUREMENT'
+    SHUTTLE = 'SHUTTLE'
+    TRANSPORT = 'TRANSPORT'
