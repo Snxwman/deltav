@@ -1,9 +1,8 @@
-from enum import Enum, auto
+from __future__ import annotations
 
-from deltav.spacetraders.enums import serialize_by_name
+from enum import Enum
 
 
-@serialize_by_name
 class FactionSymbol(Enum):
     """
     AEGIS
@@ -54,7 +53,6 @@ class FactionSymbol(Enum):
     #     return FactionSymbol.COSMIC
 
 
-@serialize_by_name
 class FactionTraitSymbol(Enum):
     """
     ADAPTABLE
@@ -118,62 +116,62 @@ class FactionTraitSymbol(Enum):
     WELCOMING
     """
 
-    ADAPTABLE = auto()
-    AGGRESSIVE = auto()
-    BOLD = auto()
-    BRUTAL = auto()
-    BUREAUCRATIC = auto()
-    CAPITALISTIC = auto()
-    CLAN = auto()
-    COLLABORATIVE = auto()
-    COMMERCIAL = auto()
-    COOPERATIVE = auto()
-    CURIOUS = auto()
-    DARING = auto()
-    DEFENSIVE = auto()
-    DEXTEROUS = auto()
-    DISTRUSTFUL = auto()
-    DIVERSE = auto()
-    DOMINANT = auto()
-    DOMINION = auto()
-    ENTREPRENEURIAL = auto()
-    ESTABLISHED = auto()
-    EXILES = auto()
-    EXPLORATORY = auto()
-    FLEETING = auto()
-    FLEXIBLE = auto()
-    FORSAKEN = auto()
-    FRAGMENTED = auto()
-    FREE_MARKETS = auto()
-    FRINGE = auto()
-    GUILD = auto()
-    IMPERIALISTIC = auto()
-    INDEPENDENT = auto()
-    INDUSTRIOUS = auto()
-    INESCAPABLE = auto()
-    INNOVATIVE = auto()
-    INTELLIGENT = auto()
-    ISOLATED = auto()
-    LOCALIZED = auto()
-    MILITARISTIC = auto()
-    NOTABLE = auto()
-    PEACEFUL = auto()
-    PIRATES = auto()
-    PROGRESSIVE = auto()
-    PROUD = auto()
-    RAIDERS = auto()
-    REBELLIOUS = auto()
-    RESEARCH_FOCUSED = auto()
-    RESOURCEFUL = auto()
-    SCAVENGERS = auto()
-    SECRETIVE = auto()
-    SELF_INTERESTED = auto()
-    SELF_SUFFICIENT = auto()
-    SMUGGLERS = auto()
-    STRATEGIC = auto()
-    TECHNOLOGICALLY_ADVANCED = auto()
-    TREASURE_HUNTERS = auto()
-    UNITED = auto()
-    UNPREDICTABLE = auto()
-    VISIONARY = auto()
-    WELCOMING = auto()
+    ADAPTABLE = 'ADAPTABLE'
+    AGGRESSIVE = 'AGGRESSIVE'
+    BOLD = 'BOLD'
+    BRUTAL = 'BRUTAL'
+    BUREAUCRATIC = 'BUREAUCRATIC'
+    CAPITALISTIC = 'CAPITALISTIC'
+    CLAN = 'CLAN'
+    COLLABORATIVE = 'COLLABORATIVE'
+    COMMERCIAL = 'COMMERCIAL'
+    COOPERATIVE = 'COOPERATIVE'
+    CURIOUS = 'CURIOUS'
+    DARING = 'DARING'
+    DEFENSIVE = 'DEFENSIVE'
+    DEXTEROUS = 'DEXTEROUS'
+    DISTRUSTFUL = 'DISTRUSTFUL'
+    DIVERSE = 'DIVERSE'
+    DOMINANT = 'DOMINANT'
+    DOMINION = 'DOMINION'
+    ENTREPRENEURIAL = 'ENTREPRENEURIAL'
+    ESTABLISHED = 'ESTABLISHED'
+    EXILES = 'EXILES'
+    EXPLORATORY = 'EXPLORATORY'
+    FLEETING = 'FLEETING'
+    FLEXIBLE = 'FLEXIBLE'
+    FORSAKEN = 'FORSAKEN'
+    FRAGMENTED = 'FRAGMENTED'
+    FREE_MARKETS = 'FREE_MARKETS'
+    FRINGE = 'FRINGE'
+    GUILD = 'GUILD'
+    IMPERIALISTIC = 'IMPERIALISTIC'
+    INDEPENDENT = 'INDEPENDENT'
+    INDUSTRIOUS = 'INDUSTRIOUS'
+    INESCAPABLE = 'INESCAPABLE'
+    INNOVATIVE = 'INNOVATIVE'
+    INTELLIGENT = 'INTELLIGENT'
+    ISOLATED = 'ISOLATED'
+    LOCALIZED = 'LOCALIZED'
+    MILITARISTIC = 'MILITARISTIC'
+    NOTABLE = 'NOTABLE'
+    PEACEFUL = 'PEACEFUL'
+    PIRATES = 'PIRATES'
+    PROGRESSIVE = 'PROGRESSIVE'
+    PROUD = 'PROUD'
+    RAIDERS = 'RAIDERS'
+    REBELLIOUS = 'REBELLIOUS'
+    RESEARCH_FOCUSED = 'RESEARCH_FOCUSED'
+    RESOURCEFUL = 'RESOURCEFUL'
+    SCAVENGERS = 'SCAVENGERS'
+    SECRETIVE = 'SECRETIVE'
+    SELF_INTERESTED = 'SELF_INTERESTED'
+    SELF_SUFFICIENT = 'SELF_SUFFICIENT'
+    SMUGGLERS = 'SMUGGLERS'
+    STRATEGIC = 'STRATEGIC'
+    TECHNOLOGICALLY_ADVANCED = 'TECHNOLOGICALLY_ADVANCED'
+    TREASURE_HUNTERS = 'TREASURE_HUNTERS'
+    UNITED = 'UNITED'
+    UNPREDICTABLE = 'UNPREDICTABLE'
+    VISIONARY = 'VISIONARY'
+    WELCOMING = 'WELCOMING'

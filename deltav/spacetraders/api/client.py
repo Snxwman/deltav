@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from copy import copy
 from time import sleep
 from typing import TypeVar
@@ -10,7 +12,6 @@ from deltav.spacetraders.api.ratelimit import Ratelimit
 from deltav.spacetraders.api.request import SpaceTradersAPIRequest
 from deltav.spacetraders.api.response import SpaceTradersAPIResponse
 from deltav.spacetraders.models import SpaceTradersAPIResShape, merge_models
-
 
 T = TypeVar('T', bound=SpaceTradersAPIResShape)
 
@@ -34,16 +35,18 @@ class SpaceTradersAPIClient:
         logger.info(f'Requesting {_req.url}')
         res = cls.http_client.send(_req)
 
-        if res.status_code < 300:
-            logger.success(res.status_code)
-            return SpaceTradersAPIResponse[T](req.endpoint, res)
-        else:
+        if res.status_code >= 300:
             logger.error(res.status_code)
             return SpaceTradersAPIError(res)
 
+        logger.success(res.status_code)
+        return SpaceTradersAPIResponse[T](req.endpoint, res)
+
     # FIX: REALLY BAD, probably need to refactor SpaceTradersAPIResponse
     @classmethod
-    def call(cls, req: SpaceTradersAPIRequest[T]) -> SpaceTradersAPIResponse[T] | SpaceTradersAPIError:
+    def call(
+        cls, req: SpaceTradersAPIRequest[T]
+    ) -> SpaceTradersAPIResponse[T] | SpaceTradersAPIError:
         """Call a SpaceTraders API endpoint by passing a request object.
 
         Args:
@@ -59,7 +62,7 @@ class SpaceTradersAPIClient:
         def httpx_request(req: SpaceTradersAPIRequest[T], page: int | None = None) -> httpx.Request:
             if page is not None:
                 req = copy(req)
-                req._current_page = page  # pyright: ignore[reportPrivateUsage]
+                req._current_page = page  # noqa: SLF001  # pyright: ignore[reportPrivateUsage]
 
             return httpx.Request(
                 method=req.endpoint.method,
@@ -80,7 +83,8 @@ class SpaceTradersAPIClient:
                     page = i + 2
                     requests.append((page, httpx_request(req, page)))
             else:
-                raise RuntimeError('Aborting since initial request failed')
+                msg = 'Aborting since initial request failed'
+                raise RuntimeError(msg)
         elif req.is_paged and not req.all_pages:
             for page in range(req.start_page, req.end_page + 1):
                 requests.append((page, httpx_request(req, page)))
@@ -92,7 +96,7 @@ class SpaceTradersAPIClient:
             sleep(0.5)
 
         ret: SpaceTradersAPIResponse[T] | None = None
-        for page, res in responses:
+        for _, res in responses:
             if isinstance(res, SpaceTradersAPIResponse):
                 if ret is None:
                     ret = res
@@ -100,7 +104,7 @@ class SpaceTradersAPIClient:
 
                 ret.data = merge_models(ret.data, res.data)
 
-        if ret is not None:
-            return ret
-        else:
+        if ret is None:
             return responses[0][1]
+
+        return ret

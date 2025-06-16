@@ -1,9 +1,10 @@
+from __future__ import annotations
+
 import os
-from pathlib import Path
 import platform
+from pathlib import Path
 
 from deltav.config.errors import UnsupportedPlatformError
-
 
 SUPPORTED_PLATFORMS = ['Linux', 'Darwin', 'Windows']
 

@@ -1,13 +1,17 @@
 from __future__ import annotations
 
-from deltav.spacetraders.enums.faction import FactionSymbol
-from deltav.spacetraders.enums.waypoint import (
-    WaypointModifierSymbol,
-    WaypointTraitSymbol,
-    WaypointType,
-)
+from typing import TYPE_CHECKING
+
 from deltav.spacetraders.models import SpaceTradersAPIReqShape, SpaceTradersAPIResShape
-from deltav.spacetraders.models.chart import ChartShape
+
+if TYPE_CHECKING:
+    from deltav.spacetraders.enums.waypoint import (
+        WaypointModifierSymbol,
+        WaypointTraitSymbol,
+        WaypointType,
+    )
+    from deltav.spacetraders.models.chart import ChartShape
+    from deltav.spacetraders.models.faction import FactionSymbolShape
 
 
 class WaypointShape(SpaceTradersAPIResShape):
@@ -18,10 +22,13 @@ class WaypointShape(SpaceTradersAPIResShape):
     system_symbol: str
     x: int
     y: int
-    orbitals: list[str]
-    faction: FactionSymbol
+    orbitals: list[WaypointOrbitalShape]
+    orbits: str
+    faction: FactionSymbolShape
     traits: list[WaypointTraitShape]
+    modifiers: list[SystemWaypointModifierShape]
     chart: ChartShape
+    is_under_construction: bool
     """
 
     symbol: str
@@ -29,10 +36,13 @@ class WaypointShape(SpaceTradersAPIResShape):
     system_symbol: str
     x: int
     y: int
-    orbitals: list[str]
-    faction: FactionSymbol
+    orbitals: list[WaypointOrbitalShape]
+    orbits: str
+    faction: FactionSymbolShape
     traits: list[WaypointTraitShape]
+    modifiers: list[WaypointModifierShape]
     chart: ChartShape
+    is_under_construction: bool
 
 
 class WaypointModifierShape(SpaceTradersAPIResShape):

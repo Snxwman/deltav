@@ -1,22 +1,21 @@
+# pyright: reportAny=false
 from __future__ import annotations
 
-from datetime import datetime
+from typing import TYPE_CHECKING
 
 from pydantic import Field
 
-from deltav.spacetraders.enums.faction import FactionSymbol
-from deltav.spacetraders.enums.ship import ShipType
-from deltav.spacetraders.enums.system import SystemType
-from deltav.spacetraders.enums.waypoint import WaypointType
 from deltav.spacetraders.models import SpaceTradersAPIResShape
-from deltav.spacetraders.models.chart import ChartShape
-from deltav.spacetraders.models.faction import FactionSymbolShape
-from deltav.spacetraders.models.ship import ShipShape
-from deltav.spacetraders.models.waypoint import (
-    WaypointModifierShape,
-    WaypointOrbitalShape,
-    WaypointTraitShape,
-)
+
+if TYPE_CHECKING:
+    from datetime import datetime
+
+    from deltav.spacetraders.enums.faction import FactionSymbol
+    from deltav.spacetraders.enums.ship import ShipType
+    from deltav.spacetraders.enums.system import SystemType
+    from deltav.spacetraders.enums.waypoint import WaypointType
+    from deltav.spacetraders.models.ship import ShipShape
+    from deltav.spacetraders.models.waypoint import WaypointOrbitalShape
 
 
 class ShipyardShape(SpaceTradersAPIResShape):
@@ -117,11 +116,6 @@ class SystemWaypointShape(SpaceTradersAPIResShape):
     y: int
     orbitals: list[WaypointOrbitalShape]
     orbits: str
-    faction: FactionSymbolShape
-    traits: list[WaypointTraitShape]
-    modifiers: list[SystemWaypointModifierShape]
-    chart: ChartShape
-    is_under_construction: bool
     """
 
     symbol: str
@@ -131,11 +125,6 @@ class SystemWaypointShape(SpaceTradersAPIResShape):
     y: int
     orbitals: list[WaypointOrbitalShape]
     orbits: str
-    faction: FactionSymbolShape
-    traits: list[WaypointTraitShape]
-    modifiers: list[WaypointModifierShape]
-    chart: ChartShape
-    is_under_construction: bool
 
 
 class SystemWaypointsShape(SpaceTradersAPIResShape):

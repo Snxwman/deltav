@@ -1,15 +1,16 @@
+from __future__ import annotations
+
 from datetime import datetime
 
 from loguru import logger
 
-from deltav.spacetraders.agent import Agent
 from deltav.spacetraders.api import MAX_PAGE_LIMIT
 from deltav.spacetraders.api.client import SpaceTradersAPIClient
 from deltav.spacetraders.api.error import SpaceTradersAPIError
 from deltav.spacetraders.api.request import SpaceTradersAPIRequest
 from deltav.spacetraders.enums.endpoints import SpaceTradersAPIEndpoint
-from deltav.spacetraders.models import ServerStatusShape
 from deltav.spacetraders.models.agent import PublicAgentShape, PublicAgentsShape
+from deltav.spacetraders.models.server import ServerStatusShape
 from deltav.spacetraders.ship import Ship
 from deltav.spacetraders.system import System
 from deltav.spacetraders.waypoint import Waypoint
@@ -27,11 +28,11 @@ class SpaceTradersGame:
 
     def __init__(self) -> None:
         self.agents: list[PublicAgentShape]
+        self.constellations: dict[str, list[System]]
+        self.sectors: dict[str, list[System]]
         self.ships: list[Ship]
         self.systems: list[System]
         self.waypoints: list[Waypoint]
-        # self.leaderboard_credits: list[tuple[str, int]]
-        # self.leaderboard_submitted_charts: list[tuple[str, int]]
 
         self.next_restart: datetime
         self.restart_freq: str
@@ -43,14 +44,13 @@ class SpaceTradersGame:
     def update_server_status(self, status: ServerStatusShape | None = None) -> None:
         if status is None:
             _status = SpaceTradersGame._fetch_server_status()
-            print(_status)
 
     def update_agents(self) -> None:
         match res := self._fetch_public_agents():
             case PublicAgentsShape():
                 self.agents = res.agents
             case SpaceTradersAPIError():
-                print(res)
+                pass
 
     @staticmethod
     def _fetch_public_agents() -> PublicAgentsShape | SpaceTradersAPIError:
@@ -61,7 +61,7 @@ class SpaceTradersGame:
             .token()
             .all_pages()
             .page_limit(MAX_PAGE_LIMIT)
-            .build(),
+            .build()
         ).unwrap()
 
     @staticmethod
@@ -75,4 +75,4 @@ class SpaceTradersGame:
 
 
 GAME = SpaceTradersGame()
-logger.info(f'SpaceTraders server status: {GAME.server_status}')
+# logger.info(f'SpaceTraders server status: {GAME.server_status}')

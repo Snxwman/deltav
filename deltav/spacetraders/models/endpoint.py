@@ -1,12 +1,19 @@
-from deltav.spacetraders.enums.faction import FactionSymbol
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from deltav.spacetraders.models import SpaceTradersAPIReqShape, SpaceTradersAPIResShape
-from deltav.spacetraders.models.agent import AgentShape
-from deltav.spacetraders.models.chart import ChartShape, ChartTransactionShape
-from deltav.spacetraders.models.contract import ContractShape
-from deltav.spacetraders.models.faction import FactionShape
-from deltav.spacetraders.models.market import TransactionShape
-from deltav.spacetraders.models.ship import ShipCargoShape, ShipShape
-from deltav.spacetraders.models.systems import SystemWaypointShape
+from deltav.spacetraders.models.ship import ShipTransactionShape
+
+if TYPE_CHECKING:
+    from deltav.spacetraders.enums.faction import FactionSymbol
+    from deltav.spacetraders.models.agent import AgentShape
+    from deltav.spacetraders.models.chart import ChartShape
+    from deltav.spacetraders.models.contract import ContractShape
+    from deltav.spacetraders.models.faction import FactionShape
+    from deltav.spacetraders.models.market import MarketTransactionShape
+    from deltav.spacetraders.models.ship import ShipCargoShape, ShipShape
+    from deltav.spacetraders.models.systems import SystemWaypointShape
 
 
 class AgentContractsShape(SpaceTradersAPIResShape):
@@ -61,13 +68,13 @@ class ChartCreateShape(SpaceTradersAPIResShape):
 
     chart: ChartShape
     waypoint: SystemWaypointShape
-    transaction: ChartTransactionShape
+    transaction: ShipTransactionShape
     agent: AgentShape
     """
 
     chart: ChartShape
     waypoint: SystemWaypointShape
-    transaction: ChartTransactionShape
+    transaction: ShipTransactionShape
     agent: AgentShape
 
 
@@ -80,5 +87,10 @@ class MarketTransactionResShape(SpaceTradersAPIResShape):
     """
 
     cargo: ShipCargoShape
-    transaction: TransactionShape
+    transaction: MarketTransactionShape
     agent: AgentShape
+
+
+class EventSubscribeReqShape(SpaceTradersAPIReqShape):
+    action: str  # TODO: Make enum
+    system_symbol: str

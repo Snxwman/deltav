@@ -1,9 +1,8 @@
-from enum import Enum, auto
+from __future__ import annotations
 
-from deltav.spacetraders.enums import serialize_by_name
+from enum import Enum
 
 
-@serialize_by_name 
 class TokenType(Enum):
     """
 
@@ -12,6 +11,6 @@ class TokenType(Enum):
     NONE
     """
 
-    ACCOUNT = auto()
-    AGENT = auto()
-    NONE = auto()
+    ACCOUNT = 'ACCOUNT'
+    AGENT = 'AGENT'
+    NONE = 'NONE'

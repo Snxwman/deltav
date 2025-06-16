@@ -1,4 +1,6 @@
+# ruff: noqa: SLF001
 # pyright: reportPrivateUsage=false
+from __future__ import annotations
 
 from collections.abc import Mapping
 from http import HTTPStatus
@@ -7,15 +9,18 @@ from typing import Any, Generic, TypeVar, override
 
 from loguru import logger
 
-from deltav.config.config import Config
 from deltav.spacetraders.api import DEFAULT_PAGE_LIMIT, MAX_PAGE_LIMIT, SPACETRADERS_API_URL
 from deltav.spacetraders.enums.endpoints import SpaceTradersAPIEndpoint
 from deltav.spacetraders.enums.error import SpaceTradersAPIErrorCodes
 from deltav.spacetraders.errors.request import InvalidRequestError
-from deltav.spacetraders.models import NoDataReqShape, SpaceTradersAPIReqShape, SpaceTradersAPIResShape, UnknownReqShape
+from deltav.spacetraders.models import (
+    NoDataReqShape,
+    SpaceTradersAPIReqShape,
+    SpaceTradersAPIResShape,
+)
 from deltav.spacetraders.token import AccountToken, AgentToken
 from deltav.util import generic__repr__
-
+from deltav.util.strings import indent
 
 T = TypeVar('T', bound=SpaceTradersAPIResShape)
 
@@ -28,7 +33,7 @@ class SpaceTradersAPIRequest(Generic[T]):
         self._headers: dict[str, str] = {}
         self._path_params: list[str] = []
         self._query_params: dict[str, str] = {}
-        self._data: SpaceTradersAPIReqShape = UnknownReqShape()
+        self._data: SpaceTradersAPIReqShape = NoDataReqShape()
 
         # Paging properties
         self._is_paged: bool = False
@@ -61,8 +66,7 @@ class SpaceTradersAPIRequest(Generic[T]):
     def json_data(self) -> Mapping[str, Any]:
         if self.endpoint.request_shape is NoDataReqShape:
             return {}
-        else:
-            return self._data.model_dump(mode='json', by_alias=True)
+        return self._data.model_dump(mode='json', by_alias=True)
 
     @property
     def headers(self) -> dict[str, str]:
@@ -122,8 +126,8 @@ class SpaceTradersAPIRequest(Generic[T]):
 
     @property
     def next_page(self) -> int | None:
-        next = self._current_page + 1
-        return next if next < self._total_pages else None
+        _next = self._current_page + 1
+        return _next if _next < self._total_pages else None
 
     @property
     def timeout_connect(self) -> int:
@@ -134,7 +138,7 @@ class SpaceTradersAPIRequest(Generic[T]):
         return self._timeout_response
 
     def parameterized_path(self) -> str:
-        mapping = dict(zip(self.endpoint.path.get_identifiers(), self._path_params))
+        mapping = dict(zip(self.endpoint.path.get_identifiers(), self._path_params, strict=False))
         path = self._endpoint.path.substitute(mapping)
         return path[1:] if path[0] == '/' else path
 
@@ -157,20 +161,7 @@ class SpaceTradersAPIRequest(Generic[T]):
 
     @override
     def __str__(self) -> str:
-        def indent(string: str, level: int, start_even: bool = False) -> str:
-            level = level - 1 if start_even else level
-
-            _string = ''.join(
-                f'\n{'\t' * level}{line.replace("\r", "")}'
-                for line in str(string).splitlines()
-            )  # fmt: skip
-
-            return _string.lstrip('\n\t') if start_even else _string
-
-        headers = '\n'.join(
-            f'{k}: {v}'
-            for k, v in self.headers.items()
-        )  # fmt: skip
+        headers = '\n'.join(f'{k}: {v}' for k, v in self.headers.items())
 
         pages = (
             'none' if not self._is_paged
@@ -178,21 +169,19 @@ class SpaceTradersAPIRequest(Generic[T]):
             else f'{self._start_page} -> {self._end_page}'
         )  # fmt: skip
 
-        return '\n\t'.join(
-            [
-                f'\n\r{self.__class__.__name__}',
-                f'URL: {self.url}',
-                f'Headers: {indent(headers, 2)}',
-                f'Endpoint: {self.endpoint}{indent(self.endpoint.value, 2)}',
-                f'Path Params: {self._path_params}',
-                f'Page Params: {self._path_params}',
-                f'Query Params: {self._query_params}',
-                f'Data: {indent(str(self._data), 2, start_even=True)}',
-                f'Token: {self._endpoint.token_type}',
-                f'Pages: {pages}',
-                f'Retry: {self._should_retry}\n',
-            ]
-        ).expandtabs(4)
+        return '\n\t'.join([
+            f'\n\r{self.__class__.__name__}',
+            f'URL: {self.url}',
+            f'Headers: {indent(headers, 2)}',
+            f'Endpoint: {self.endpoint}{indent(self.endpoint.value, 2)}',  # pyright: ignore[reportAny]
+            f'Path Params: {self._path_params}',
+            f'Page Params: {self._path_params}',
+            f'Query Params: {self._query_params}',
+            f'Data: {indent(str(self._data), 2, start_even=True)}',
+            f'Token: {self._endpoint.token_type}',
+            f'Pages: {pages}',
+            f'Retry: {self._should_retry}\n',
+        ]).expandtabs(4)  # fmt: skip
 
 
 class SpaceTradersAPIRequestBuilder(Generic[T]):
@@ -219,9 +208,8 @@ class SpaceTradersAPIRequestBuilder(Generic[T]):
 
         endpoint = self.req.endpoint
         if not isinstance(data, endpoint.request_shape):
-            raise InvalidRequestError(
-                f'Endpoint {endpoint.name} requires a {endpoint.request_shape} data. Received a {data.__repr_name__} data.'
-            )
+            msg = f'Endpoint {endpoint.name} requires a {endpoint.request_shape} data. Received a {data.__repr_name__} data.'
+            raise InvalidRequestError(msg)
 
         self.req._data = data
         return self
@@ -243,30 +231,35 @@ class SpaceTradersAPIRequestBuilder(Generic[T]):
         l_p_params = len(p_params)
 
         if l_p_params != l_e_params:
-            raise InvalidRequestError(
-                f'Endpoint {self.req.endpoint.name} requires {l_e_params} path params ({e_params}). Received {l_p_params} ({p_params})'
-            )
+            msg = f'Endpoint {self.req.endpoint.name} requires {l_e_params} path params ({e_params}). Received {l_p_params} ({p_params})'
+            raise InvalidRequestError(msg)
 
         self.req._path_params = p_params
         return self
 
     # TODO: implement
-    def pages(self, start: int | None = None, end: int | None = None) -> 'SpaceTradersAPIRequestBuilder[T]':
+    def pages(
+        self, start: int | None = None, end: int | None = None
+    ) -> 'SpaceTradersAPIRequestBuilder[T]':
         self.__check_must_call_endpoint_before('.pages()')
         self.__called_page_method = True
 
         if self.req._is_paged:
-            raise InvalidRequestError('cannot call .pages(...) after calling .all_pages()')
+            msg = 'cannot call .pages(...) after calling .all_pages()'
+            raise InvalidRequestError(msg)
 
         start = 1 if start is None else start
         end = 1 if end is None else end
 
         if start > end:
-            raise InvalidRequestError(f'{start=} must be less than {end=}')
-        elif end > MAX_PAGE_LIMIT:
-            raise InvalidRequestError(f'{end=} must be between 1 and {MAX_PAGE_LIMIT}')
-        elif start < 1 and start > MAX_PAGE_LIMIT:
-            raise InvalidRequestError(f'{start=} and {end=} must be between 1 and {MAX_PAGE_LIMIT}')
+            msg = f'{start=} must be less than {end=}'
+            raise InvalidRequestError(msg)
+        if end > MAX_PAGE_LIMIT:
+            msg = f'{end=} must be between 1 and {MAX_PAGE_LIMIT}'
+            raise InvalidRequestError(msg)
+        if start < 1 and start > MAX_PAGE_LIMIT:
+            msg = f'{start=} and {end=} must be between 1 and {MAX_PAGE_LIMIT}'
+            raise InvalidRequestError(msg)
 
         self.req._start_page = start
         self.req._end_page = end
@@ -278,7 +271,8 @@ class SpaceTradersAPIRequestBuilder(Generic[T]):
         self.__called_page_method = True
 
         if self.req._is_paged:
-            raise InvalidRequestError('cannot call .all_pages() after calling .pages(...)')
+            msg = 'cannot call .all_pages() after calling .pages(...)'
+            raise InvalidRequestError(msg)
 
         self.req._all_pages = True
         self.req._is_paged = True
@@ -286,21 +280,30 @@ class SpaceTradersAPIRequestBuilder(Generic[T]):
 
     def page_limit(self, limit: int) -> 'SpaceTradersAPIRequestBuilder[T]':
         if limit < 1 or limit > MAX_PAGE_LIMIT:
-            raise InvalidRequestError(f'{limit=} must be bewteen 1 and {MAX_PAGE_LIMIT}')
+            msg = f'{limit=} must be bewteen 1 and {MAX_PAGE_LIMIT}'
+            raise InvalidRequestError(msg)
 
         self.req._page_limit = limit
         self.req._is_paged = True
         return self
 
+    def query_params(self, **kwargs: Any) -> 'SpaceTradersAPIRequestBuilder[T]':  # pyright: ignore[reportAny]
+        self.req._query_params = {str(k): str(v) for k, v in kwargs}
+        return self
+
     def retries(self, times: int) -> 'SpaceTradersAPIRequestBuilder[T]':
         if times < 1:
-            raise InvalidRequestError(f'times={times} must be greater than 1')
+            msg = f'times={times} must be greater than 1'
+            raise InvalidRequestError(msg)
+
         self.req._retries = times
         self.req._should_retry = True
         return self
 
     # TODO: Find a better way to get account and agent
-    def token(self, token: AccountToken | AgentToken | None = None) -> 'SpaceTradersAPIRequestBuilder[T]':
+    def token(
+        self, token: AccountToken | AgentToken | None = None
+    ) -> 'SpaceTradersAPIRequestBuilder[T]':
         self.__check_must_call_endpoint_before('.token()')
         self.__called_token = True
 
@@ -309,7 +312,8 @@ class SpaceTradersAPIRequestBuilder(Generic[T]):
             return self
 
         if not isinstance(token, self.req.endpoint.token_type):
-            raise TypeError(f'Endpoint {self.req.endpoint.name} requires {self.req.endpoint.token_type}')
+            msg = f'Endpoint {self.req.endpoint.name} requires {self.req.endpoint.token_type}'
+            raise TypeError(msg)
 
         self.req._token = token
         self.req._headers['Authorization'] = f'Bearer {self.req._token}'
@@ -320,11 +324,13 @@ class SpaceTradersAPIRequestBuilder(Generic[T]):
         return self
 
     def cancel_on_http_errors(self, *statuses: HTTPStatus) -> 'SpaceTradersAPIRequestBuilder[T]':
-        self.req._cancel_on_http_errors = [status for status in statuses]
+        self.req._cancel_on_http_errors = list(statuses)
         return self
 
-    def cancel_on_spacetrader_errors(self, *codes: SpaceTradersAPIErrorCodes) -> 'SpaceTradersAPIRequestBuilder[T]':
-        self.req._cancel_on_spacetrader_errors = [code for code in codes]
+    def cancel_on_spacetrader_errors(
+        self, *codes: SpaceTradersAPIErrorCodes
+    ) -> 'SpaceTradersAPIRequestBuilder[T]':
+        self.req._cancel_on_spacetrader_errors = list(codes)
         return self
 
     def timeout(self, seconds: int) -> 'SpaceTradersAPIRequestBuilder[T]':
@@ -333,19 +339,24 @@ class SpaceTradersAPIRequestBuilder(Generic[T]):
 
     def build(self) -> SpaceTradersAPIRequest[T]:
         if not self.__called_endpoint:
-            raise InvalidRequestError('')
+            msg = ''
+            raise InvalidRequestError(msg)
 
         if self.req.endpoint.get_path_params() and not self.__called_path_params:
-            raise InvalidRequestError('')
+            msg = ''
+            raise InvalidRequestError(msg)
 
         if self.req.endpoint.request_shape is not NoDataReqShape and not self.__called_data:
-            raise InvalidRequestError('')
+            msg = ''
+            raise InvalidRequestError(msg)
 
         if self.req.endpoint.paginated and not self.__called_page_method:
-            raise InvalidRequestError('')
+            msg = ''
+            raise InvalidRequestError(msg)
 
         if self.req.endpoint.token_type is not None and not self.__called_token:
-            raise InvalidRequestError('')
+            msg = ''
+            raise InvalidRequestError(msg)
 
         # Default headers
         if self.req.endpoint.request_shape is not NoDataReqShape:
@@ -361,4 +372,5 @@ class SpaceTradersAPIRequestBuilder(Generic[T]):
 
     def __check_must_call_endpoint_before(self, method: str) -> None:
         if not self.__called_endpoint:
-            raise InvalidRequestError(f'Must call .endpoint() before calling {method}')
+            msg = f'Must call .endpoint() before calling {method}'
+            raise InvalidRequestError(msg)

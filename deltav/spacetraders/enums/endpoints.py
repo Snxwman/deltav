@@ -1,27 +1,19 @@
 from __future__ import annotations
 
-from collections.abc import Mapping
 from dataclasses import dataclass
 from enum import Enum, unique
 from http import HTTPMethod, HTTPStatus
 from string import Template
-from typing import override
-
-from pydantic import BaseModel
+from typing import TYPE_CHECKING, override
 
 from deltav.spacetraders.models import (
-    ErrorCodesShape,
-    EventSubscribeReqShape,
-    MarketSupplyChainShape,
     NoDataReqShape,
     NoDataResShape,
-    ServerStatusShape,
     SpaceTradersAPIReqShape,
     SpaceTradersAPIResShape,
 )
-from deltav.spacetraders.models.account import AccountShape, MyAccountShape
+from deltav.spacetraders.models.account import MyAccountShape
 from deltav.spacetraders.models.agent import (
-    AgentEventShape,
     AgentEventsShape,
     AgentShape,
     PublicAgentShape,
@@ -43,9 +35,16 @@ from deltav.spacetraders.models.endpoint import (
     AgentRegisterReqData,
     AgentRegisterResData,
     ChartCreateShape,
+    EventSubscribeReqShape,
 )
+from deltav.spacetraders.models.error import ErrorCodesShape
 from deltav.spacetraders.models.faction import FactionReputationsShape, FactionShape, FactionsShape
-from deltav.spacetraders.models.market import MarketShape, TransactionShape
+from deltav.spacetraders.models.market import (
+    MarketShape,
+    MarketSupplyChainShape,
+    MarketTransactionShape,
+)
+from deltav.spacetraders.models.server import ServerStatusShape
 from deltav.spacetraders.models.ship import (
     CargoItemReqShape,
     CargoItemResShape,
@@ -74,9 +73,9 @@ from deltav.spacetraders.models.ship import (
     ShipRefuelResShape,
     ShipRepairShape,
     ShipScrapShape,
-    ShipScrapTransactionShape,
     ShipShape,
     ShipsShape,
+    ShipTransactionShape,
     SiphonResShape,
     SurveyCreateShape,
     SurveyReqShape,
@@ -89,11 +88,14 @@ from deltav.spacetraders.models.systems import (
     SystemWaypointShape,
     SystemWaypointsShape,
 )
-from deltav.spacetraders.models.waypoint import (
-    WaypointSymbolReqShape,
-)
+from deltav.spacetraders.models.waypoint import WaypointSymbolReqShape
 from deltav.spacetraders.token import AccountToken, AgentToken
 from deltav.util import generic__repr__
+
+if TYPE_CHECKING:
+    from collections.abc import Mapping
+
+    from pydantic import BaseModel
 
 
 @dataclass
@@ -125,7 +127,9 @@ class EndpointDataMixin:
             )
             return f'{s.__name__}{fields_str}'
 
-        request_shape = '\n\t\tnone' if self.request_shape is NoDataReqShape else shape_str(self.request_shape)
+        request_shape = (
+            '\n\t\tnone' if self.request_shape is NoDataReqShape else shape_str(self.request_shape)
+        )
         response_shape = '\n'.join(shape_str(shape) for shape in self.response_shapes.values())
 
         return '\n\t'.join([
@@ -518,34 +522,12 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     False,
     ```
     """
-    # INFO: Duplicate
-    #
-    # NEGOTIATE_CONTRACT = (
-    #     Template('/my/ships/$ship_symbol/negotiate/contract'),
-    #     AgentToken,
-    #     {HTTPMethod.POST: NoDataReqShape},
-    #     {HTTPStatus.CREATED: ContractShape},
-    #     False,
-    # )
-    # """Negotiate a new contract with the HQ.
-    #
-    # ```
-    # Template('/my/ships/$ship_symbol/negotiate/contract'),
-    # AgentToken,
-    # {HTTPMethod.POST: NoDataReqShape},
-    # {HTTPStatus.CREATED: ContractShape},
-    # False,
-    # ```
-    # """
     GET_SHIP_COOLDOWN = (
         Template('/my/ships/$ship_symbol/cooldown'),
         HTTPMethod.GET,
         AgentToken,
         NoDataReqShape,
-        {
-            HTTPStatus.OK: ShipCooldownShape,
-            HTTPStatus.NO_CONTENT: NoDataResShape,
-        },
+        {HTTPStatus.OK: ShipCooldownShape, HTTPStatus.NO_CONTENT: NoDataResShape},
         False,
     )
     """Retrieve the details of your ship's reactor cooldown.
@@ -647,7 +629,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
         HTTPMethod.POST,
         AgentToken,
         WaypointSymbolReqShape,
-        {HTTPStatus.OK: TransactionShape},
+        {HTTPStatus.OK: MarketTransactionShape},
         False,
     )
     """Jump your ship instantly to a target connected waypoint.
@@ -745,7 +727,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
         HTTPMethod.GET,
         AgentToken,
         NoDataReqShape,
-        {HTTPStatus.OK: ShipScrapTransactionShape},
+        {HTTPStatus.OK: ShipTransactionShape},
         False,
     )
     """Get the value of scrapping a ship.
@@ -821,7 +803,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
         HTTPMethod.POST,
         AgentToken,
         CargoItemReqShape,
-        {HTTPStatus.CREATED: TransactionShape},
+        {HTTPStatus.CREATED: MarketTransactionShape},
         False,
     )
     """Purchase cargo from a market.
@@ -831,7 +813,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     HTTPMethod.POST,
     AgentToken,
     CargoItemReqShape,
-    {HTTPStatus.CREATED: MarketTransactionShape},
+    {HTTPStatus.CREATED: TransactionShape},
     False,
     ```
     """
@@ -897,7 +879,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
         HTTPMethod.GET,
         AgentToken,
         NoDataReqShape,
-        {HTTPStatus.OK: ShipScrapTransactionShape},
+        {HTTPStatus.OK: ShipTransactionShape},
         False,
     )
     """Get the cost of repairing a ship.
@@ -916,7 +898,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
         HTTPMethod.POST,
         AgentToken,
         CargoItemReqShape,
-        {HTTPStatus.CREATED: TransactionShape},
+        {HTTPStatus.CREATED: MarketTransactionShape},
         False,
     )
     """Sell cargo in your ship to a market that trades this cargo.
@@ -926,7 +908,7 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     HTTPMethod.POST,
     AgentToken,
     CargoItemReqShape,
-    {HTTPStatus.CREATED: MarketTransactionShape},
+    {HTTPStatus.CREATED: TransactionShape},
     False,
     ```
     """
@@ -1410,12 +1392,6 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     True,
     ```
     """
-
-    def with_paging(self, page: int, limit: int) -> str:
-        paging_query_fragment = f'?page={page}&limit={limit}'
-        return self.path.substitute()
-
-    def with_query_params(self, **params: str) -> str: ...
 
     def get_path_params(self) -> list[str]:
         return self.path.get_identifiers()

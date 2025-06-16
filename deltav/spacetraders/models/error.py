@@ -1,10 +1,13 @@
 from __future__ import annotations
 
-from http import HTTPStatus
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-from deltav.spacetraders.enums.error import SpaceTradersAPIErrorCodes
 from deltav.spacetraders.models import SpaceTradersAPIResShape
+
+if TYPE_CHECKING:
+    from http import HTTPStatus
+
+    from deltav.spacetraders.enums.error import SpaceTradersAPIErrorCodes
 
 
 class SpaceTradersAPIErrorShape(SpaceTradersAPIResShape):
@@ -33,3 +36,24 @@ class HttpErrorShape(SpaceTradersAPIResShape):
     code: HTTPStatus
     error: str
     message: str
+
+
+class ErrorCodeShape(SpaceTradersAPIResShape):
+    """
+
+    code: int
+    name: str
+    """
+
+    code: int
+    name: str
+
+
+# NOTE: Top level return shape
+class ErrorCodesShape(SpaceTradersAPIResShape):
+    """
+
+    error_codes: list[ErrorCodeShape]
+    """
+
+    error_codes: list[ErrorCodeShape]

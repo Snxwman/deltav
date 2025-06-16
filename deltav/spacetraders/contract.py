@@ -1,4 +1,6 @@
-from datetime import datetime, timedelta
+from __future__ import annotations
+
+from datetime import UTC, datetime, timedelta
 
 from deltav.spacetraders.api.client import SpaceTradersAPIClient
 from deltav.spacetraders.api.error import SpaceTradersAPIError
@@ -42,11 +44,12 @@ class Contract:
 
     @property
     def is_expired(self) -> bool:
-        now = datetime.now()
+        now = datetime.now(tz=UTC)
+
         if self.accepted and self.deadline <= now:
             self._closed_at = self.deadline
             return True
-        elif not self.accepted and self.deadline_to_accept <= now:
+        elif not self.accepted and self.deadline_to_accept <= now:  # noqa: RET505
             self._closed_at = self.deadline_to_accept
             return True
         else:
@@ -58,7 +61,7 @@ class Contract:
 
     @property
     def time_to_deadline(self) -> timedelta:
-        return self.deadline - datetime.now()
+        return self.deadline - datetime.now(tz=UTC)
 
     @property
     def payment_on_accept(self) -> int:
@@ -70,12 +73,13 @@ class Contract:
 
     @property
     def deliverables(self) -> list[ContractDeliverResShape]:
-        return [deliverable for deliverable in self.terms.deliver]
+        return self.terms.deliver
 
     def get_deliverable_by_symbol(self, symbol: TradeSymbol) -> ContractDeliverResShape | None:
         for deliverable in self.deliverables:
             if deliverable.trade_symbol == symbol:
                 return deliverable
+        return None
 
     def _accept(self) -> ContractAcceptShape | SpaceTradersAPIError:
         return SpaceTradersAPIClient.call(
@@ -84,17 +88,15 @@ class Contract:
             .endpoint(SpaceTradersAPIEndpoint.ACCEPT_CONTRACT)
             .path_params(self.id)
             .token()
-            .build(),
+            .build()
         ).unwrap()
 
-    def _deliver(self, symbol: TradeSymbol, units: int = 0) -> ContractDeliverResShape | SpaceTradersAPIError:
+    def _deliver(
+        self, symbol: TradeSymbol, units: int = 0
+    ) -> ContractDeliverResShape | SpaceTradersAPIError:
         # FIX: Move out of this method
         # FIX: Data should be acquired from ship instances
-        deliverable = ContractDeliverReqShape(
-            ship_symbol='',
-            trade_symbol=symbol.name,
-            units=units,
-        )
+        deliverable = ContractDeliverReqShape(ship_symbol='', trade_symbol=symbol.name, units=units)
 
         return SpaceTradersAPIClient.call(
             SpaceTradersAPIRequest[ContractDeliverResShape]()
@@ -103,7 +105,7 @@ class Contract:
             .path_params(self.id)
             .token()
             .data(deliverable)
-            .build(),
+            .build()
         ).unwrap()
 
     def _fulfill(self) -> ContractShape | SpaceTradersAPIError:
@@ -113,7 +115,7 @@ class Contract:
             .endpoint(SpaceTradersAPIEndpoint.FULFILL_CONTRACT)
             .path_params(self.id)
             .token()
-            .build(),
+            .build()
         ).unwrap()
 
     @staticmethod
@@ -124,5 +126,5 @@ class Contract:
             .endpoint(SpaceTradersAPIEndpoint.GET_CONTRACT)
             .path_params(contract_id)
             .token()
-            .build(),
+            .build()
         ).unwrap()
