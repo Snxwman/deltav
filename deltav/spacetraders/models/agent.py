@@ -1,12 +1,16 @@
+# pyright: reportAny=false
 from __future__ import annotations
 
-from datetime import datetime
-from typing import Any, override
+from typing import TYPE_CHECKING, Any, override
 
 from pydantic import Field
 
-from deltav.spacetraders.enums.faction import FactionSymbol
 from deltav.spacetraders.models import SpaceTradersAPIResShape
+
+if TYPE_CHECKING:
+    from datetime import datetime
+
+    from deltav.spacetraders.enums.faction import FactionSymbol
 
 
 def agent__str__(agent: AgentShape | PublicAgentShape) -> str:

@@ -1,16 +1,21 @@
 # pyright: reportAny=false
 from __future__ import annotations
 
-from enum import Enum, EnumType
-from types import UnionType
-from typing import Any, get_args, get_origin
+from enum import Enum
+from typing import TYPE_CHECKING, Any, get_args, get_origin
 
-from pydantic import ValidationError, ValidatorFunctionWrapHandler, field_serializer, field_validator
-from pydantic_core.core_schema import FieldValidationInfo
+from pydantic import (
+    ValidationError,
+    ValidatorFunctionWrapHandler,
+    field_serializer,
+    field_validator,
+)
+
+if TYPE_CHECKING:
+    from pydantic_core.core_schema import FieldValidationInfo
 
 
 def validate_enum_by_name():
-
     @field_validator('*', mode='wrap')
     @classmethod
     def _validate_enum_by_name(
@@ -57,7 +62,6 @@ def validate_enum_by_name():
 
 
 def serialize_enum_by_name():
-
     @field_serializer('*', return_type=str, when_used='always')
     def _serialize_enum_by_name(value: Any) -> Any:
         if isinstance(value, Enum):

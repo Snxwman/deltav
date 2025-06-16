@@ -1,9 +1,14 @@
+# pyright: reportAny=false
 from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 from pydantic import Field
 
-from deltav.spacetraders.enums.faction import FactionSymbol, FactionTraitSymbol
 from deltav.spacetraders.models import SpaceTradersAPIResShape
+
+if TYPE_CHECKING:
+    from deltav.spacetraders.enums.faction import FactionSymbol, FactionTraitSymbol
 
 
 class FactionShape(SpaceTradersAPIResShape):

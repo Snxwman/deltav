@@ -1,16 +1,20 @@
 from __future__ import annotations
 
-from collections.abc import Mapping
-from datetime import datetime
+from typing import TYPE_CHECKING
 
-from deltav.spacetraders.enums.market import (
-    ActivityLevel,
-    MarketTradeGoodType,
-    SupplyLevel,
-    TradeSymbol,
-    TransactionType,
-)
 from deltav.spacetraders.models import SpaceTradersAPIResShape
+
+if TYPE_CHECKING:
+    from collections.abc import Mapping
+    from datetime import datetime
+
+    from deltav.spacetraders.enums.market import (
+        ActivityLevel,
+        MarketTradeGoodType,
+        SupplyLevel,
+        TradeSymbol,
+        TransactionType,
+    )
 
 
 # FIX: Cargo Item Shape
@@ -29,7 +33,7 @@ class MarketShape(SpaceTradersAPIResShape):
     exports: list[MarketItemShape]
     imports: list[MarketItemShape]
     exchange: list[MarketItemShape]
-    transactions: list[TransactionShape]
+    transactions: list[MarketTransactionShape]
     trade_goods: list[TradeGoodShape]
 
 
@@ -67,7 +71,7 @@ class TradeGoodShape(SpaceTradersAPIResShape):
     sell_price: int
 
 
-class TransactionShape(SpaceTradersAPIResShape):
+class MarketTransactionShape(SpaceTradersAPIResShape):
     """
 
     waypoint_symbol: str

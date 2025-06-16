@@ -1,31 +1,36 @@
+# pyright: reportAny=false, reportImportCycles=false
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import UTC, datetime
+from typing import TYPE_CHECKING
 
 from pydantic import Field
 
-from deltav.spacetraders.enums.faction import FactionSymbol
-from deltav.spacetraders.enums.market import SurveySize, TradeSymbol, TransactionType
-from deltav.spacetraders.enums.ship import (
-    ShipComponent,
-    ShipConditionEvent,
-    ShipCrewRotationShape,
-    ShipEngines,
-    ShipFrames,
-    ShipModules,
-    ShipMountDeposits,
-    ShipMounts,
-    ShipNavFlightMode,
-    ShipReactors,
-    ShipRole,
-    ShipType,
-)
-from deltav.spacetraders.enums.system import SystemType
-from deltav.spacetraders.enums.waypoint import WaypointModifierSymbol, WaypointType
 from deltav.spacetraders.models import SpaceTradersAPIReqShape, SpaceTradersAPIResShape
-from deltav.spacetraders.models.agent import AgentShape
-from deltav.spacetraders.models.market import TransactionShape
-from deltav.spacetraders.models.waypoint import WaypointShape
+
+if TYPE_CHECKING:
+    from deltav.spacetraders.enums.faction import FactionSymbol
+    from deltav.spacetraders.enums.market import SurveySize, TradeSymbol, TransactionType
+    from deltav.spacetraders.enums.ship import (
+        ShipComponent,
+        ShipConditionEvent,
+        ShipCrewRotationShape,
+        ShipEngines,
+        ShipFrames,
+        ShipModules,
+        ShipMountDeposits,
+        ShipMounts,
+        ShipNavFlightMode,
+        ShipReactors,
+        ShipRole,
+        ShipType,
+    )
+    from deltav.spacetraders.enums.system import SystemType
+    from deltav.spacetraders.enums.waypoint import WaypointModifierSymbol, WaypointType
+    from deltav.spacetraders.models.agent import AgentShape
+    from deltav.spacetraders.models.market import MarketTransactionShape
+    from deltav.spacetraders.models.systems import ShipyardTransactionShape
+    from deltav.spacetraders.models.waypoint import WaypointShape
 
 
 class CargoItemReqShape(SpaceTradersAPIReqShape):
@@ -178,7 +183,7 @@ class ShipCooldownShape(SpaceTradersAPIResShape):
     ship_symbol: str
     total_seconds: int = 0
     remaining_seconds: int = 0
-    expiration: datetime = datetime.now()
+    expiration: datetime = datetime.now(tz=UTC)
 
 
 class ShipCrewShape(SpaceTradersAPIResShape):
@@ -327,7 +332,7 @@ class ShipJumpResShape(SpaceTradersAPIResShape):
 
     nav: ShipNavShape
     cooldown: ShipCooldownShape
-    transaction: TransactionShape
+    transaction: MarketTransactionShape
     agent: AgentShape
 
 
@@ -538,14 +543,6 @@ class ShipPurchaseReqShape(SpaceTradersAPIReqShape):
     waypoint_symbol: str
 
 
-class ShipPurchaseTransactionShape(SpaceTradersAPIReqShape):
-    waypoint_symbol: str
-    ship_type: ShipType
-    price: int
-    agent_symbol: str
-    timestamp: datetime
-
-
 class ShipPurchaseResShape(SpaceTradersAPIResShape):
     """
 
@@ -556,7 +553,7 @@ class ShipPurchaseResShape(SpaceTradersAPIResShape):
 
     ship: ShipShape
     agent: AgentShape
-    transaction: ShipPurchaseTransactionShape
+    transaction: ShipyardTransactionShape
 
 
 class ShipReactorShape(SpaceTradersAPIResShape):
@@ -619,23 +616,22 @@ class ShipRefuelReqShape(SpaceTradersAPIReqShape):
 
 class ShipRefuelTransactionShape(SpaceTradersAPIResShape):
     """
-
-    waypoint_symbol: str
     ship_symbol: str
+    timestamp: datetime
+    total_price: int
     trade_symbol: TradeSymbol
     type: TransactionType
-    total_price: int
     units: int
-    timestamp: datetime
+    waypoint_symbol: str
     """
 
-    waypoint_symbol: str
     ship_symbol: str
+    timestamp: datetime
+    total_price: int
     trade_symbol: TradeSymbol
     type: TransactionType
-    total_price: int
     units: int
-    timestamp: datetime
+    waypoint_symbol: str
 
 
 class ShipRefuelResShape(SpaceTradersAPIResShape):
@@ -684,53 +680,23 @@ class ShipRepairShape(SpaceTradersAPIResShape):
 
     agent: AgentShape
     ship: ShipShape
-    transaction: ShipScrapTransactionShape
+    transaction: ShipTransactionShape
     """
 
     agent: AgentShape
     ship: ShipShape
-    transaction: ShipScrapTransactionShape
-
-
-class ShipRepairTransactionShape(SpaceTradersAPIResShape):
-    """
-
-    waypoint_symbol: str
-    ship_symbol: str
-    total_price: int
-    timestamp: datetime
-    """
-
-    waypoint_symbol: str
-    ship_symbol: str
-    total_price: int
-    timestamp: datetime
+    transaction: ShipTransactionShape
 
 
 class ShipScrapShape(SpaceTradersAPIResShape):
     """
 
     agent: AgentShape
-    transaction: ScrapShipTransactionShape
+    transaction: ShipTransactionShape
     """
 
     agent: AgentShape
-    transaction: ShipScrapTransactionShape
-
-
-class ShipScrapTransactionShape(SpaceTradersAPIResShape):
-    """
-
-    waypoint_symbol: str
-    ship_symbol: str
-    total_price: int
-    timestamp: datetime
-    """
-
-    waypoint_symbol: str
-    ship_symbol: str
-    total_price: int
-    timestamp: datetime
+    transaction: ShipTransactionShape
 
 
 class ShipSystemShape(SpaceTradersAPIResShape):
@@ -750,6 +716,20 @@ class ShipSystemShape(SpaceTradersAPIResShape):
     x: int
     y: int
     distance: int
+
+
+class ShipTransactionShape(SpaceTradersAPIResShape):
+    """
+    timestamp: datetime
+    waypoint_symbol: str
+    ship_symbol: str
+    total_price: int
+    """
+
+    timestamp: datetime
+    waypoint_symbol: str
+    ship_symbol: str
+    total_price: int
 
 
 class SurveyCreateShape(SpaceTradersAPIResShape):

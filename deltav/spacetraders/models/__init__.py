@@ -1,28 +1,13 @@
 # pyright: reportAny=false
 from __future__ import annotations
 
-from enum import Enum, EnumType
-from pprint import pp
-from pydoc import locate
-from types import UnionType
-from typing import Any, TypeVar, get_args, get_origin, override
+from typing import TypeVar, override
 
 from deepmerge import always_merger
-from pydantic import (
-    AliasGenerator,
-    BaseModel,
-    ConfigDict,
-    SerializationInfo,
-    ValidationError,
-    ValidatorFunctionWrapHandler,
-    field_serializer,
-    field_validator,
-)
+from pydantic import AliasGenerator, BaseModel, ConfigDict
 from pydantic.alias_generators import to_camel
-from pydantic_core.core_schema import FieldValidationInfo
 
 from deltav.spacetraders.models._str import logfmt, pretty
-from deltav.spacetraders.models._util import serialize_enum_by_name, validate_enum_by_name
 
 # TODO: Look into the following model config fields for ConfigDict
 #   - str_to_upper
@@ -30,6 +15,8 @@ from deltav.spacetraders.models._util import serialize_enum_by_name, validate_en
 #   - str_max_length
 #   - use_enum_values
 #   - validate_assignment
+
+# TODO: Find a way to validate an enum by field name
 
 
 # Inherited super type used for type annotations
@@ -44,9 +31,6 @@ class SpaceTradersAPIReqShape(BaseModel):
         revalidate_instances='always',
         serialize_by_alias=True
     )  # fmt: skip
-
-    _enum_validator = validate_enum_by_name()
-    _enum_serializer = serialize_enum_by_name()
 
     @property
     def pretty(self) -> str:
@@ -73,47 +57,6 @@ class SpaceTradersAPIResShape(BaseModel):
         revalidate_instances='always',
         validate_by_alias=True,
     )  # fmt: skip
-
-    @field_validator('*', mode='wrap')
-    @classmethod
-    def _validate_enum_by_name(
-        cls, value: Any, handler: ValidatorFunctionWrapHandler, info: FieldValidationInfo
-    ) -> Any:
-        try:
-            return handler(value)
-        except ValidationError as err:
-            if info.field_name is None:
-                msg = 'Cannot determine field name for enum validator'
-                raise RuntimeError(msg) from err
-
-            if err.errors()[0]['type'] == 'enum':
-                _type = cls.__annotations__[info.field_name]
-                _enum = None
-
-                pp(info.field_name)
-                pp(cls.__annotations__[info.field_name])
-                pp(locate(f'deltav.spacetraders.enums.{_type}'))
-                pp(locate(f'deltav.spacetraders.enums.faction.{_type}'))
-                if get_origin(_type) is not None:
-                    _enum_types = [
-                        _sub_type
-                        for _sub_type in get_args(_type)
-                        if isinstance(_sub_type, type) and issubclass(_sub_type, Enum)
-                    ]
-                    if len(_enum_types) > 1:
-                        msg = f"Multiple Enum types in annotation: '{info.field_name}: {_ann}'"
-                        raise TypeError(msg) from err
-                    _enum = _enum_types[0]
-                    return handler(_enum[value])
-
-                if isinstance(_type, type) and issubclass(_type, Enum):
-                    _enum = _type
-                    return handler(_type[value])
-            else:
-                raise
-
-    # _enum_validator = validate_enum_by_name()
-    _enum_serializer = serialize_enum_by_name()
 
     @property
     def pretty(self) -> str:

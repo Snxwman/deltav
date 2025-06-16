@@ -1,16 +1,21 @@
+# pyright: reportAny=false
 from __future__ import annotations
 
-from datetime import datetime
+from typing import TYPE_CHECKING
 
 from pydantic import Field
 
-from deltav.spacetraders.enums.faction import FactionSymbol
-from deltav.spacetraders.enums.ship import ShipType
-from deltav.spacetraders.enums.system import SystemType
-from deltav.spacetraders.enums.waypoint import WaypointType
 from deltav.spacetraders.models import SpaceTradersAPIResShape
-from deltav.spacetraders.models.ship import ShipShape
-from deltav.spacetraders.models.waypoint import WaypointOrbitalShape
+
+if TYPE_CHECKING:
+    from datetime import datetime
+
+    from deltav.spacetraders.enums.faction import FactionSymbol
+    from deltav.spacetraders.enums.ship import ShipType
+    from deltav.spacetraders.enums.system import SystemType
+    from deltav.spacetraders.enums.waypoint import WaypointType
+    from deltav.spacetraders.models.ship import ShipShape
+    from deltav.spacetraders.models.waypoint import WaypointOrbitalShape
 
 
 class ShipyardShape(SpaceTradersAPIResShape):

@@ -1,14 +1,17 @@
 from __future__ import annotations
 
-from deltav.spacetraders.enums.faction import FactionSymbol
-from deltav.spacetraders.enums.waypoint import (
-    WaypointModifierSymbol,
-    WaypointTraitSymbol,
-    WaypointType,
-)
+from typing import TYPE_CHECKING
+
 from deltav.spacetraders.models import SpaceTradersAPIReqShape, SpaceTradersAPIResShape
-from deltav.spacetraders.models.chart import ChartShape
-from deltav.spacetraders.models.faction import FactionSymbolShape
+
+if TYPE_CHECKING:
+    from deltav.spacetraders.enums.waypoint import (
+        WaypointModifierSymbol,
+        WaypointTraitSymbol,
+        WaypointType,
+    )
+    from deltav.spacetraders.models.chart import ChartShape
+    from deltav.spacetraders.models.faction import FactionSymbolShape
 
 
 class WaypointShape(SpaceTradersAPIResShape):
