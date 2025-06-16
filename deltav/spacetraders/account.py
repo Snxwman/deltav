@@ -4,7 +4,6 @@ from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
 from loguru import logger
-from sqlalchemy import select
 
 from deltav.config.config import Config, StAccountConfig
 from deltav.spacetraders.api.client import SpaceTradersAPIClient
@@ -30,34 +29,47 @@ class Account:
         agent_token: AgentToken,
         data: AccountShape | AccountRecord | None = None,
     ) -> None:
-        """A SpaceTraders Account
-
-        Fields:
-            id (str)
-            token (AccountToken)
-            created_at (datetime)
-            email (str)
-        """
+        """A SpaceTraders Account"""
 
         logger.debug('Initializing new Account')
         logger.trace(f'{token=}')
 
         self.__synced_api: bool = False
         self.__synced_db: bool = False
-        self.__data: AccountShape
+        self.__data: AccountRecord
         self.__data_timestamp: datetime
         self.__config: StAccountConfig
+
         self._account_id: str = token.account_id
-        self._token: AccountToken = token
         self._created_at: datetime = token.issued_at
         self._email: str | None = None
+        self._token: AccountToken = token
 
         if config := Config.get_account_from_token(token):
             self.__config = config
             self._email = config.email
 
+        match data:
+            case AccountShape():
+                self.__hydrate_from_shape(data)
+            case AccountRecord():
+                self.__hydrate_from_record(data)
+            case None:
+                try:
+                    self.__hydrate_from_db()
+                except:  # TODO: Make custom db errors
+                    self.__hydrate_from_api()
+
         self.update_account(agent_token)
         Account.__update_cache(self)
+
+    def __hydrate_from_api(self) -> None: ...
+
+    def __hydrate_from_db(self) -> None: ...
+
+    def __hydrate_from_record(self, data: AccountRecord) -> None: ...
+
+    def __hydrate_from_shape(self, data: AccountShape) -> None: ...
 
     @property
     def id(self) -> str:
@@ -85,11 +97,12 @@ class Account:
     def update_account(self, token: AgentToken) -> None:
         match self._fetch_account(token):
             case MyAccountShape() as res:
+                self.__update_db_from_shape(res)
                 self.__synced_api = True
-                self.__data = res.account
-                self.__data_timestamp = datetime.now(tz=UTC)
+                self.__synced_db = True
                 if self.email is None or self.email != res.account.email:
                     self._email = res.account.email
+
             case SpaceTradersAPIError() as err:
                 raise self.__handle_fetch_account_err(err)
 
@@ -118,7 +131,7 @@ class Account:
     def __from_cache(cls, account_id: str) -> 'Account | None':
         return cls._ACCOUNTS.get(account_id, None)
 
-    def __update_db(self) -> None:
+    def __update_db(self, data: AccountShape | None = None) -> None:
         account = AccountRecord(
             account_id=self.id, created_at=self.created_at, email=self.email, token=self.token
         )
@@ -126,7 +139,4 @@ class Account:
         with Session() as session:
             session.add(account)
 
-    def __from_db(self) -> None:
-        query = select(AccountRecord).where(AccountRecord.account_id == self.id)
-        with Session() as session:
-            data = session.scalar(query)
+    def __update_db_from_shape(self, data: MyAccountShape) -> None: ...
