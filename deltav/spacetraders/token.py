@@ -11,7 +11,7 @@ from deltav.spacetraders.enums.token import TokenType
 
 class Token:
     def __init__(self, token: str) -> None:
-        self._alg: str = 'RS256' 
+        self._alg: str = 'RS256'
         self._typ: str = 'JWT'
         self._encoded: str = token
         self._decoded: dict[str, Any] = jwt.decode(
@@ -42,7 +42,7 @@ class Token:
             case 'agent-token':
                 return TokenType.AGENT
             case _:
-                raise ValueError(f'Unknown token type \'{self._sub}\'')
+                raise ValueError(f"Unknown token type '{self._sub}'")
 
     @property
     def hash(self) -> str:
@@ -75,7 +75,9 @@ class AgentToken(Token):
 
     @property
     def expiration(self) -> date:
-        return date.fromisoformat(self._reset_date) + timedelta(days=7)  # TODO: Make this dynamic somehow
+        return date.fromisoformat(self._reset_date) + timedelta(
+            days=7
+        )  # TODO: Make this dynamic somehow
 
     @property
     def is_expired(self) -> bool:

@@ -110,7 +110,11 @@ class StAgentConfig:
 
     @override
     def __str__(self) -> str:
-        name = f'{self.symbol} ({self.nickname})' if self.symbol != self.nickname else f'{self.nickname}'
+        name = (
+            f'{self.symbol} ({self.nickname})'
+            if self.symbol != self.nickname
+            else f'{self.nickname}'
+        )
         return '\n\t'.join([
             f'\n{name}',
             f'token: {self.token.hash}',
@@ -222,8 +226,7 @@ class Config:
         logger.success('Loaded config')
         logger.trace(f'Config values: {self}')
 
-    def update_agent_token(self, token: AgentToken) -> None:
-        ...
+    def update_agent_token(self, token: AgentToken) -> None: ...
 
     @classmethod
     def get_account(cls, account: str) -> StAccountConfig:
@@ -267,7 +270,9 @@ class Config:
 
     def __load_toml_file(self) -> TOMLDocument:
         if not self.__config_file_path:
-            raise ValueError('self.__config_file_path must be set before calling self.__get_toml_from_file()')
+            raise ValueError(
+                'self.__config_file_path must be set before calling self.__get_toml_from_file()'
+            )
 
         with open(self.__config_file_path, 'r') as config_file:
             return tomlkit.load(config_file)
@@ -280,7 +285,6 @@ class Config:
 
         with open(self.__config_file_path, 'w') as config_file:
             tomlkit.dump(self.__original_toml, config_file)
-
 
     @staticmethod
     def __locate_config_file(path: Path | str | None) -> Path:

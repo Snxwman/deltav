@@ -88,17 +88,15 @@ class Contract:
             .endpoint(SpaceTradersAPIEndpoint.ACCEPT_CONTRACT)
             .path_params(self.id)
             .token()
-            .build(),
+            .build()
         ).unwrap()
 
-    def _deliver(self, symbol: TradeSymbol, units: int = 0) -> ContractDeliverResShape | SpaceTradersAPIError:
+    def _deliver(
+        self, symbol: TradeSymbol, units: int = 0
+    ) -> ContractDeliverResShape | SpaceTradersAPIError:
         # FIX: Move out of this method
         # FIX: Data should be acquired from ship instances
-        deliverable = ContractDeliverReqShape(
-            ship_symbol='',
-            trade_symbol=symbol.name,
-            units=units,
-        )
+        deliverable = ContractDeliverReqShape(ship_symbol='', trade_symbol=symbol.name, units=units)
 
         return SpaceTradersAPIClient.call(
             SpaceTradersAPIRequest[ContractDeliverResShape]()
@@ -107,7 +105,7 @@ class Contract:
             .path_params(self.id)
             .token()
             .data(deliverable)
-            .build(),
+            .build()
         ).unwrap()
 
     def _fulfill(self) -> ContractShape | SpaceTradersAPIError:
@@ -117,7 +115,7 @@ class Contract:
             .endpoint(SpaceTradersAPIEndpoint.FULFILL_CONTRACT)
             .path_params(self.id)
             .token()
-            .build(),
+            .build()
         ).unwrap()
 
     @staticmethod
@@ -128,5 +126,5 @@ class Contract:
             .endpoint(SpaceTradersAPIEndpoint.GET_CONTRACT)
             .path_params(contract_id)
             .token()
-            .build(),
+            .build()
         ).unwrap()

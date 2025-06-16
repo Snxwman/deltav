@@ -61,7 +61,7 @@ class SpaceTradersGame:
             .token()
             .all_pages()
             .page_limit(MAX_PAGE_LIMIT)
-            .build(),
+            .build()
         ).unwrap()
 
     @staticmethod

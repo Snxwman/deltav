@@ -11,7 +11,7 @@ from deltav.spacetraders.enums.ship import ShipCrewRotationShape, ShipRole
 from deltav.spacetraders.models import NoDataResShape
 from deltav.spacetraders.models.contract import ContractShape
 from deltav.spacetraders.models.endpoint import ChartCreateShape
-from deltav.spacetraders.models.market import TransactionShape
+from deltav.spacetraders.models.market import MarketTransactionShape
 from deltav.spacetraders.models.ship import (
     CargoItemReqShape,
     ScanShipsShape,
@@ -204,7 +204,9 @@ class Ship:
             .build()
         ).unwrap()
 
-    def _navigate(self, waypoint: WaypointSymbolReqShape) -> ShipNavigationShape | SpaceTradersAPIError:
+    def _navigate(
+        self, waypoint: WaypointSymbolReqShape
+    ) -> ShipNavigationShape | SpaceTradersAPIError:
         return SpaceTradersAPIClient.call(
             SpaceTradersAPIRequest[ShipNavigationShape]()
             .builder()
@@ -235,9 +237,11 @@ class Ship:
             .build()
         ).unwrap()
 
-    def _purchase_cargo(self, purchase: CargoItemReqShape) -> TransactionShape | SpaceTradersAPIError:
+    def _purchase_cargo(
+        self, purchase: CargoItemReqShape
+    ) -> MarketTransactionShape | SpaceTradersAPIError:
         return SpaceTradersAPIClient.call(
-            SpaceTradersAPIRequest[TransactionShape]()
+            SpaceTradersAPIRequest[MarketTransactionShape]()
             .builder()
             .endpoint(SpaceTradersAPIEndpoint.PURCHASE_CARGO)
             .path_params(self.symbol)
@@ -246,9 +250,11 @@ class Ship:
             .build()
         ).unwrap()
 
-    def _sell_cargo(self, cargo: CargoItemReqShape) -> TransactionShape | SpaceTradersAPIError:
+    def _sell_cargo(
+        self, cargo: CargoItemReqShape
+    ) -> MarketTransactionShape | SpaceTradersAPIError:
         return SpaceTradersAPIClient.call(
-            SpaceTradersAPIRequest[TransactionShape]()
+            SpaceTradersAPIRequest[MarketTransactionShape]()
             .builder()
             .endpoint(SpaceTradersAPIEndpoint.SELL_CARGO)
             .path_params(self.symbol)
@@ -340,7 +346,9 @@ class Ship:
             .build()
         ).unwrap()
 
-    def _jump_ship(self, waypoint: WaypointSymbolReqShape) -> ShipJumpResShape | SpaceTradersAPIError:
+    def _jump_ship(
+        self, waypoint: WaypointSymbolReqShape
+    ) -> ShipJumpResShape | SpaceTradersAPIError:
         return SpaceTradersAPIClient.call(
             SpaceTradersAPIRequest[ShipJumpResShape]()
             .builder()

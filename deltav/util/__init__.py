@@ -8,5 +8,3 @@ from pydantic import BaseModel
 
 def generic__repr__(instance: object) -> str:
     return f'{instance.__class__.__name__}({instance.__dict__})'
-
-

@@ -44,7 +44,9 @@ class SpaceTradersAPIClient:
 
     # FIX: REALLY BAD, probably need to refactor SpaceTradersAPIResponse
     @classmethod
-    def call(cls, req: SpaceTradersAPIRequest[T]) -> SpaceTradersAPIResponse[T] | SpaceTradersAPIError:
+    def call(
+        cls, req: SpaceTradersAPIRequest[T]
+    ) -> SpaceTradersAPIResponse[T] | SpaceTradersAPIError:
         """Call a SpaceTraders API endpoint by passing a request object.
 
         Args:
