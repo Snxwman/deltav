@@ -1,24 +1,31 @@
-from datetime import datetime, timedelta
-from typing import Any, Callable, cast
-import traceback
+from __future__ import annotations
 
-from deltav.config import CONFIG
-from deltav.defaults import Defaults
+from datetime import datetime, timedelta
+from typing import cast
+
+from deltav.config.config import Config
 from deltav.spacetraders.agent import Agent
-from deltav.spacetraders.api.response import SpaceTradersAPIResponse
-from deltav.spacetraders.enums.faction import FactionSymbol
-from deltav.spacetraders.enums.market import TradeSymbol
-from deltav.spacetraders.game import SpaceTradersGame
-from deltav.spacetraders.models.agent import AgentShape, RegisterAgentData
-from deltav.spacetraders.api.client import SpaceTradersAPIClient
-from deltav.spacetraders.models.contract import ContractDeliverShape
-from deltav.spacetraders.models.market import CargoItemShape
-from deltav.spacetraders.models.ship import ShipCargoInventoryShape, ShipCooldownShape
-from deltav.spacetraders.models.waypoint import WaypointNavigateShape, WaypointShape
-from deltav.spacetraders.ship import Ship
+from deltav.spacetraders.api.error import SpaceTradersAPIError
 from deltav.spacetraders.contract import Contract
 from deltav.spacetraders.enums.error import SpaceTradersAPIErrorCodes
-from deltav.spacetraders.api.error import SpaceTradersAPIError
+from deltav.spacetraders.game import GAME
+from deltav.spacetraders.models import NoDataResShape
+from deltav.spacetraders.models.agent import AgentShape
+from deltav.spacetraders.models.contract import ContractDeliverReqShape
+from deltav.spacetraders.models.market import MarketShape
+from deltav.spacetraders.models.ship import (
+    CargoItemReqShape,
+    ShipCargoInventoryShape,
+    ShipCooldownShape,
+    ShipEventShape,
+    ShipFuelShape,
+    ShipNavShape,
+    ShipPurchaseReqShape,
+    ShipRefuelReqShape,
+)
+from deltav.spacetraders.models.waypoint import WaypointShape, WaypointSymbolReqShape
+from deltav.spacetraders.ship import Ship
+from deltav.spacetraders.system import System
 
 DEFAULT_FACTION = 'COSMIC'
 active_agent: AgentShape | None = None
@@ -32,16 +39,16 @@ active_agent: AgentShape | None = None
 #
 #
 def get_next_command() -> list[str]:
-    raw = input("cmd > ")
+    raw = input('cmd > ')
     return raw.split(' ')
 
 
 # def get_prompt_answer(
-#         prompt: str = '', 
-#         answer = None, 
-#         default = None, 
+#         prompt: str = '',
+#         answer = None,
+#         default = None,
 #         generate: Callable | None = None,  # pyright: ignore[reportMissingTypeArgument]
-#         validate: Callable | None = None,  # pyright: ignore[reportMissingTypeArgument] 
+#         validate: Callable | None = None,  # pyright: ignore[reportMissingTypeArgument]
 #         allow_empty = False
 #     ) -> str:
 #
@@ -80,8 +87,8 @@ def get_next_command() -> list[str]:
 #         prompt = '[REQ] Enter agent\'s callsign: '
 #         answer = get_prompt_answer(
 #             prompt=prompt,
-#             answer=arg, 
-#             generate=generate_callsign, 
+#             answer=arg,
+#             generate=generate_callsign,
 #             validate=validate_callsign
 #         )
 #         return answer.upper()
@@ -115,17 +122,17 @@ def get_next_command() -> list[str]:
 #
 #         return False
 #
-#     callsign = get_callsign(arg=index_or_none(args, 1)) 
+#     callsign = get_callsign(arg=index_or_none(args, 1))
 #     faction = get_faction(arg=index_or_none(args, 2))
 #
 #     agent_data: RegisterAgentData = {
 #         'symbol': callsign,
 #         'faction': FactionSymbol[faction.upper()],
-#     } 
-#     
+#     }
+#
 #     while confirm_agent_details() is not True:
 #         print(agent_data)
-#     
+#
 #     Agent.register(agent_data)
 #
 #
@@ -140,17 +147,18 @@ def accept_contract():
     print(f'Available contract ID: {temp_contract_id}')
     contract_id = input('Enter contract ID to accept: ')
 
-    contract = Contract.accept(contract_id)
+    contract = Contract._accept(contract_id)
 
     if isinstance(contract, SpaceTradersAPIError):
         print('You have already accepted the contract.')
     else:
         print(f'Contract {contract_id} accepted successfully.')
 
+
 def get_contracts():
     # TODO: likely unneeded, as the game only allows for one contract at a time
     print('Getting contracts for active agent...')
-    contracts = Contract.get_contracts()
+    contracts = Contract.fetch_contracts()
 
     if not contracts:
         print('No contracts found.')
@@ -161,7 +169,7 @@ def get_contracts():
 
 def get_contract(contract_id: str):
     print('Getting contracts for active agent...')
-    contract = Contract.get_contract(contract_id)
+    contract = Contract.fetch_contract(contract_id)
     if not contract:
         print('No contracts found.')
         return
@@ -169,237 +177,369 @@ def get_contract(contract_id: str):
     print(contract)
 
 
-def ships(active_agent: AgentShape | None):
-    def navigate(shipSymbol: str, waypoint: WaypointNavigateShape):
-        waypointSymbol = waypoint['waypointSymbol']
-        print(f'Navigating ship {shipSymbol} to waypoint {waypointSymbol}...')
-        try:
-            Ship.navigate(shipSymbol, waypoint)
-            print(f'Ship {shipSymbol} is now navigating to {waypointSymbol}.')
-        except ValueError as e:
-            print(f'Error navigating ship: {e}')
+def transit_time(departure_time_str: datetime, arrival_time_str: datetime) -> list[float]:
+    departure_time: datetime = datetime.fromisoformat(str(departure_time_str))
+    arrival_time: datetime = datetime.fromisoformat(str(arrival_time_str))
+    time_difference: timedelta = arrival_time - departure_time
+    total_seconds = time_difference.total_seconds()
+    hours = total_seconds // 3600
+    minutes = (total_seconds % 3600) // 60
+    seconds = total_seconds % 60
+    return [hours, minutes, seconds]
 
 
-    def scanWaypoints(shipSymbol: str):
-        print(f'Scanning waypoints for ship {shipSymbol}...')
+def cli_ships(active_agent: AgentShape | None):
+    if active_agent is None:
+        print('No active agent set. Please set an active agent first.')
+        return
 
-        data = Ship.scan_waypoints(shipSymbol)
-        if isinstance(data, SpaceTradersAPIError):
-            print(f'Error scanning waypoints: {data}')
+    def navigate(ship_symbol: str, waypoint: WaypointSymbolReqShape):
+        waypoint_symbol = waypoint.waypoint_symbol
+        print(f'Navigating ship {ship_symbol} to waypoint {waypoint_symbol}...')
+        res = Ship.navigate(ship_symbol, waypoint)
+        if isinstance(res, SpaceTradersAPIError):
+            print(f'Error navigating ship {ship_symbol} to waypoint {waypoint_symbol}: {res}')
             return
-        
-        cooldown: ShipCooldownShape = cast(ShipCooldownShape, data['cooldown'])
+        navigation_data: ShipNavShape = res.nav
+        fuel: ShipFuelShape = res.fuel
+        if hasattr(res, 'event'):
+            event: ShipEventShape | None = res.event
+            if event and isinstance(event, dict) and 'message' in event:
+                print(f'Event during navigation: {event["message"]}')
+
+        print(f'Ship {ship_symbol} is now navigating to waypoint {waypoint_symbol}.')
+        print(f'Fuel remaining: {fuel.current}/{fuel.capacity} units')
+        print(f'Fuel consumed on this trip: {fuel.consumed} units')
+
+    def scanWaypoints(ship_symbol: str):
+        print(f'Scanning waypoints for ship {ship_symbol}...')
+
+        data = Ship.scan_waypoints(ship_symbol)
+        if isinstance(data, SpaceTradersAPIError):
+            print(f'Error scanning waypoints: {data.code.value} - {data.message}')
+            return
+
+        cooldown: ShipCooldownShape = cast(ShipCooldownShape, data.cooldown)
         print(cooldown)
-        waypoints: list[WaypointShape] = cast(list[WaypointShape], data['waypoints'])
-        print(f'Waypoints for ship {shipSymbol}:')
+        waypoints: list[WaypointShape] = cast(list[WaypointShape], data.waypoints)
+        print(f'Waypoints for ship {ship_symbol}:')
         if isinstance(waypoints, list):
             for waypoint in waypoints:
-                print(f'Location: {waypoint["symbol"]} ({waypoint["type"]}) at ({waypoint["x"]}, {waypoint["y"]})')
+                faction = getattr(waypoint, 'faction', None)
+                print(
+                    f'Location: {waypoint.symbol} ({waypoint.type}) at ({waypoint.x}, {waypoint.y})'
+                )
+                print(f'Faction: {faction}')
+
+                traits = getattr(waypoint, 'traits', [])
+                for trait in traits:
+                    print(f'Trait: {trait["symbol"]} - {trait["name"]}')
+                print()
         else:
             print(waypoints)
-            print(f'Error: Waypoints data is not in the expected format.')
+            print('Error: Waypoints data is not in the expected format.')
 
-
-    def getNavStatus(shipSymbol: str):
-        print(f'Getting navigation status for ship {shipSymbol}...')
-        status = Ship.get_nav_status(shipSymbol)
+    def getNavStatus(ship_symbol: str):
+        print(f'Getting navigation status for ship {ship_symbol}...')
+        status = Ship.fetch_nav_status(ship_symbol)
         if isinstance(status, SpaceTradersAPIError):
-            print(f'No navigation status found for ship {shipSymbol}. Error: {status.message}')
+            print(f'No navigation status found for ship {ship_symbol}. Error: {status.message}')
             return
-        print(f'Navigation status for ship {shipSymbol}:')
-        if (status['status'] =='IN_TRANSIT'):
-            departure_time_str = status['route']['departureTime']
-            arrival_time_str = status['route']['arrival']
-            departureTime: datetime = datetime.fromisoformat(str(departure_time_str))
-            arrivalTime: datetime = datetime.fromisoformat(str(arrival_time_str))
-            time_difference: timedelta = arrivalTime - departureTime
-            total_seconds = time_difference.total_seconds()
-            hours = total_seconds // 3600
-            minutes = (total_seconds % 3600) // 60
-            seconds = total_seconds % 60
-
-            print(f'Ship {shipSymbol} is currently in transit.')
-            print(f'Origin: {status['route']['origin']['symbol']}')
-            print(f'Destination: {status['route']['destination']['symbol']}')
-            print(f"Arriving to destination in: {int(hours)} hours, {int(minutes)} minutes, {int(seconds)} seconds")
+        print(f'Navigation status for ship {ship_symbol}:')
+        if status.status == 'IN_TRANSIT':
+            departure_time_str = status.route.departure_time
+            arrival_time_str = status.route.arrival
+            hours, minutes, seconds = transit_time(departure_time_str, arrival_time_str)
+            print(f'Ship {ship_symbol} is currently in transit.')
+            print(f'Origin: {status.route.origin.symbol}')
+            print(f'Destination: {status.route.destination.symbol}')
+            print(
+                f'Arriving to destination in: {int(hours)} hours, {int(minutes)} minutes, {int(seconds)} seconds'
+            )
         else:
-            print(f'Location: {status["waypointSymbol"]}\tStatus: {status["status"]}\tFlight Mode: {status["flightMode"]}')
+            print(
+                f'Location: {status.waypoint_symbol}\tStatus: {status.status}\tFlight Mode: {status.flight_mode}'
+            )
 
-
-
-
-    def orbitShip(shipSymbol: str):
-        print(f'Orbiting ship {shipSymbol}...')
+    def orbitShip(ship_symbol: str):
+        print(f'Orbiting ship {ship_symbol}...')
         try:
-            Ship.orbit_ship(shipSymbol)
-            print(f'Ship {shipSymbol} is now orbiting.')
+            Ship.orbit_ship(ship_symbol)
+            print(f'Ship {ship_symbol} is now orbiting.')
         except ValueError as e:
             print(f'Error orbiting ship: {e}')
-    
 
-    def dockShip(shipSymbol: str):
-        print(f'Docking ship {shipSymbol}...')
+    def dockShip(ship_symbol: str):
+        print(f'Docking ship {ship_symbol}...')
         try:
-            Ship.dock_ship(shipSymbol)
-            print(f'Ship {shipSymbol} is now docked.')
+            Ship.dock_ship(ship_symbol)
+            print(f'Ship {ship_symbol} is now docked.')
         except ValueError as e:
             print(f'Error docking ship: {e}')
 
-
-    def purchaseCargo(shipSymbol: str):
-        cargoSymbol = input('Enter cargo symbol to purchase: ')
+    def purchaseCargo(ship_symbol: str):
+        cargo_symbol = input('Enter cargo symbol to purchase: ')
         units = int(input('Enter number of units to purchase: '))
-        print(f'Purchasing {units} units of {cargoSymbol} for ship {shipSymbol}...')
+        print(f'Purchasing {units} units of {cargo_symbol} for ship {ship_symbol}...')
         try:
-            
-            purchase: CargoItemShape = {
-                'symbol': cargoSymbol,
-                'units': units
-            }
-            Ship.purchase_cargo(shipSymbol, purchase)
-            print(f'Purchased {units} units of {cargoSymbol} for ship {shipSymbol}.')
+            purchase = cast(CargoItemReqShape, {'symbol': cargo_symbol, 'units': units})
+            Ship.purchase_cargo(ship_symbol, purchase)
+            print(f'Purchased {units} units of {cargo_symbol} for ship {ship_symbol}.')
         except ValueError as e:
             print(f'Error purchasing cargo: {e}')
 
-
-    def sellCargo(shipSymbol: str, tradeSymbol: str, units: int):
-        print(f'Selling {units} units of {tradeSymbol} for ship {shipSymbol}...')
+    def sellCargo(ship_symbol: str, trade_symbol: str, units: int):
+        print(f'Selling {units} units of {trade_symbol} for ship {ship_symbol}...')
         try:
-            sell: CargoItemShape = {
-                'symbol': tradeSymbol,
-                'units': units
-            }
-            data = Ship.sell_cargo(shipSymbol, sell)
+            sell = cast(CargoItemReqShape, {'symbol': trade_symbol, 'units': units})
+            data = Ship.sell_cargo(ship_symbol, sell)
             if isinstance(data, SpaceTradersAPIError):
-
                 print(f'Error selling cargo: {data.message}')
                 return
-            print(f'Successfully sold {units} units of {tradeSymbol} for ship {shipSymbol}.')
+            print(f'Successfully sold {units} units of {trade_symbol} for ship {ship_symbol}.')
         except ValueError as e:
             print(f'Error selling cargo: {e}')
 
-
-    def viewCargo(shipSymbol: str):
-        print(f'Viewing cargo for ship {shipSymbol}...')
-        cargo = Ship.get_cargo(shipSymbol)
+    def viewCargo(ship_symbol: str):
+        print(f'Viewing cargo for ship {ship_symbol}...')
+        cargo = Ship.fetch_cargo(ship_symbol)
         if isinstance(cargo, SpaceTradersAPIError):
-            print(f'Error getting cargo for ship {shipSymbol}: {cargo}')
+            print(f'Error getting cargo for ship {ship_symbol}: {cargo}')
             return
-        print(f'Cargo for ship {shipSymbol}:')
-        print(f'Cargo Hold: {cargo["units"]}/{cargo["capacity"]} units')
-        inventory_data = cargo['inventory']
+        print(f'Cargo for ship {ship_symbol}:')
+        print(f'Cargo Hold: {cargo.units}/{cargo.capacity} units')
+        inventory_data = cargo.inventory
         if isinstance(inventory_data, list):
             inventory: ShipCargoInventoryShape = cast(ShipCargoInventoryShape, inventory_data)
             for item in inventory:
-                item_casted = cast(CargoItemShape, item)
-                print(f'{item_casted["symbol"]}: {item_casted["units"]} units')
+                item_casted = cast(CargoItemReqShape, item)
+                print(f'{item_casted.symbol}: {item_casted.units} units')
         else:
-            print("Error: Inventory data is not in the expected format.")
-            
+            print('Error: Inventory data is not in the expected format.')
 
-    def deliverCargo(shipSymbol: str):
-        print(f'Delivering cargo for ship {shipSymbol}...')
+    def deliverCargo(ship_symbol: str):
+        print(f'Delivering cargo for ship {ship_symbol}...')
         try:
             contract_id = input('Enter contract ID to deliver cargo for: ')
-            tradeSymbol = input('Enter trade symbol: ').upper()
+            trade_symbol = input('Enter trade symbol: ').upper()
             units = int(input('Enter number of units to deliver: '))
-            deliver: ContractDeliverShape = {
-                'ship_symbol': shipSymbol,
-                'trade_symbol': tradeSymbol,
-                'units': units
-            }
-            delivery = Ship.deliver_contract(contract_id, deliver)
-            print(f'Cargo delivered for ship {shipSymbol}:')
+            deliver = cast(
+                ContractDeliverReqShape,
+                {'ship_symbol': ship_symbol, 'trade_symbol': trade_symbol, 'units': units},
+            )
+            delivery = Contract._fulfill(contract_id, deliver)
+            print(f'Cargo delivered for ship {ship_symbol}:')
             print(delivery)
         except ValueError as e:
             print(f'Error delivering cargo: {e}')
-    
-    def extract_resources(shipSymbol: str):
-        print(f'Extracting resources for ship {shipSymbol}...')
-        extract = Ship.extract(shipSymbol)
+
+    def extract_resources(ship_symbol: str):
+        print(f'Extracting resources for ship {ship_symbol}...')
+        extract = Ship.extract(ship_symbol)
         if isinstance(extract, SpaceTradersAPIError):
-            print(f'Error extracting resources for ship {shipSymbol}: {extract}')
+            print(f'Error extracting resources for ship {ship_symbol}: {extract}')
             return
-        
-        print(f'Resources extracted for ship {shipSymbol}:')
-        print(f'Cargo Hold: {extract["cargo"]["units"]}/{extract["cargo"]["capacity"]} units')
-        for item in extract['cargo']['inventory']:
-            item_casted = cast(CargoItemShape, item)
-            print(f'{item_casted["symbol"]}: {item_casted["units"]} units')
-        print(f'Ship on cooldown for {extract["cooldown"]["remaining_seconds"]} seconds.')
-        print(f'Ship {shipSymbol} has finished extracting resources.')
 
-    def getCooldown(shipSymbol: str):
-        print(f'Getting cooldowns for ship {shipSymbol}...')
-        cooldown = Ship.get_cooldown(shipSymbol)
+        print(f'Resources extracted for ship {ship_symbol}:')
+        print(f'Cargo Hold: {extract.cargo.units}/{extract.cargo.capacity} units')
+        for item in extract.cargo.inventory:
+            item_casted = cast(CargoItemReqShape, item)
+            print(f'{item_casted.symbol}: {item_casted.units} units')
+        print(f'Ship on cooldown for {extract.cooldown.remaining_seconds} seconds.')
+        print(f'Ship {ship_symbol} has finished extracting resources.')
+
+    def getCooldown(ship_symbol: str):
+        print(f'Getting cooldowns for ship {ship_symbol}...')
+        cooldown = Ship.fetch_cooldown(ship_symbol)
         if isinstance(cooldown, SpaceTradersAPIError):
-            print(f'Error getting cooldown for ship {shipSymbol}: {cooldown}')
+            print(f'Error getting cooldown for ship {ship_symbol}: {cooldown}')
             print(f'Error code: {cooldown.code}')
-            print(f'Probably means no cooldown?')
+            print('Probably means no cooldown?')
             return
-        if 'total_seconds' not in cooldown or 'remaining_seconds' not in cooldown:
-            print(f'No Cooldown currently for ship {shipSymbol}.')
+        elif isinstance(cooldown, NoDataResShape):
+            print(f'No cooldown data available for ship {ship_symbol}.')
             return
-        print(f'Cooldowns for ship {shipSymbol}:')
-        print(f'Total Cooldown: {cooldown["total_seconds"]} seconds')
-        print(f'Remaining: {cooldown["remaining_seconds"]} seconds')
 
-    def jettisonCargo(shipSymbol: str, cargoSymbol: str, units):
-        print(f'Jettisoning {units} units of {cargoSymbol} from ship {shipSymbol}...')
+        print(f'Cooldowns for ship {ship_symbol}:')
+        print(f'Total Cooldown: {cooldown.total_seconds} seconds')
+        print(f'Remaining: {cooldown.remaining_seconds} seconds')
+
+    def jettisonCargo(ship_symbol: str, cargo_symbol: str, units):
+        print(f'Jettisoning {units} units of {cargo_symbol} from ship {ship_symbol}...')
         try:
-            jettison: CargoItemShape = {
-                'symbol': cargoSymbol,
-                'units': units
-            }
-            cargo_jettisoned = Ship.jettison_cargo(shipSymbol, jettison)
+            jettison = cast(CargoItemReqShape, {'symbol': cargo_symbol, 'units': units})
+            cargo_jettisoned = Ship.jettison_cargo(ship_symbol, jettison)
             if isinstance(cargo_jettisoned, SpaceTradersAPIError):
                 print(f'Error jettisoning cargo: {cargo_jettisoned}')
                 return
-            print(f'Jettisoned {units} units of {cargoSymbol} from ship {shipSymbol}.')
+            print(f'Jettisoned {units} units of {cargo_symbol} from ship {ship_symbol}.')
         except ValueError as e:
             print(f'Error jettisoning cargo: {e}')
-        
+
+    def purchase_ship(waypoint_symbol: str):
+        shipyard = System.get_shipyard(waypoint_symbol)
+
+        if isinstance(shipyard, SpaceTradersAPIError):
+            print(f'Error getting shipyard at waypoint {waypoint_symbol}: {shipyard}')
+            print(f'Error: {shipyard.code.value} - {shipyard.message}')
+            return
+        print(f'Available ships for purchase at waypoint {waypoint_symbol}:')
+        if not isinstance(shipyard, dict) or 'ships' not in shipyard or not shipyard['ships']:
+            print('No ships available for purchase at this waypoint.')
+            return
+        transactions = shipyard['transactions']
+
+        ship_prices = {}
+        count = 0
+        for transaction in transactions:
+            agent_symbol = transaction['agent_symbol']
+            if agent_symbol == active_agent.symbol:
+                continue
+            ship_type = transaction['ship_type']
+            price = transaction['price']
+            ship_prices[ship_type] = price
+            print(f'# - {count}Ship Type: {ship_type} - Price: {price} credits')
+            count += 1
+
+        ship_type = input('Enter ship type to purchase (e.g. EXPLORER, FIGHTER, etc.): ').upper()
+        print(f'Purchasing ship of type {ship_type} at waypoint {waypoint_symbol}...')
+        shape = cast(
+            ShipPurchaseReqShape, {'ship_type': ship_type, 'waypoint_symbol': waypoint_symbol}
+        )
+        res = Ship.purchase_ship(shape)
+        if isinstance(res, SpaceTradersAPIError):
+            print(f'Error purchasing ship: Error Code: {res.code.value} - {res.message}')
+            if res.code == SpaceTradersAPIErrorCodes.PURCHASE_SHIP_CREDITS_ERROR:
+                print('You do not have enough credits to purchase this ship.')
+            elif res.code == SpaceTradersAPIErrorCodes.SHIP_NOT_AVAILABLE_FOR_PURCHASE_ERROR:
+                print('Ship not available for purchase at this waypoint.')
+            else:
+                print('An unexpected error occurred while purchasing the ship.')
+            return
+        ship = res.ship
+        agent = res.agent
+        transaction = res.transaction
+
+        print(f'Ship purchased successfully: {ship.symbol} for {transaction.price} credits.')
+
+    def refuel_ship(ship_symbol: str):
+        # one unit of fuel from marketplace/cargo = 100 fuel units TODO: verify?
+        print(f'Refueling ship {ship_symbol}...')
+        refuel = cast(ShipRefuelReqShape, {'units': 0, 'from_cargo': True})
+
+        # if not at marketplace with fuel, check if ship cargo has fuel, if so use it
+        req = Ship.fetch_ship(ship_symbol)
+        if isinstance(req, SpaceTradersAPIError):
+            print(
+                f'Error getting ship during refueling {ship_symbol}: {req.code.value} - {req.message}'
+            )
+            return
+        cargo = req.cargo
+        fuel = None
+        for item in cargo.inventory:
+            if item.symbol == 'FUEL':
+                fuel = item
+                break
+        # need to check if ship is docked in a waypoint with a marketplace that sells fuel
+        waypoint_symbol = req.nav.waypoint_symbol
+
+        market_request = System.get_market(waypoint_symbol)
+
+        market: MarketShape | None = None
+
+        if isinstance(market, SpaceTradersAPIError):
+            print(
+                f'Possibly just not docked at a waypoint with a market, or no market at waypoint {waypoint_symbol}.'
+            )
+            print(
+                f'Error getting market at waypoint during refueling {waypoint_symbol}: {market.code.value} - {market.message}'
+            )
+            return
+
+        if market:
+            print('Market found, refueling from market')
+            refuel['from_cargo'] = False
+
+        print(f'Current Fuel: {req.fuel.consumed}/{req.fuel.capacity} units')
+        refuel_amount = input('Enter amount of fuel to refuel (negative to fill): ')
+        try:
+            refuel_amount = int(refuel_amount)
+            if refuel_amount < 0:
+                refuel.units = req.fuel.capacity - req.fuel.current
+            else:
+                refuel.units = refuel_amount
+            if refuel.units > req.fuel.capacity - req.fuel.current:
+                print(
+                    f'Cannot refuel more than the remaining capacity: {req.fuel.capacity - req.fuel.current} units'
+                )
+                return
+        except ValueError as e:
+            print(f'Invalid fuel amount: {e}')
+            return
+
+        res = Ship.refuel_ship(ship_symbol, refuel)
+        if isinstance(res, SpaceTradersAPIError):
+            print(f'Error refueling ship {ship_symbol}: {res.code.value} {res.message}')
+            return
+        agent = res.agent
+        fuel = res.fuel
+        # cargo = res['cargo']
+        transaction = res.transaction
+
+        print(f'Ship {ship_symbol} refueled successfully.')
+        print(f'Fuel: {fuel.current}/{fuel.capacity} units')
+        print(f'Spent {transaction.total_price} credits on refueling.')
 
     print('Printing ships details...')
-    
     current_ships = []
     if active_agent is not None:
         agent_instance = Agent(CONFIG.agent_token, active_agent)
-        current_ships = Ship.my_ships()
+
+    current_ships = Ship.fetch_ships()
+    if isinstance(current_ships, SpaceTradersAPIError):
+        print(f'Error retrieving ships: {current_ships.message}')
+        return
 
     if not current_ships:
         if active_agent is not None:
-            print(f'No ships found for agent {active_agent["symbol"]}.')
+            print(f'No ships found for agent {active_agent.symbol}.')
         else:
             print('No ships found because no active agent is set.')
-        
 
-    # print(f'Ships for {active_agent.callsign}:')
     if isinstance(current_ships, list):
         for x in range(len(current_ships)):
             ship = current_ships[x]
-            print(f'#{x} + Ship Name: {ship['symbol']}\tLocation: {ship['nav']['waypointSymbol']}\tStatus: {ship['nav']['status']}\tCargo: {ship['cargo']['units']}/{ship['cargo']['capacity']} units')
+            if ship['nav']['status'] == 'IN_ORBIT':
+                status: str = 'IN_ORBIT  '
+            elif ship['nav']['status'] == 'IN_TRANSIT':
+                status: str = 'IN_TRANSIT'
+            elif ship['nav']['status'] == 'DOCKED':
+                status: str = 'DOCKED    '
+            else:
+                status: str = 'UNKNOWN   '
+            print(
+                f'#{x} + Ship Name: {ship["symbol"]}\tLocation: {ship["nav"]["waypoint_symbol"]}\tType: {ship["registration"]["role"]}\tStatus: {status}\tFuel: {ship["fuel"]["current"]}/{ship["fuel"]["capacity"]}\tCargo: {ship["cargo"]["units"]}/{ship["cargo"]["capacity"]} units'
+            )
     elif isinstance(current_ships, SpaceTradersAPIError):
         print(f'Error retrieving ships: {current_ships}')
         return
     else:
-        print("Unexpected error: current_ships is not a list.")
+        print('Unexpected error: current_ships is not a list.')
         return
-    
-    # choose ship to do something with
+
     print('Select a ship by entering its index (0-based):')
-    ship_chosen = int(input('Ship index: '))
+    ship_chosen = input('Ship index: ')
     try:
-        ship_index = ship_chosen
+        ship_index = int(ship_chosen)
         if ship_index < 0 or ship_index >= len(current_ships):
             raise IndexError
         chosen_ship = current_ships[ship_index]
-    
+
     except (IndexError, ValueError):
         print(f'Invalid ship index: {ship_chosen}. Please enter a valid index.')
         return
-    
-    def functions_on_orbit(shipSymbol: str):
+
+    def functions_on_orbit(ship_symbol: str):
         print('1. Get Navigation Status')
         print('1. Get Cooldown')
         print('3. Dock Ship')
@@ -411,30 +551,29 @@ def ships(active_agent: AgentShape | None):
         action = input('Enter action number (1-9): ')
         match action:
             case '1':
-                getNavStatus(shipSymbol)
+                getNavStatus(ship_symbol)
             case '2':
-                getCooldown(shipSymbol)
+                getCooldown(ship_symbol)
             case '3':
-                dockShip(shipSymbol)
+                dockShip(ship_symbol)
             case '4':
                 print('Available waypoints:')
-                scanWaypoints(shipSymbol)
+                scanWaypoints(ship_symbol)
             case '5':
-                waypointSymbol = input('Enter waypoint symbol to navigate to: ').upper()
-                waypoint: WaypointNavigateShape = {
-                    'waypointSymbol': waypointSymbol
-                }
-                navigate(shipSymbol, waypoint)
-                if not waypointSymbol:
+                waypoint_symbol = input('Enter waypoint symbol to navigate to: ').upper()
+                waypoint: WaypointSymbolReqShape = WaypointSymbolReqShape(
+                    waypoint_symbol=waypoint_symbol
+                )
+                navigate(ship_symbol, waypoint)
+                if not waypoint_symbol:
                     print('No waypoint symbol provided. Aborting navigation.')
                     return
             case '6':
-                extract_resources(shipSymbol)
+                extract_resources(ship_symbol)
             case '7':
-                viewCargo(shipSymbol)
-                
-        
-    def functions_while_docked(shipSymbol: str):
+                viewCargo(ship_symbol)
+
+    def functions_while_docked(ship_symbol: str):
         print('1. Get Navigation Status')
         print('1. Get Cooldown')
         print('3. Orbit Ship')
@@ -443,49 +582,54 @@ def ships(active_agent: AgentShape | None):
         print('6. Sell Cargo')
         print('7. Deliver Cargo')
         print('8. Jettison Cargo')
+        print('9. Purchase Ship')
+        print('10. Refuel Ship')
 
         action = input('Enter action number (1-9): ')
         match action:
             case '1':
-                getNavStatus(shipSymbol)
+                getNavStatus(ship_symbol)
             case '2':
-                getCooldown(shipSymbol)
+                getCooldown(ship_symbol)
             case '3':
-                orbitShip(shipSymbol)
+                orbitShip(ship_symbol)
             case '4':
-                viewCargo(shipSymbol)
+                viewCargo(ship_symbol)
             case '5':
-                viewCargo(shipSymbol)
-                purchaseCargo(shipSymbol)
+                viewCargo(ship_symbol)
+                purchaseCargo(ship_symbol)
             case '6':
-                viewCargo(shipSymbol)
+                viewCargo(ship_symbol)
                 cargo_symbol = input('Enter cargo symbol to sell: ')
                 units = int(input('Enter number of units to sell: '))
-                sellCargo(shipSymbol, cargo_symbol, units)
+                sellCargo(ship_symbol, cargo_symbol, units)
             case '7':
                 # TODO: is this while docked or in orbit?
-                deliverCargo(shipSymbol)
+                deliverCargo(ship_symbol)
             case '8':
-                viewCargo(shipSymbol)
+                viewCargo(ship_symbol)
                 cargo_symbol = input('Enter cargo symbol to jettison: ')
                 units = int(input('Enter number of units to jettison: '))
-                jettisonCargo(shipSymbol, cargo_symbol, units)
+                jettisonCargo(ship_symbol, cargo_symbol, units)
+            case '9':
+                purchase_ship(waypoint_symbol=chosen_ship['nav']['waypoint_symbol'])
+            case '10':
+                refuel_ship(ship_symbol)
 
-    def functions_in_transit(shipSymbol: str):
+    def functions_in_transit(ship_symbol: str):
         print('1. Get Navigation Status')
         print('1. Get Cooldown')
 
         action = input('Enter action number (1-9): ')
         match action:
             case '1':
-                getNavStatus(shipSymbol)
+                getNavStatus(ship_symbol)
             case '2':
-                getCooldown(shipSymbol)
-
+                getCooldown(ship_symbol)
 
     nav_status = chosen_ship['nav']['status']
-    print(f'You selected ship: {chosen_ship["symbol"]} at {chosen_ship["nav"]["waypointSymbol"]}')
-    print("What would you like to do with this ship?")
+    print(f'You selected ship: {chosen_ship["symbol"]} at {chosen_ship["nav"]["waypoint_symbol"]}')
+    print('What would you like to do with this ship?')
     if nav_status == 'DOCKED':
         functions_while_docked(chosen_ship['symbol'])
     elif nav_status == 'IN_ORBIT':
@@ -494,17 +638,22 @@ def ships(active_agent: AgentShape | None):
         functions_in_transit(chosen_ship['symbol'])
 
 
-def run(client: SpaceTradersAPIClient):
+def run():
     quit = False
-    contract_id = 'cmb8cutehk6lxuo6x23gs1gu1'
-    active_agent: AgentShape = {
-        'symbol': 'AGENT_MOJO',
-        'starting_faction': FactionSymbol.COSMIC,
-        'headquarters': 'HQ',
-        'credits': 1000,
-        'ship_count': 1,
-        'account_id': None
-    }
+    # contract_id = 'cmb8cutehk6lxuo6x23gs1gu1'
+    # active_agent = cast(AgentShape, {
+    #     'symbol': 'AGENT_MOJO',
+    #     'starting_faction': FactionSymbol.COSMIC,
+    #     'headquarters': 'HQ',
+    #     'credits': 1000,
+    #     'ship_count': 1,
+    #     'account_id': None
+    # })
+
+    config = Config()
+    agent_config = config.get_agent('snxwman', 'snxw')
+    my_agent = Agent(agent_config.token)
+
     while not quit:
         args = list(filter(len, get_next_command()))
 
@@ -514,19 +663,29 @@ def run(client: SpaceTradersAPIClient):
             case 'h' | 'help':
                 usage()
             case 'game':
-                from pprint import pp
-                pp(SpaceTradersGame().fetch_server_status())
+                print(GAME.server_status)
+            case 'agents':
+                GAME.update_agents()
+                for agent in GAME.agents:
+                    if agent.ship_count != 2:
+                        print(agent)
             # case 'new' | 'new-agent':
             #     make_new_agent(args)
             # case 'current' | 'agent' | 'me':
             #     get_current_agent()
             # TODO: negotate contract
             case 'contract' | 'contract' | 'c':
-                get_contract(contract_id)
+                pass
             case 'contracts':
-                get_contracts()
+                contracts = my_agent.past_contracts
+                print(contracts)
             case 'accept' | 'a' | 'accept-contract':
                 accept_contract()
             case 'ships' | 'ship' | 'my-ships' | 's':
-                ships(active_agent)
-
+                my_ships = my_agent.ships
+                for ship in my_ships:
+                    print(ship)
+            case 'config':
+                print(config)
+            case 'faction':
+                print(my_agent.faction.symbol)

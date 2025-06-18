@@ -1,64 +1,55 @@
-from dataclasses import dataclass
-from typing import Any, cast
+from __future__ import annotations
 
-from requests import Response
-from requests.structures import CaseInsensitiveDict
+from http import HTTPStatus
+from typing import Any, Generic, TypeVar, cast
 
+from httpx import Headers, Response
+
+from deltav.spacetraders.api.ratelimit import Ratelimit
 from deltav.spacetraders.enums.endpoints import SpaceTradersAPIEndpoint
 from deltav.spacetraders.models import SpaceTradersAPIResShape
 from deltav.spacetraders.models.meta import MetaShape
 
-
-@dataclass
-class HttpResponse:
-    status_code: int
-    headers: CaseInsensitiveDict[str]
+T = TypeVar('T', bound=SpaceTradersAPIResShape)
 
 
-@dataclass
-class SpaceTradersAPIResData:
-    data: SpaceTradersAPIResShape
-    meta: MetaShape | None
-    headers: CaseInsensitiveDict[str]
-
-
-class SpaceTradersAPIResponse:
-    x_headers: list[str] = [
-        'X-Ratelimit-Limit-Burst',
-        'X-Ratelimit-Limit-Per-Second',
-        'X-Ratelimit-Remaining',
-        'X-Ratelimit-Reset',
-        'X-Ratelimit-Type',
-    ]
-
+class SpaceTradersAPIResponse(Generic[T]):
     def __init__(self, endpoint: SpaceTradersAPIEndpoint, res: Response):
-        http_headers = res.headers.copy()
-        spacetraders_headers = res.headers.copy()
+        self.__endpoint: SpaceTradersAPIEndpoint = endpoint
+        self.__headers: Headers = res.headers.copy()
+        self.__shape: type[SpaceTradersAPIResShape]
+        self.__meta: MetaShape | None
+        self.data: T
 
-        for header in res.headers.keys():
-            if header in SpaceTradersAPIResponse.x_headers:
-                _ = http_headers.pop(header)
-            else:
-                _ = spacetraders_headers.pop(header)
+        self.__filter_headers()
 
-        if res.status_code == 204:
-            json_data: dict[Any, Any] = {}
+        shape = endpoint.response_shapes.get(HTTPStatus(res.status_code))
+        if shape is None:
+            msg = f'Got unexpected http status code {res.status_code}'
+            raise ValueError(msg)
+        self.__shape = shape
+
+        json_data: dict[str, Any] = {} if res.status_code == 204 else res.json()
+        if 'meta' in json_data:
+            self.__meta = MetaShape.model_validate(json_data['meta'])
         else:
-            json_data: dict[Any, Any] = res.json()
+            self.__meta = None
 
-        data: SpaceTradersAPIResShape = cast(  # pyright: ignore[reportUnknownVariableType]
-            endpoint.value.response_shape,  # pyright: ignore[reportInvalidTypeForm]
-            json_data if 'data' not in json_data else json_data['data']
-        )
-        meta = None if 'meta' not in json_data else cast(MetaShape, json_data['meta'])
+        if 'data' in json_data and isinstance(json_data['data'], dict):
+            model = shape.model_validate(json_data['data'], by_alias=True)
+        else:
+            model = shape.model_validate(json_data, by_alias=True)
 
-        self.http: HttpResponse = HttpResponse(
-            status_code = res.status_code, 
-            headers = http_headers
-        )
-        self.spacetraders: SpaceTradersAPIResData = SpaceTradersAPIResData(
-            data = data,
-            meta = meta,
-            headers = spacetraders_headers,
-        )
+        self.data = cast(T, model)
 
+    def unwrap(self) -> T:
+        return self.data
+
+    @property
+    def meta(self) -> MetaShape | None:
+        return self.__meta
+
+    def __filter_headers(self) -> None:
+        for header in self.__headers.keys():
+            if header not in Ratelimit.X_HEADERS:
+                _ = self.__headers.pop(header)

@@ -1,7 +1,16 @@
-from enum import Enum, auto
+from __future__ import annotations
+
+from enum import Enum
 
 
 class TokenType(Enum):
-    ACCOUNT = auto()
-    AGENT = auto()
-    NONE = auto()
+    """
+
+    ACCOUNT
+    AGENT
+    NONE
+    """
+
+    ACCOUNT = 'ACCOUNT'
+    AGENT = 'AGENT'
+    NONE = 'NONE'

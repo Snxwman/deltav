@@ -1,92 +1,100 @@
+# pyright: reportAny=false
 from __future__ import annotations
-from datetime import datetime
-from typing import TypedDict
+
+from typing import TypeVar, override
+
+from deepmerge import always_merger
+from pydantic import AliasGenerator, BaseModel, ConfigDict
+from pydantic.alias_generators import to_camel
+
+from deltav.spacetraders.models._str import logfmt, pretty
+
+# TODO: Look into the following model config fields for ConfigDict
+#   - str_to_upper
+#   - str_min_length
+#   - str_max_length
+#   - use_enum_values
+#   - validate_assignment
+
+# TODO: Find a way to validate an enum by field name
 
 
 # Inherited super type used for type annotations
-class SpaceTradersAPIReqShape(TypedDict):
-    pass
+class SpaceTradersAPIReqShape(BaseModel):
+    """Base class for all request data sent in an SpaceTraders API request.
+
+    Inherits from pydantic.BaseModel.
+    """
+
+    model_config = ConfigDict(  # pyright: ignore[reportUnannotatedClassAttribute]
+        alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
+        revalidate_instances='always',
+        serialize_by_alias=True
+    )  # fmt: skip
+
+    @property
+    def pretty(self) -> str:
+        return pretty(self, 0).expandtabs(4)
+
+    @property
+    def logfmt(self) -> str:
+        return logfmt(self)
+
+    @override
+    def __str__(self) -> str:
+        return repr(self)
 
 
 # Inherited super type used for type annotations
-class SpaceTradersAPIResShape(TypedDict):
+class SpaceTradersAPIResShape(BaseModel):
+    """Base class for all response data received by a SpaceTraders API call.
+
+    Inherits from pydantic.BaseModel.
+    """
+
+    model_config = ConfigDict(  # pyright: ignore[reportUnannotatedClassAttribute]
+        alias_generator=to_camel,
+        revalidate_instances='always',
+        validate_by_alias=True,
+    )  # fmt: skip
+
+    @property
+    def pretty(self) -> str:
+        return pretty(self, 0).expandtabs(4)
+
+    @property
+    def logfmt(self) -> str:
+        return logfmt(self)
+
+    @override
+    def __str__(self) -> str:
+        return repr(self)
+
+
+class NoDataReqShape(SpaceTradersAPIReqShape):
     pass
 
 
-####################
-# Global endpoints #
-####################
-
-class StatsShape(SpaceTradersAPIResShape):
-    accounts: int
-    agents: int
-    ships: int
-    systems: int
-    waypoints: int
+class NoDataResShape(SpaceTradersAPIResShape):
+    pass
 
 
-class HealthShape(SpaceTradersAPIResShape):
-    last_market_update: datetime 
+T = TypeVar('T', bound='SpaceTradersAPIResShape')
 
 
-class CreditsLeaderboardAgentShape(SpaceTradersAPIResShape):
-    agent_symbol: str
-    credits: int
+# https://github.com/pydantic/pydantic/discussions/3416
+def merge_models(base: T, nxt: T) -> T:
+    """Merge two Pydantic model instances.
 
+    The attributes of 'base' and 'nxt' that weren't explicitly set are dumped into dicts
+    using '.model_dump(exclude_unset=True)', which are then merged using 'deepmerge',
+    and the merged result is turned into a model instance using '.model_validate'.
 
-class CreditsLeaderboardShape(SpaceTradersAPIResShape):
-    most_credits: list[CreditsLeaderboardAgentShape]
+    For attributes set on both 'base' and 'nxt', the value from 'nxt' will be used in
+    the output result.
+    """
 
-
-class ChartsLeaderboardAgentShape(SpaceTradersAPIResShape):
-    agent_symbol: str
-    chart_count: int
-
-
-class ChartsLeaderboardShape(SpaceTradersAPIResShape):
-    chart_count: list[ChartsLeaderboardAgentShape]
-
-
-class LeaderboardsShape(SpaceTradersAPIResShape):
-    most_credits: CreditsLeaderboardShape
-    most_submitted_charts: ChartsLeaderboardAgentShape
-
-
-class ServerRestartsShape(SpaceTradersAPIResShape):
-    next: datetime
-    frequency: str
-
-
-class AnnouncementShape(SpaceTradersAPIResShape):
-    title: str
-    body: str
-
-
-class LinkShape(SpaceTradersAPIResShape):
-    name: str
-    url: str
-
-
-# NOTE: Top level return shape
-class ServerStatusShape(SpaceTradersAPIResShape):
-    status: str
-    version: str
-    reset_date: str
-    description: str
-    stats: StatsShape
-    health: HealthShape
-    leaderboards: LeaderboardsShape
-    server_resets: ServerRestartsShape
-    announcements: list[AnnouncementShape]
-    links: list[LinkShape]
-
-
-class ErrorCodeShape(SpaceTradersAPIResShape):
-    code: int
-    name: str
-
-
-# NOTE: Top level return shape
-class ErrorCodesShape(SpaceTradersAPIResShape):
-    error_codes: list[ErrorCodeShape]
-
+    base_dict = base.model_dump(exclude_unset=True)
+    next_dict = nxt.model_dump(exclude_unset=True)
+    merged_dict = always_merger.merge(base_dict, next_dict)
+    return base.model_validate(merged_dict, by_name=True)

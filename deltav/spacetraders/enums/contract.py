@@ -1,7 +1,16 @@
-from enum import Enum, auto
+from __future__ import annotations
+
+from enum import Enum
 
 
 class ContractType(Enum):
-    PROCUREMENT = auto()
-    TRANSPORT = auto()
-    SHUTTLE = auto()
+    """
+
+    PROCUREMENT
+    SHUTTLE
+    TRANSPORT
+    """
+
+    PROCUREMENT = 'PROCUREMENT'
+    SHUTTLE = 'SHUTTLE'
+    TRANSPORT = 'TRANSPORT'

@@ -1,241 +1,371 @@
-from datetime import datetime
-from typing import cast
+from __future__ import annotations
 
-from deltav.spacetraders.api.request import SpaceTradersAPIRequest, SpaceTradersAPIEndpoint
+from datetime import UTC, datetime
+
 from deltav.spacetraders.api.client import SpaceTradersAPIClient
-from deltav.spacetraders.api.response import SpaceTradersAPIResponse
 from deltav.spacetraders.api.error import SpaceTradersAPIError
-from deltav.spacetraders.models.contract import ContractDeliverShape
-from deltav.spacetraders.models.endpoint import ContractSuccessfulDeliveryShape, NavigateResponseShape, MarketTransactionShape, WaypointScanShape
-from deltav.spacetraders.models.market import CargoItemShape
-from deltav.spacetraders.models.ship import ShipShape, ShipRegistrationShape, ShipNavShape, ShipCrewShape, ShipFrameShape, ShipReactorShape, ShipEngineShape, ShipModulesShape, ShipMountsShape, ShipCargoShape, ShipFuelShape, ShipCooldownShape, ShipCargoInventoryShape, ShipExtractShape
-from deltav.spacetraders.models.waypoint import  WaypointNavigateShape, WaypointShape, WaypointChartShape
-
+from deltav.spacetraders.api.request import SpaceTradersAPIRequest
+from deltav.spacetraders.enums.endpoints import SpaceTradersAPIEndpoint
+from deltav.spacetraders.enums.faction import FactionSymbol
+from deltav.spacetraders.enums.ship import ShipCrewRotationShape, ShipRole
+from deltav.spacetraders.models import NoDataResShape
+from deltav.spacetraders.models.contract import ContractShape
+from deltav.spacetraders.models.endpoint import ChartCreateShape
+from deltav.spacetraders.models.market import MarketTransactionShape
+from deltav.spacetraders.models.ship import (
+    CargoItemReqShape,
+    ScanShipsShape,
+    ScanSystemsShape,
+    ScanWaypointsShape,
+    ShipCargoInventoryShape,
+    ShipCargoShape,
+    ShipCooldownShape,
+    ShipCrewShape,
+    ShipEngineShape,
+    ShipExtractionShape,
+    ShipFrameShape,
+    ShipFuelShape,
+    ShipJumpResShape,
+    ShipModuleShape,
+    ShipMountShape,
+    ShipNavigationShape,
+    ShipNavShape,
+    ShipReactorShape,
+    ShipRefineReqShape,
+    ShipRefineResShape,
+    ShipRefuelReqShape,
+    ShipRefuelResShape,
+    ShipRegistrationShape,
+    ShipShape,
+    SurveyReqShape,
+)
+from deltav.spacetraders.models.waypoint import WaypointSymbolReqShape
+from deltav.spacetraders.token import AgentToken
 
 
 class Ship:
+    def __init__(self, data: ShipShape):
+        self.__synced_api: bool = False
+        self.__synced_db: bool = False
 
-    def __init__(self):
-        self.registration: ShipRegistrationShape
-        self.nav: ShipNavShape
-        self.crew: ShipCrewShape
-        self.frame: ShipFrameShape
-        self.reactor: ShipReactorShape
-        self.engine: ShipEngineShape
-        self.modules: ShipModulesShape
-        self.mounts: ShipMountsShape
-        self.cargo: ShipCargoShape
-        self.fuel: ShipFuelShape
-        self.cooldown: ShipCooldownShape
-        ...
+        self.__data: ShipShape = data
+        self.__data_timestamp = datetime.now(tz=UTC)
 
+        self.__agent_token: AgentToken
 
-    @staticmethod
-    def my_ships() -> ShipShape | SpaceTradersAPIError:
-        req = SpaceTradersAPIRequest().builder() \
-            .endpoint(SpaceTradersAPIEndpoint.MY_SHIPS) \
-            .with_agent_token() \
+        self._cargo: ShipCargoShape = data.cargo
+        self._cooldown: ShipCooldownShape = data.cooldown
+        self._crew: ShipCrewShape = data.crew
+        self._engine: ShipEngineShape = data.engine
+        self._frame: ShipFrameShape = data.frame
+        self._fuel: ShipFuelShape = data.fuel
+        self._modules: list[ShipModuleShape] = data.modules
+        self._mounts: list[ShipMountShape] = data.mounts
+        self._nav: ShipNavShape = data.nav
+        self._reactor: ShipReactorShape = data.reactor
+        self._registration: ShipRegistrationShape = data.registration
+        self._symbol: str = data.symbol
+
+    @property
+    def cargo(self) -> list[ShipCargoInventoryShape]:
+        return self._cargo.inventory
+
+    @property
+    def cargo_capacity(self) -> int:
+        return self._cargo.capacity
+
+    @property
+    def cargo_units(self) -> int:
+        return self._cargo.units
+
+    @property
+    def cargo_units_remaining(self) -> int:
+        return self.cargo_capacity - self.cargo_units
+
+    @property
+    def has_cargo(self) -> bool:
+        return bool(self._cargo.inventory)
+
+    @property
+    def cooldown(self) -> ShipCooldownShape:
+        return self._cooldown
+
+    @property
+    def on_cooldown(self) -> bool:
+        return False if self._cooldown.remaining_seconds == 0 else True
+
+    @property
+    def crew(self) -> int:
+        return self._crew.current
+
+    @property
+    def crew_details(self) -> ShipCrewShape:
+        return self._crew
+
+    @property
+    def crew_required(self) -> int:
+        return self._crew.required
+
+    @property
+    def crew_rotation(self) -> ShipCrewRotationShape:
+        return self._crew.rotation
+
+    @property
+    def engine(self) -> ShipEngineShape:
+        return self._engine
+
+    @property
+    def faction(self) -> FactionSymbol:
+        return self._registration.faction_symbol
+
+    @property
+    def frame(self) -> ShipFrameShape:
+        return self._frame
+
+    @property
+    def fuel(self) -> ShipFuelShape:
+        return self._fuel
+
+    @property
+    def modules(self) -> list[ShipModuleShape]:
+        return self._modules
+
+    @property
+    def mounts(self) -> list[ShipMountShape]:
+        return self._mounts
+
+    @property
+    def nav(self) -> ShipNavShape:
+        return self._nav
+
+    @property
+    def reactor(self) -> ShipReactorShape:
+        return self._reactor
+
+    @property
+    def registration(self) -> ShipRegistrationShape:
+        return self._registration
+
+    @property
+    def role(self) -> ShipRole:
+        return self._registration.role
+
+    @property
+    def symbol(self) -> str:
+        return self._symbol
+
+    def fetch_ship(self) -> ShipShape | SpaceTradersAPIError:
+        return SpaceTradersAPIClient.call(
+            SpaceTradersAPIRequest[ShipShape]()
+            .builder()
+            .endpoint(SpaceTradersAPIEndpoint.GET_SHIP)
+            .path_params(self.symbol)
+            .token(self.__agent_token)
             .build()
-    
-        match (res := SpaceTradersAPIClient.call(req)):
-            case SpaceTradersAPIResponse():
-                data: ShipShape = cast(ShipShape, res.spacetraders.data)
+        ).unwrap()
 
-
-                return data
-            case SpaceTradersAPIError() as err:
-                return err
-
-    @staticmethod
-    def scan_waypoints(shipSymbol: str) -> WaypointScanShape | SpaceTradersAPIError:
-        res = SpaceTradersAPIRequest().builder() \
-            .endpoint(SpaceTradersAPIEndpoint.MY_SHIPS_SCAN_WAYPOINTS) \
-            .path_params(shipSymbol) \
-            .with_agent_token() \
+    def _scan_ships(self) -> ScanShipsShape | SpaceTradersAPIError:
+        return SpaceTradersAPIClient.call(
+            SpaceTradersAPIRequest[ScanShipsShape]()
+            .builder()
+            .endpoint(SpaceTradersAPIEndpoint.SCAN_SHIPS)
+            .path_params(self.symbol)
+            .token(self.__agent_token)
             .build()
-        
-        match (res := SpaceTradersAPIClient().call(res)):
-            case SpaceTradersAPIResponse():
-                data: WaypointScanShape = cast(WaypointScanShape, res.spacetraders.data)
-                return data
-            case SpaceTradersAPIError() as err:
-                return err;
+        ).unwrap()
 
-
-    @staticmethod
-    def get_nav_status(shipSymbol: str):
-        req = SpaceTradersAPIRequest().builder() \
-            .endpoint(SpaceTradersAPIEndpoint.MY_SHIPS_NAV) \
-            .path_params(shipSymbol) \
-            .with_agent_token() \
+    def _scan_systems(self) -> ScanSystemsShape | SpaceTradersAPIError:
+        return SpaceTradersAPIClient.call(
+            SpaceTradersAPIRequest[ScanSystemsShape]()
+            .builder()
+            .endpoint(SpaceTradersAPIEndpoint.SCAN_SYSTEMS)
+            .path_params(self.symbol)
+            .token(self.__agent_token)
             .build()
-        
-        match (res := SpaceTradersAPIClient().call(req)):
-            case SpaceTradersAPIResponse():
-                data: ShipNavShape = cast(ShipNavShape, res.spacetraders.data)
-                return data
-            case SpaceTradersAPIError() as err:
-                return err;
-    
+        ).unwrap()
 
-    @staticmethod
-    def navigate(shipSymbol: str, waypoint: WaypointNavigateShape) -> NavigateResponseShape | SpaceTradersAPIError:
-        req = SpaceTradersAPIRequest().builder() \
-            .endpoint(SpaceTradersAPIEndpoint.MY_SHIP_NAVIGATE) \
-            .path_params(shipSymbol) \
-            .data(waypoint) \
-            .with_agent_token() \
+    def _scan_waypoints(self) -> ScanWaypointsShape | SpaceTradersAPIError:
+        return SpaceTradersAPIClient.call(
+            SpaceTradersAPIRequest[ScanWaypointsShape]()
+            .builder()
+            .endpoint(SpaceTradersAPIEndpoint.SCAN_WAYPOINTS)
+            .path_params(self.symbol)
+            .token(self.__agent_token)
             .build()
-        
-        match (res := SpaceTradersAPIClient().call(req)):
-            case SpaceTradersAPIResponse():
-                data: NavigateResponseShape = cast(NavigateResponseShape, res.spacetraders.data)
-                return data
-            case SpaceTradersAPIError() as err:
-                return err;
-    
+        ).unwrap()
 
-    @staticmethod
-    def orbit_ship(shipSymbol: str) -> ShipNavShape | SpaceTradersAPIError:
-        req = SpaceTradersAPIRequest().builder() \
-            .endpoint(SpaceTradersAPIEndpoint.MY_SHIPS_ORBIT) \
-            .path_params(shipSymbol) \
-            .with_agent_token() \
+    def _fetch_nav_status(self) -> ShipNavShape | SpaceTradersAPIError:
+        return SpaceTradersAPIClient.call(
+            SpaceTradersAPIRequest[ShipNavShape]()
+            .builder()
+            .endpoint(SpaceTradersAPIEndpoint.GET_NAV_STATUS)
+            .path_params(self.symbol)
+            .token(self.__agent_token)
             .build()
-        
-        match (res := SpaceTradersAPIClient().call(req)):
-            case SpaceTradersAPIResponse():
-                data: ShipNavShape = cast(ShipNavShape, res.spacetraders.data)
-                return data
-            case SpaceTradersAPIError() as err:
-                return err;
-    
+        ).unwrap()
 
-    @staticmethod
-    def dock_ship(shipSymbol: str) -> ShipNavShape | SpaceTradersAPIError:
-        req = SpaceTradersAPIRequest().builder() \
-            .endpoint(SpaceTradersAPIEndpoint.MY_SHIPS_DOCK) \
-            .path_params(shipSymbol) \
-            .with_agent_token() \
+    def _navigate(
+        self, waypoint: WaypointSymbolReqShape
+    ) -> ShipNavigationShape | SpaceTradersAPIError:
+        return SpaceTradersAPIClient.call(
+            SpaceTradersAPIRequest[ShipNavigationShape]()
+            .builder()
+            .endpoint(SpaceTradersAPIEndpoint.NAVIGATE_SHIP)
+            .path_params(self.symbol)
+            .data(waypoint)
+            .token(self.__agent_token)
             .build()
-        
-        match (res := SpaceTradersAPIClient().call(req)):
-            case SpaceTradersAPIResponse():
-                data: ShipNavShape = cast(ShipNavShape, res.spacetraders.data)
-                return data
-            case SpaceTradersAPIError() as err:
-                return err;
-    
-    
-    @staticmethod
-    def deliver_contract(contract_id: str, deliver: ContractDeliverShape) -> ContractSuccessfulDeliveryShape | SpaceTradersAPIError:
-        req = SpaceTradersAPIRequest().builder() \
-            .endpoint(SpaceTradersAPIEndpoint.DELIVER_CONTRACT) \
-            .path_params(contract_id) \
-            .data(deliver) \
-            .with_agent_token() \
-            .build()
-        
-        match (res := SpaceTradersAPIClient().call(req)):
-            case SpaceTradersAPIResponse():
-                data: ContractSuccessfulDeliveryShape = cast(ContractSuccessfulDeliveryShape, res.spacetraders.data)
-                return data
-            case SpaceTradersAPIError() as err:
-                return err;
-    
+        ).unwrap()
 
-    @staticmethod
-    def purchase_cargo(shipSymbol: str, purchase: CargoItemShape) -> MarketTransactionShape | SpaceTradersAPIError:
-        req = SpaceTradersAPIRequest().builder() \
-            .endpoint(SpaceTradersAPIEndpoint.MY_SHIPS_PURCHASE_CARGO) \
-            .path_params(shipSymbol) \
-            .data(purchase) \
-            .with_agent_token() \
+    def _orbit_ship(self) -> ShipNavShape | SpaceTradersAPIError:
+        return SpaceTradersAPIClient.call(
+            SpaceTradersAPIRequest[ShipNavShape]()
+            .builder()
+            .endpoint(SpaceTradersAPIEndpoint.ORBIT_SHIP)
+            .path_params(self.symbol)
+            .token(self.__agent_token)
             .build()
-        
-        match (res := SpaceTradersAPIClient().call(req)):
-            case SpaceTradersAPIResponse():
-                data: MarketTransactionShape = cast(MarketTransactionShape, res.spacetraders.data)
-                return data
-            case SpaceTradersAPIError() as err:
-                return err;
+        ).unwrap()
 
-    @staticmethod
-    def sell_cargo(shipSymbol: str, cargo: CargoItemShape) -> MarketTransactionShape | SpaceTradersAPIError:
-        req = SpaceTradersAPIRequest().builder() \
-            .endpoint(SpaceTradersAPIEndpoint.MY_SHIPS_SELL) \
-            .path_params(shipSymbol) \
-            .data(cargo) \
-            .with_agent_token() \
+    def _dock_ship(self) -> ShipNavShape | SpaceTradersAPIError:
+        return SpaceTradersAPIClient.call(
+            SpaceTradersAPIRequest[ShipNavShape]()
+            .builder()
+            .endpoint(SpaceTradersAPIEndpoint.DOCK_SHIP)
+            .path_params(self.symbol)
+            .token(self.__agent_token)
             .build()
-        
-        match (res := SpaceTradersAPIClient().call(req)):
-            case SpaceTradersAPIResponse():
-                data: MarketTransactionShape = cast(MarketTransactionShape, res.spacetraders.data)
-                return data
-            case SpaceTradersAPIError() as err:
-                return err;
-        
+        ).unwrap()
 
-    @staticmethod
-    def jettison_cargo(shipSymbol: str, cargo: CargoItemShape) -> ShipCargoShape | SpaceTradersAPIError:
-        req = SpaceTradersAPIRequest().builder() \
-            .endpoint(SpaceTradersAPIEndpoint.MY_SHIPS_JETTISON) \
-            .path_params(shipSymbol) \
-            .data(cargo) \
-            .with_agent_token() \
+    def _purchase_cargo(
+        self, purchase: CargoItemReqShape
+    ) -> MarketTransactionShape | SpaceTradersAPIError:
+        return SpaceTradersAPIClient.call(
+            SpaceTradersAPIRequest[MarketTransactionShape]()
+            .builder()
+            .endpoint(SpaceTradersAPIEndpoint.PURCHASE_CARGO)
+            .path_params(self.symbol)
+            .data(purchase)
+            .token(self.__agent_token)
             .build()
-        
-        match (res := SpaceTradersAPIClient().call(req)):
-            case SpaceTradersAPIResponse():
-                data: ShipCargoShape = cast(ShipCargoShape, res.spacetraders.data)
-                return data
-            case SpaceTradersAPIError() as err:
-                return err;
+        ).unwrap()
 
-    @staticmethod
-    def extract(shipSymbol: str) -> ShipExtractShape | SpaceTradersAPIError:
-        res = SpaceTradersAPIRequest().builder() \
-            .endpoint(SpaceTradersAPIEndpoint.MY_SHIPS_EXTRACT) \
-            .path_params(shipSymbol) \
-            .with_agent_token() \
+    def _sell_cargo(
+        self, cargo: CargoItemReqShape
+    ) -> MarketTransactionShape | SpaceTradersAPIError:
+        return SpaceTradersAPIClient.call(
+            SpaceTradersAPIRequest[MarketTransactionShape]()
+            .builder()
+            .endpoint(SpaceTradersAPIEndpoint.SELL_CARGO)
+            .path_params(self.symbol)
+            .data(cargo)
+            .token(self.__agent_token)
             .build()
-        
-        match (res := SpaceTradersAPIClient().call(res)):
-            case SpaceTradersAPIResponse():
-                data: ShipExtractShape = cast(ShipExtractShape, res.spacetraders.data)
-                return data
-            case SpaceTradersAPIError() as err:
-                return err;
+        ).unwrap()
 
-
-    @staticmethod
-    def get_cooldown(shipSymbol: str) -> ShipCooldownShape | SpaceTradersAPIError:
-        req = SpaceTradersAPIRequest().builder() \
-            .endpoint(SpaceTradersAPIEndpoint.MY_SHIPS_COOLDOWN) \
-            .path_params(shipSymbol) \
-            .with_agent_token() \
+    def _jettison_cargo(self, cargo: CargoItemReqShape) -> ShipCargoShape | SpaceTradersAPIError:
+        return SpaceTradersAPIClient.call(
+            SpaceTradersAPIRequest[ShipCargoShape]()
+            .builder()
+            .endpoint(SpaceTradersAPIEndpoint.JETTISON_CARGO)
+            .path_params(self.symbol)
+            .data(cargo)
+            .token(self.__agent_token)
             .build()
-        
-        match (res := SpaceTradersAPIClient().call(req)):
-            case SpaceTradersAPIResponse():
-                data: ShipCooldownShape = cast(ShipCooldownShape, res.spacetraders.data)
-                return data
-            case SpaceTradersAPIError() as err:
-                return err;
+        ).unwrap()
 
-    
-    @staticmethod
-    def get_cargo(shipSymbol: str) -> ShipCargoShape | SpaceTradersAPIError:
-        req = SpaceTradersAPIRequest().builder() \
-            .endpoint(SpaceTradersAPIEndpoint.MY_SHIPS_CARGO) \
-            .path_params(shipSymbol) \
-            .with_agent_token() \
+    def _extract(self) -> ShipExtractionShape | SpaceTradersAPIError:
+        return SpaceTradersAPIClient.call(
+            SpaceTradersAPIRequest[ShipExtractionShape]()
+            .builder()
+            .endpoint(SpaceTradersAPIEndpoint.EXTRACT_RESOURCES)
+            .path_params(self.symbol)
+            .token(self.__agent_token)
             .build()
-        
-        match (res := SpaceTradersAPIClient().call(req)):
-            case SpaceTradersAPIResponse():
-                data: ShipCargoShape = cast(ShipCargoShape, res.spacetraders.data)
-                return data
-            case SpaceTradersAPIError() as err:
-                return err;
+        ).unwrap()
+
+    def _extract_survey(self, survey: SurveyReqShape) -> ShipExtractionShape | SpaceTradersAPIError:
+        return SpaceTradersAPIClient.call(
+            SpaceTradersAPIRequest[ShipExtractionShape]()
+            .builder()
+            .endpoint(SpaceTradersAPIEndpoint.EXTRACT_RESOURCES_WITH_SURVEY)
+            .path_params(self.symbol)
+            .token(self.__agent_token)
+            .data(survey)
+            .build()
+        ).unwrap()
+
+    def _fetch_cooldown(self) -> ShipCooldownShape | NoDataResShape | SpaceTradersAPIError:
+        return SpaceTradersAPIClient.call(
+            SpaceTradersAPIRequest[ShipCooldownShape | NoDataResShape]()
+            .builder()
+            .endpoint(SpaceTradersAPIEndpoint.GET_SHIP_COOLDOWN)
+            .path_params(self.symbol)
+            .token(self.__agent_token)
+            .build()
+        ).unwrap()
+
+    def _fetch_cargo(self) -> ShipCargoShape | SpaceTradersAPIError:
+        return SpaceTradersAPIClient.call(
+            SpaceTradersAPIRequest[ShipCargoShape]()
+            .builder()
+            .endpoint(SpaceTradersAPIEndpoint.GET_SHIP_CARGO)
+            .path_params(self.symbol)
+            .token(self.__agent_token)
+            .build()
+        ).unwrap()
+
+    def _refuel_ship(self, refuel: ShipRefuelReqShape) -> ShipRefuelResShape | SpaceTradersAPIError:
+        return SpaceTradersAPIClient.call(
+            SpaceTradersAPIRequest[ShipRefuelResShape]()
+            .builder()
+            .endpoint(SpaceTradersAPIEndpoint.REFUEL_SHIP)
+            .path_params(self.symbol)
+            .data(refuel)
+            .token(self.__agent_token)
+            .build()
+        ).unwrap()
+
+    def _create_chart(self) -> ChartCreateShape | SpaceTradersAPIError:
+        return SpaceTradersAPIClient.call(
+            SpaceTradersAPIRequest[ChartCreateShape]()
+            .builder()
+            .endpoint(SpaceTradersAPIEndpoint.CREATE_CHART)
+            .path_params(self.symbol)
+            .token(self.__agent_token)
+            .build()
+        ).unwrap()
+
+    def _negotiate_contract(self) -> ContractShape | SpaceTradersAPIError:
+        return SpaceTradersAPIClient.call(
+            SpaceTradersAPIRequest[ContractShape]()
+            .builder()
+            .endpoint(SpaceTradersAPIEndpoint.NEGOTIATE_CONTRACT)
+            .path_params(self.symbol)
+            .token(self.__agent_token)
+            .build()
+        ).unwrap()
+
+    def _jump_ship(
+        self, waypoint: WaypointSymbolReqShape
+    ) -> ShipJumpResShape | SpaceTradersAPIError:
+        return SpaceTradersAPIClient.call(
+            SpaceTradersAPIRequest[ShipJumpResShape]()
+            .builder()
+            .endpoint(SpaceTradersAPIEndpoint.JUMP_SHIP)
+            .path_params(self.symbol)
+            .data(waypoint)
+            .token(self.__agent_token)
+            .build()
+        ).unwrap()
+
+    def _refine(self, produce: ShipRefineReqShape) -> ShipRefineResShape | SpaceTradersAPIError:
+        return SpaceTradersAPIClient.call(
+            SpaceTradersAPIRequest[ShipRefineResShape]()
+            .builder()
+            .endpoint(SpaceTradersAPIEndpoint.REFINE_MATERIALS)
+            .path_params(self.symbol)
+            .data(produce)
+            .token(self.__agent_token)
+            .build()
+        ).unwrap()
