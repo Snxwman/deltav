@@ -74,5 +74,4 @@ class SpaceTradersGame:
         ).unwrap()  # fmt: skip
 
 
-GAME = SpaceTradersGame()
 # logger.info(f'SpaceTraders server status: {GAME.server_status}')

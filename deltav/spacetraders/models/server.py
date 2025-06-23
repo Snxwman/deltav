@@ -1,13 +1,11 @@
 from __future__ import annotations
 
+from datetime import date, datetime
 from textwrap import wrap
-from typing import TYPE_CHECKING, override
+from typing import override
 
 from deltav.spacetraders.models import SpaceTradersAPIResShape
 from deltav.util.strings import indent
-
-if TYPE_CHECKING:
-    from datetime import date, datetime
 
 
 class StatsShape(SpaceTradersAPIResShape):

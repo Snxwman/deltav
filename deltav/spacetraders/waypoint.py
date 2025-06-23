@@ -16,7 +16,8 @@ from deltav.spacetraders.enums.waypoint import (
 from deltav.spacetraders.faction import Faction
 from deltav.spacetraders.models.construction import ConstructionShape
 from deltav.spacetraders.models.market import MarketShape
-from deltav.spacetraders.models.systems import JumpgateShape, ShipyardShape
+from deltav.spacetraders.models.ship import ShipyardShape
+from deltav.spacetraders.models.systems import JumpgateShape
 from deltav.spacetraders.models.waypoint import (
     WaypointModifierShape,
     WaypointShape,

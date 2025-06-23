@@ -6,6 +6,8 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from deltav.store.db import Base
+from deltav.store.db.system import SystemRecord
+from deltav.store.db.waypoint import WaypointRecord
 
 if TYPE_CHECKING:
     from deltav.store.db.agent import AgentRecord
@@ -26,6 +28,8 @@ class FactionRecord(Base):
         back_populates='faction'
     )
     traits: Mapped[list[FactionTraitRecord]] = relationship(back_populates='faction')
+    systems: Mapped[list[SystemRecord]] = relationship(back_populates='factions')
+    waypoints: Mapped[list[WaypointRecord]] = relationship(back_populates='faction')
 
 
 class FactionReputationRecord(Base):

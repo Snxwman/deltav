@@ -16,7 +16,7 @@ from deltav.spacetraders.models.error import HttpErrorShape, SpaceTradersAPIErro
 #  - Handle HTTP 502 errors (recommended to wait a few minutes for retry)
 class SpaceTradersAPIError:
     def __init__(self, res: Response):
-        logger.error(res.json())
+        logger.error(res.json())  # pyright: ignore[reportAny]
         self.__res: Response = res
         self.__data: SpaceTradersAPIErrorShape | HttpErrorShape
         self.code: SpaceTradersAPIErrorCodes | HTTPStatus
@@ -25,17 +25,19 @@ class SpaceTradersAPIError:
         self.request_id: str | None
 
         try:
-            data = SpaceTradersAPIErrorShape.model_validate(res.json()['error'])
-            self.__init_spacetraders_error(data)
+            self.__init_spacetraders_error(
+                SpaceTradersAPIErrorShape.model_validate(res.json()['error'])
+            )
         except ValidationError:
-            data = HttpErrorShape.model_validate(res.json())
-            self.__init_http_error(data)
+            self.__init_http_error(
+                HttpErrorShape.model_validate(res.json())
+            )
 
     def unwrap(self) -> 'SpaceTradersAPIError':
         return self
 
     def __init_spacetraders_error(self, err: SpaceTradersAPIErrorShape) -> None:
-        self.code = err.code
+        self.code = SpaceTradersAPIErrorCodes(err.code)
         self.message = err.message
         self.data = err.data
         self.request_id = err.request_id

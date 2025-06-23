@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass
 from enum import Enum, unique
 from http import HTTPMethod, HTTPStatus
 from string import Template
-from typing import TYPE_CHECKING, override
+from typing import override
+
+from pydantic import BaseModel
 
 from deltav.spacetraders.models import (
     NoDataReqShape,
@@ -32,8 +35,8 @@ from deltav.spacetraders.models.contract import (
     ContractsShape,
 )
 from deltav.spacetraders.models.endpoint import (
-    AgentRegisterReqData,
-    AgentRegisterResData,
+    AgentRegisterReqShape,
+    AgentRegisterResShape,
     ChartCreateShape,
     EventSubscribeReqShape,
 )
@@ -76,13 +79,13 @@ from deltav.spacetraders.models.ship import (
     ShipShape,
     ShipsShape,
     ShipTransactionShape,
+    ShipyardShape,
     SiphonResShape,
     SurveyCreateShape,
     SurveyReqShape,
 )
 from deltav.spacetraders.models.systems import (
     JumpgateShape,
-    ShipyardShape,
     SystemShape,
     SystemsShape,
     SystemWaypointShape,
@@ -91,11 +94,6 @@ from deltav.spacetraders.models.systems import (
 from deltav.spacetraders.models.waypoint import WaypointSymbolReqShape
 from deltav.spacetraders.token import AccountToken, AgentToken
 from deltav.util import generic__repr__
-
-if TYPE_CHECKING:
-    from collections.abc import Mapping
-
-    from pydantic import BaseModel
 
 
 @dataclass
@@ -184,8 +182,8 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
         Template('/register'),
         HTTPMethod.POST,
         AccountToken,
-        AgentRegisterReqData,
-        {HTTPStatus.CREATED: AgentRegisterResData},
+        AgentRegisterReqShape,
+        {HTTPStatus.CREATED: AgentRegisterResShape},
         False,
     )
     """Creates a new agent and ties it to an account.
@@ -194,8 +192,8 @@ class SpaceTradersAPIEndpoint(EndpointDataMixin, Enum):
     Template('/register'),
     HTTPMethod.POST,
     AccountToken,
-    RegisterAgentReqData,
-    {HTTPStatus.CREATED: RegisterAgentResData},
+    RegisterAgentReqShape,
+    {HTTPStatus.CREATED: RegisterAgentResShape},
     False,
     ```
     """

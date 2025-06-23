@@ -13,6 +13,8 @@ from deltav.spacetraders.api.error import SpaceTradersAPIError
 from deltav.spacetraders.api.request import SpaceTradersAPIRequest
 from deltav.spacetraders.contract import Contract
 from deltav.spacetraders.enums.endpoints import SpaceTradersAPIEndpoint
+from deltav.spacetraders.enums.faction import FactionSymbol
+from deltav.spacetraders.enums.ship import ShipType
 from deltav.spacetraders.faction import Faction
 from deltav.spacetraders.models.agent import (
     AgentEventShape,
@@ -21,25 +23,23 @@ from deltav.spacetraders.models.agent import (
     PublicAgentShape,
 )
 from deltav.spacetraders.models.contract import ContractsShape
-from deltav.spacetraders.models.endpoint import AgentRegisterReqData, AgentRegisterResData
+from deltav.spacetraders.models.endpoint import AgentRegisterReqShape, AgentRegisterResShape
 from deltav.spacetraders.models.faction import FactionReputationsShape
 from deltav.spacetraders.models.ship import ShipPurchaseReqShape, ShipPurchaseResShape, ShipsShape
 from deltav.spacetraders.ship import Ship
 from deltav.spacetraders.token import AccountToken, AgentToken
-from deltav.store.db.agent import AgentEventRecord, AgentRecord, PublicAgentRecord
+from deltav.store.db.agent import AgentEventRecord, AgentRecord
 from deltav.store.db.faction import FactionReputationRecord
-from deltav.store.db.transaction import TransactionRecord
+from deltav.store.db.waypoint import TransactionRecord
 
 if TYPE_CHECKING:
-    from deltav.spacetraders.enums.faction import FactionSymbol
-    from deltav.spacetraders.enums.ship import ShipType
     from deltav.spacetraders.models.transaction import TransactionShape
 
 
 class AgentABC(ABC):  # noqa: B024
     """Abstract base class for Agent and PublicAgent"""
 
-    def __init__(self, data: AgentRecord | PublicAgentRecord) -> None:
+    def __init__(self, data: AgentRecord) -> None:
         self._symbol: str = data.symbol
         self._credits: int = data.credits
         self._faction: Faction = Faction.get_faction(FactionSymbol[data.faction_symbol])
@@ -364,19 +364,21 @@ class Agent(AgentABC):
                 raise self.__handle_purchase_ship_err(err)
 
     def register(self) -> None:
-        register_data = AgentRegisterReqData(
+        register_data = AgentRegisterReqShape(
             symbol=self.__config.symbol,
-            faction=self.__config.faction
+            faction=self.__config.faction,
         )  # fmt: skip
 
         account_config = Config.get_account_from_agent_token(self.token)
         assert account_config is not None
 
         match self._register(register_data, account_config.token):
-            case AgentRegisterResData() as res:
-                self.__data = res.agent
+            case AgentRegisterResShape() as res:
+                record = AgentRecord.insert(res)
+                assert record is not None
+                self.__data = record
                 self.__data_timestamp = datetime.now(tz=UTC)
-                self._token = AgentToken(res.token)
+                self._token = AgentToken(self.__data.token)
                 self._active_contract = Contract(res.contract)
                 self._ships = [Ship(ship) for ship in res.ships]
                 logger.info(f'Acquired new agent token {res.token}')
@@ -454,18 +456,18 @@ class Agent(AgentABC):
         ).unwrap()
 
     def _register(
-        self, data: AgentRegisterReqData, account_token: AccountToken
-    ) -> AgentRegisterResData | SpaceTradersAPIError:
+        self, data: AgentRegisterReqShape, account_token: AccountToken
+    ) -> AgentRegisterResShape | SpaceTradersAPIError:
         """Register a new agent
 
         Args:
-            data (RegisterAgentReqData): The data to be sent in the request
+            data (RegisterAgentReqShape): The data to be sent in the request
 
         Returns:
-            RegisterAgentReqData | SpaceTradersAPIError
+            RegisterAgentReqShape | SpaceTradersAPIError
         """
         return SpaceTradersAPIClient.call(
-            SpaceTradersAPIRequest[AgentRegisterResData]()
+            SpaceTradersAPIRequest[AgentRegisterResShape]()
             .builder()
             .endpoint(SpaceTradersAPIEndpoint.REGISTER_AGENT)
             .data(data)

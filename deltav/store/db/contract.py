@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import datetime
 from typing import TYPE_CHECKING
 
 from sqlalchemy import ForeignKey
@@ -8,10 +9,8 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from deltav.store.db import Base
 
 if TYPE_CHECKING:
-    from datetime import datetime
-
     from deltav.store.db.agent import AgentRecord
-    from deltav.store.db.market import TradeGoodRecord
+    from deltav.store.db.transaction import TradeGoodRecord
 
 
 class ContractRecord(Base):

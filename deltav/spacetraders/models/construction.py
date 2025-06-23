@@ -1,12 +1,8 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
+from deltav.spacetraders.enums.market import TradeSymbol
 from deltav.spacetraders.models import SpaceTradersAPIReqShape, SpaceTradersAPIResShape
-
-if TYPE_CHECKING:
-    from deltav.spacetraders.enums.market import TradeSymbol
-    from deltav.spacetraders.models.ship import ShipCargoShape
+from deltav.spacetraders.models.ship import ShipCargoShape
 
 
 class ConstructionShape(SpaceTradersAPIResShape):

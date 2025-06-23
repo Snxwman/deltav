@@ -1,19 +1,15 @@
 # pyright: reportAny=false
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from datetime import datetime
 
 from pydantic import Field
 
+from deltav.spacetraders.enums.contract import ContractType
+from deltav.spacetraders.enums.faction import FactionSymbol
+from deltav.spacetraders.enums.market import TradeSymbol
 from deltav.spacetraders.models import SpaceTradersAPIReqShape, SpaceTradersAPIResShape
-
-if TYPE_CHECKING:
-    from datetime import datetime
-
-    from deltav.spacetraders.enums.contract import ContractType
-    from deltav.spacetraders.enums.faction import FactionSymbol
-    from deltav.spacetraders.enums.market import TradeSymbol
-    from deltav.spacetraders.models.agent import AgentShape
+from deltav.spacetraders.models.agent import AgentShape
 
 
 class ContractShape(SpaceTradersAPIResShape):

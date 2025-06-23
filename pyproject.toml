@@ -26,10 +26,12 @@ lint = [
 ]
 
 [project.scripts]
-cli = "deltav.__main__:main"
+cli = "deltav.__main__:launch_deltav"
+deltav = "deltav.__main__:launch_deltav"
 
 [project.gui-scripts]
-tui = "deltav.vantage.__main__:main"
+tui = "deltav.__main__:launch_vantage"
+vantage = "deltav.__main__:launch_vantage"
 
 [build-system]
 requires = ["hatchling"]
@@ -77,6 +79,10 @@ ignore = [
     "COM812",  # Missing trailing comma
     "S101"     # Use of assert detected
 ]
+
+[tool.ruff.lint.per-file-ignores]
+"deltav/spacetraders/enums/**" = ["TC"]
+"deltav/spacetraders/models/**" = ["TC"]
 
 [tool.ruff.lint.flake8-quotes]
 inline-quotes = "single"

@@ -1,20 +1,16 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from collections.abc import Mapping
+from datetime import datetime
 
+from deltav.spacetraders.enums.market import (
+    ActivityLevel,
+    MarketTradeGoodType,
+    SupplyLevel,
+    TradeSymbol,
+    TransactionType,
+)
 from deltav.spacetraders.models import SpaceTradersAPIResShape
-
-if TYPE_CHECKING:
-    from collections.abc import Mapping
-    from datetime import datetime
-
-    from deltav.spacetraders.enums.market import (
-        ActivityLevel,
-        MarketTradeGoodType,
-        SupplyLevel,
-        TradeSymbol,
-        TransactionType,
-    )
 
 
 # FIX: Cargo Item Shape

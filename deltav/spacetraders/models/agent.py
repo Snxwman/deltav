@@ -1,16 +1,13 @@
 # pyright: reportAny=false
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, override
+from datetime import datetime
+from typing import Any, override
 
 from pydantic import Field
 
+from deltav.spacetraders.enums.faction import FactionSymbol
 from deltav.spacetraders.models import SpaceTradersAPIResShape
-
-if TYPE_CHECKING:
-    from datetime import datetime
-
-    from deltav.spacetraders.enums.faction import FactionSymbol
 
 
 def agent__str__(agent: AgentShape | PublicAgentShape) -> str:
@@ -26,14 +23,6 @@ class AgentShape(SpaceTradersAPIResShape):
     credits: int
     starting_faction: FactionSymbol
     ship_count: int
-
-    Inherits `SpaceTradersAPIResShape(TypeDict)`
-
-    Component of types:
-        - RegisterAgentResData
-
-    SpaceTraders API endpoints:
-        - SpaceTradersAPIEndpoints.MY_AGENT (GET /my/agent)
     """
 
     account_id: str
@@ -52,11 +41,6 @@ class AgentEventShape(SpaceTradersAPIResShape):
     message: str
     data: dict[Any, Any]
     created_at: datetime
-
-    Inherits from `SpaceTradersAPIResShape(TypeDict)`
-
-    SpaceTraders API endpoints:
-        - SpaceTradersAPIEndpoints.MY_AGENT_EVENTS (GET /my/agent/events)
     """
 
     id: str
@@ -84,11 +68,6 @@ class PublicAgentShape(SpaceTradersAPIResShape):
     credits: int
     starting_faction: FactionSymbol
     ship_count: int
-
-    Inherits `SpaceTradersAPIResShape(TypeDict)`
-
-    SpaceTraders API endpoint:
-        - SpaceTradersAPIEndpoints.GET_AGENT (GET /agents/{agentSymbol})
     """
 
     symbol: str

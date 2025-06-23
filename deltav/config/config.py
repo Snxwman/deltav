@@ -44,6 +44,13 @@ class LogLevel(Enum):
 
 @dataclass
 class DeltavConfig:
+    """
+    proxy: str | None
+    log_level: LogLevel
+    log_directory: Path
+    db_directory: Path
+    """
+
     proxy: str | None = None
     log_level: LogLevel = LogLevel.default()
     log_directory: Path = get_default_log_path()
@@ -73,6 +80,15 @@ class VantageConfig:
 
 @dataclass
 class StAccountConfig:
+    """
+    nickname: str
+    email: str
+    token: AccountToken
+    agents: dict[str, StAgentConfig]
+    autocreate: bool
+    proxy: str | None
+    """
+
     nickname: str
     email: str
     token: AccountToken
@@ -101,6 +117,15 @@ class StAccountConfig:
 
 @dataclass
 class StAgentConfig:
+    """
+    nickname: str
+    symbol: str
+    faction: FactionSymbol
+    token: AgentToken
+    account: str
+    autocreate: bool
+    """
+
     nickname: str
     symbol: str
     faction: FactionSymbol

@@ -1,18 +1,18 @@
+# ruff: noqa: ERA001, T201
 from __future__ import annotations
 
 from datetime import datetime, timedelta
 from typing import cast
 
-from deltav.config.config import Config
+from deltav.deltav import Deltav
 from deltav.spacetraders.agent import Agent
 from deltav.spacetraders.api.error import SpaceTradersAPIError
 from deltav.spacetraders.contract import Contract
 from deltav.spacetraders.enums.error import SpaceTradersAPIErrorCodes
-from deltav.spacetraders.game import GAME
 from deltav.spacetraders.models import NoDataResShape
-from deltav.spacetraders.models.agent import AgentShape
+from deltav.spacetraders.models.agent import AgentShape  # noqa: TC001
 from deltav.spacetraders.models.contract import ContractDeliverReqShape
-from deltav.spacetraders.models.market import MarketShape
+from deltav.spacetraders.models.market import MarketShape  # noqa: TC001
 from deltav.spacetraders.models.ship import (
     CargoItemReqShape,
     ShipCargoInventoryShape,
@@ -47,8 +47,8 @@ def get_next_command() -> list[str]:
 #         prompt: str = '',
 #         answer = None,
 #         default = None,
-#         generate: Callable | None = None,  # pyright: ignore[reportMissingTypeArgument]
-#         validate: Callable | None = None,  # pyright: ignore[reportMissingTypeArgument]
+#         generate: Callable | None = None,
+#         validate: Callable | None = None,
 #         allow_empty = False
 #     ) -> str:
 #
@@ -356,7 +356,7 @@ def cli_ships(active_agent: AgentShape | None):
             print(f'Error code: {cooldown.code}')
             print('Probably means no cooldown?')
             return
-        elif isinstance(cooldown, NoDataResShape):
+        if isinstance(cooldown, NoDataResShape):
             print(f'No cooldown data available for ship {ship_symbol}.')
             return
 
@@ -639,40 +639,24 @@ def cli_ships(active_agent: AgentShape | None):
 
 
 def run():
-    quit = False
-    # contract_id = 'cmb8cutehk6lxuo6x23gs1gu1'
-    # active_agent = cast(AgentShape, {
-    #     'symbol': 'AGENT_MOJO',
-    #     'starting_faction': FactionSymbol.COSMIC,
-    #     'headquarters': 'HQ',
-    #     'credits': 1000,
-    #     'ship_count': 1,
-    #     'account_id': None
-    # })
+    _quit = False
+    my_agent = Deltav.get_agent('snxw')
+    st = Deltav.spacetraders
 
-    config = Config()
-    agent_config = config.get_agent('snxwman', 'snxw')
-    my_agent = Agent(agent_config.token)
-
-    while not quit:
+    while not _quit:
         args = list(filter(len, get_next_command()))
 
         match args[0]:
             case 'q' | 'quit' | 'e' | 'exit':
-                quit = True
+                _quit = True
             case 'h' | 'help':
                 usage()
             case 'game':
-                print(GAME.server_status)
+                print(st.server_status)
             case 'agents':
-                GAME.update_agents()
-                for agent in GAME.agents:
-                    if agent.ship_count != 2:
-                        print(agent)
-            # case 'new' | 'new-agent':
-            #     make_new_agent(args)
-            # case 'current' | 'agent' | 'me':
-            #     get_current_agent()
+                st.update_agents()
+            case 'current' | 'agent' | 'me':
+                print(my_agent)
             # TODO: negotate contract
             case 'contract' | 'contract' | 'c':
                 pass
@@ -686,6 +670,9 @@ def run():
                 for ship in my_ships:
                     print(ship)
             case 'config':
-                print(config)
+                print(Deltav.config)
             case 'faction':
                 print(my_agent.faction.symbol)
+            case _:
+                print('not a command')
+                pass

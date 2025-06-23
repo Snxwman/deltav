@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import date, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
 from hashlib import sha256
 from typing import Any, final, override
 
@@ -32,7 +32,7 @@ class Token:
 
     @property
     def issued_at(self) -> datetime:
-        return datetime.fromtimestamp(self._iat)
+        return datetime.fromtimestamp(self._iat, tz=UTC)
 
     @property
     def type(self) -> TokenType:
@@ -42,11 +42,12 @@ class Token:
             case 'agent-token':
                 return TokenType.AGENT
             case _:
-                raise ValueError(f"Unknown token type '{self._sub}'")
+                msg = f"Unknown token type '{self._sub}'"
+                raise ValueError(msg)
 
     @property
     def hash(self) -> str:
-        return sha256(self.encoded.encode('utf-8')).hexdigest()
+        return sha256(self.encoded.encode('utf-8')).hexdigest()[:8]
 
     @override
     def __str__(self) -> str:
@@ -81,4 +82,4 @@ class AgentToken(Token):
 
     @property
     def is_expired(self) -> bool:
-        return date.today() >= self.expiration
+        return datetime.now(tz=UTC).date() >= self.expiration

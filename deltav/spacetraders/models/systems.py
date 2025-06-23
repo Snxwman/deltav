@@ -1,55 +1,13 @@
 # pyright: reportAny=false
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
 from pydantic import Field
 
+from deltav.spacetraders.enums.faction import FactionSymbol
+from deltav.spacetraders.enums.system import SystemType
+from deltav.spacetraders.enums.waypoint import WaypointType
 from deltav.spacetraders.models import SpaceTradersAPIResShape
-
-if TYPE_CHECKING:
-    from datetime import datetime
-
-    from deltav.spacetraders.enums.faction import FactionSymbol
-    from deltav.spacetraders.enums.ship import ShipType
-    from deltav.spacetraders.enums.system import SystemType
-    from deltav.spacetraders.enums.waypoint import WaypointType
-    from deltav.spacetraders.models.ship import ShipShape
-    from deltav.spacetraders.models.waypoint import WaypointOrbitalShape
-
-
-class ShipyardShape(SpaceTradersAPIResShape):
-    """
-    symbol: str
-    ship_types: list[ShipType]
-    transactions: list[ShipyardTransactionShape]
-    ships: list[ShipShape]
-    modifications_fee: int
-
-    """
-
-    symbol: str
-    ship_types: list[ShipType]
-    transactions: list[ShipyardTransactionShape]
-    ships: list[ShipShape]
-    modifications_fee: int
-
-
-class ShipyardTransactionShape(SpaceTradersAPIResShape):
-    """
-
-    waypoint_symbol: str
-    ship_type: ShipType
-    price: int
-    agent_symbol: str
-    timestamp: datetime
-    """
-
-    waypoint_symbol: str
-    ship_type: ShipType
-    price: int
-    agent_symbol: str
-    timestamp: datetime
+from deltav.spacetraders.models.waypoint import WaypointOrbitalShape
 
 
 class JumpgateShape(SpaceTradersAPIResShape):

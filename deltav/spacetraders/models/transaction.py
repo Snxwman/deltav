@@ -7,8 +7,8 @@ from deltav.spacetraders.models.ship import (
     ShipModifyTransactionShape,
     ShipRefuelTransactionShape,
     ShipTransactionShape,
+    ShipyardTransactionShape,
 )
-from deltav.spacetraders.models.systems import ShipyardTransactionShape
 
 TransactionShape: TypeAlias = (
     MarketTransactionShape

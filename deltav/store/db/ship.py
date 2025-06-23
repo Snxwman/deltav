@@ -7,6 +7,7 @@ from sqlalchemy import ForeignKey, select
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from deltav.store.db import Base, Session
+from deltav.store.db.waypoint import TransactionRecord
 
 if TYPE_CHECKING:
     from deltav.store.db.agent import AgentRecord
@@ -16,32 +17,29 @@ class ShipRecord(Base):
     __tablename__: str = 'ships'
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    cargo_capacity: Mapped[int] = mapped_column()
+    cargo_capacity: Mapped[int] = mapped_column(nullable=True)
     # cargo_inventory
-    cargo_units: Mapped[int] = mapped_column()
-    cooldown_total: Mapped[int] = mapped_column()
-    cooldown_remaining: Mapped[int] = mapped_column()
-    cooldown_expiration: Mapped[datetime] = mapped_column()
-    crew_current: Mapped[int] = mapped_column()
-    crew_required: Mapped[int] = mapped_column()
-    crew_capacity: Mapped[int] = mapped_column()
-    crew_morale: Mapped[int] = mapped_column()
-    crew_rotation: Mapped[str] = mapped_column()
-    crew_wages: Mapped[int] = mapped_column()
-    faction: Mapped[str] = mapped_column()
-    fuel_current: Mapped[int] = mapped_column()
-    fuel_capacity: Mapped[int] = mapped_column()
-    nav_system: Mapped[str] = mapped_column()
-    nav_waypoint: Mapped[str] = mapped_column()
-    nav_flight_mode: Mapped[str] = mapped_column()
-    nav_status: Mapped[str] = mapped_column()
-    role: Mapped[str] = mapped_column()
+    cargo_units: Mapped[int] = mapped_column(nullable=True)
+    cooldown_total: Mapped[int] = mapped_column(nullable=True)
+    cooldown_remaining: Mapped[int] = mapped_column(nullable=True)
+    cooldown_expiration: Mapped[datetime] = mapped_column(nullable=True)
+    crew_current: Mapped[int] = mapped_column(nullable=True)
+    crew_required: Mapped[int] = mapped_column(nullable=True)
+    crew_capacity: Mapped[int] = mapped_column(nullable=True)
+    crew_morale: Mapped[int] = mapped_column(nullable=True)
+    crew_rotation: Mapped[str] = mapped_column(nullable=True)
+    crew_wages: Mapped[int] = mapped_column(nullable=True)
+    faction: Mapped[str] = mapped_column(nullable=True)
+    fuel_current: Mapped[int] = mapped_column(nullable=True)
+    fuel_capacity: Mapped[int] = mapped_column(nullable=True)
+    nav_system: Mapped[str] = mapped_column(nullable=True)
+    nav_waypoint: Mapped[str] = mapped_column(nullable=True)
+    nav_flight_mode: Mapped[str] = mapped_column(nullable=True)
+    nav_status: Mapped[str] = mapped_column(nullable=True)
+    role: Mapped[str] = mapped_column(nullable=True)
     symbol: Mapped[str] = mapped_column(unique=True)
 
     agent_id: Mapped[int] = mapped_column(ForeignKey('agents.id'))
-    engine_id: Mapped[int] = mapped_column(ForeignKey('ship_engines.id'))
-    frame_id: Mapped[int] = mapped_column(ForeignKey('ship_frames.id'))
-    reactor_id: Mapped[int] = mapped_column(ForeignKey('ship_reactors.id'))
 
     agent: Mapped[AgentRecord] = relationship(back_populates='ships')
     cargo: Mapped[list[ShipCargoRecord]] = relationship(back_populates='ship')
@@ -76,7 +74,7 @@ class FuelConsumedRecord(Base):
 
     ship_id: Mapped[int] = mapped_column(ForeignKey('ships.id'))
 
-    ship: Mapped[ShipRecord] = relationship(back_populates='fuel_consumed')
+    ship: Mapped[ShipRecord] = relationship(back_populates='fuel_consumed', foreign_keys=[ship_id])
 
 
 class ShipCargoRecord(Base):
@@ -218,6 +216,8 @@ class ShipRouteRecord(Base):
     origin_waypoint: Mapped[str] = mapped_column()
     origin_x: Mapped[int] = mapped_column()
     origin_y: Mapped[int] = mapped_column()
+
+    ship_id: Mapped[int] = mapped_column(ForeignKey('ships.id'))
 
     ship: Mapped[ShipRecord] = relationship(back_populates='nav_routes')
 

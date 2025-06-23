@@ -48,10 +48,6 @@ class FactionSymbol(Enum):
     UNITED = 'UNITED'
     VOID = 'VOID'
 
-    # @property
-    # def default(self) -> 'FactionSymbol':
-    #     return FactionSymbol.COSMIC
-
 
 class FactionTraitSymbol(Enum):
     """

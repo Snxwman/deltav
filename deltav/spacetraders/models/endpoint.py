@@ -1,19 +1,14 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
+from deltav.spacetraders.enums.faction import FactionSymbol
 from deltav.spacetraders.models import SpaceTradersAPIReqShape, SpaceTradersAPIResShape
-from deltav.spacetraders.models.ship import ShipTransactionShape
-
-if TYPE_CHECKING:
-    from deltav.spacetraders.enums.faction import FactionSymbol
-    from deltav.spacetraders.models.agent import AgentShape
-    from deltav.spacetraders.models.chart import ChartShape
-    from deltav.spacetraders.models.contract import ContractShape
-    from deltav.spacetraders.models.faction import FactionShape
-    from deltav.spacetraders.models.market import MarketTransactionShape
-    from deltav.spacetraders.models.ship import ShipCargoShape, ShipShape
-    from deltav.spacetraders.models.systems import SystemWaypointShape
+from deltav.spacetraders.models.agent import AgentShape
+from deltav.spacetraders.models.chart import ChartShape
+from deltav.spacetraders.models.contract import ContractShape
+from deltav.spacetraders.models.faction import FactionShape
+from deltav.spacetraders.models.market import MarketTransactionShape
+from deltav.spacetraders.models.ship import ShipCargoShape, ShipShape, ShipTransactionShape
+from deltav.spacetraders.models.systems import SystemWaypointShape
 
 
 class AgentContractsShape(SpaceTradersAPIResShape):
@@ -25,7 +20,7 @@ class AgentContractsShape(SpaceTradersAPIResShape):
     contracts: list[ContractShape]
 
 
-class AgentRegisterReqData(SpaceTradersAPIReqShape):
+class AgentRegisterReqShape(SpaceTradersAPIReqShape):
     """Represents the request data sent when registering an agent.
 
     symbol: str
@@ -41,7 +36,7 @@ class AgentRegisterReqData(SpaceTradersAPIReqShape):
     faction: FactionSymbol
 
 
-class AgentRegisterResData(SpaceTradersAPIResShape):
+class AgentRegisterResShape(SpaceTradersAPIResShape):
     """Represents the response data returned when registering an agent.
 
     token: AgentToken
